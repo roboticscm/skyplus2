@@ -223,7 +223,6 @@
         filter((value) => value !== 'fail') /* filter if pass verify permission*/,
         switchMap((_) => {
           preprocessData();
-          console.log(form.data());
           /* submit data to API server*/
           saveRunning$.next(true);
           return form.post(saveUpdateUri).pipe(

@@ -8,30 +8,95 @@ import '@/lib/js/vendor/jquery.ztree.all';
 
 import App from '@/App.svelte';
 
-// import Color, { getThemeColors } from '@/lib/js/color';
 import { Debug } from '@/lib/js/debug';
-import { UrlUtil } from '@/lib/js/url-util';
-// import { setHeader, getBrowserID, loginSuccess, logout } from '@/lib/js/security';
-// import { Token, API } from '@/lib/js/constants';
-// import { menuStore } from '@/store/menu';
 import { sysGetLocaleResourceListByCompanyIdAndLocale } from '@/lib/js/locale/locale';
-// import { appStore } from '@/store/app';
-// import { take } from 'rxjs/operators';
 
 import MobileDetect from 'mobile-detect';
+import { TableUtilStore } from '@/store/table-util';
+import { take } from 'rxjs/operators';
+import { OrgStore } from '@/store/org';
+import { SObject } from '@/lib/js/sobject';
+import { AppStore, appStore } from '@/store/app';
+import { menuStore } from '@/store/menu';
+import Color, { getThemeColors } from '@/lib/js/color';
+import {
+  getCompanyId,
+  getLanguage,
+  getRememberLogin,
+  getToken,
+  getUserId,
+  loginSuccess,
+  logout,
+  setHeader,
+} from '@/lib/js/security';
+import '@/lib/js/session';
 
 const startApp = () => {
-  const companyId = UrlUtil.getCompanyId();
-  const locale = UrlUtil.getLanguage();
+  const companyId = getCompanyId();
+  const locale = getLanguage();
 
   sysGetLocaleResourceListByCompanyIdAndLocale(companyId, locale)
-    .then((_: any) => {
+    .then((res: any) => {
+      const _companyId = res[0].companyId;
+      TableUtilStore.getOneById('owner_org', _companyId)
+        .pipe(take(1))
+        .subscribe((res) => {
+          OrgStore.currentCompany$.next(SObject.convertFieldsToCamelCase(res.data[0]));
+
+          const rememberLogin = getRememberLogin();
+          if (rememberLogin === 'true') {
+            const userId = getUserId();
+            const token = getToken();
+            if (userId && token) {
+              AppStore.rememberLogin = true;
+              loginSuccess(userId, token);
+              setHeader(userId, token);
+              loadMenuAndUserSettings(_companyId);
+            } else {
+              logout();
+            }
+          }
+        });
       new App({
         target: document.body,
       });
-    }).catch((error: any) => {
+    })
+    .catch((error: any) => {
       Debug.error('Load resource error. Exit app');
     });
+};
+
+export const applyAlphaColor = (alpha: number) => {
+  Color.applyApha(getThemeColors(), alpha);
+};
+
+export const loadMenuAndUserSettings = (companyId) => {
+  menuStore.sysGetRoledMenuPathListByUserId();
+  menuStore.menuPaths$.pipe(take(1)).subscribe(
+    (_) => {
+      appStore.getCurrentUserInfo();
+      appStore.getUserSettings(companyId);
+
+      // load last menu
+      appStore.org$.subscribe((org) => {
+        if (org) {
+          menuStore.sysGetRoledMenuListByUserIdAndDepId(org.departmentId);
+        }
+      });
+
+      // load last theme
+      appStore.theme$.subscribe((theme: any) => {
+        if (theme) {
+          document.querySelector('body').classList.add(theme.theme);
+          applyAlphaColor(theme.alpha);
+        }
+      });
+    },
+    (error) => {
+      Debug.errorSection('Main App - menuStore.sysGetRoledMenuPathListByUserId', error);
+      logout();
+    },
+  );
 };
 
 startApp();

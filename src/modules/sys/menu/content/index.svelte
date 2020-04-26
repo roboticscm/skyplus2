@@ -283,7 +283,6 @@
       view.selectedData$
         .pipe(
           switchMap((it) => {
-            console.log('??', it && it.id);
             if (!it) return EMPTY;
             return apolloClient.subscribe({
               query,
@@ -373,6 +372,54 @@
 <SC bind:this={scRef} {view} {menuPath} />
 <!--//Invisible Element-->
 
+<!--Form controller-->
+<section class="view-content-bottom">
+  {#if view.isRendered(ButtonId.AddNew)}
+    <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Save, !$isUpdateMode$)}
+    <Button
+      action={useSaveOrUpdateAction}
+      bind:this={btnSaveRef}
+      btnType={ButtonType.Save}
+      disabled={view.isDisabled(ButtonId.Save, form.errors.any())}
+      running={$saveRunning$} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Edit, $isReadOnlyMode$ && $isUpdateMode$)}
+    <Button btnType={ButtonType.Edit} on:click={onEdit} disabled={view.isDisabled(ButtonId.Edit)} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Update, !$isReadOnlyMode$ && $isUpdateMode$)}
+    <Button
+      action={useSaveOrUpdateAction}
+      bind:this={btnUpdateRef}
+      btnType={ButtonType.Update}
+      disabled={view.isDisabled(ButtonId.Update, form.errors.any())}
+      running={$saveRunning$} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
+    <Button
+      btnType={ButtonType.Delete}
+      on:click={onDelete}
+      disabled={view.isDisabled(ButtonId.Delete)}
+      running={$deleteRunning$} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Config)}
+    <Button btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
+    <Button
+      btnType={ButtonType.TrashRestore}
+      on:click={onTrashRestore}
+      disabled={view.isDisabled(ButtonId.TrashRestore)} />
+  {/if}
+</section>
+<!--//Form controller-->
 <!--Main content-->
 <section class="view-content-main">
   <form class="form" on:keydown={(event) => form.errors.clear(event.target.name)}>
@@ -514,52 +561,3 @@
   </form>
 </section>
 <!--//Main content-->
-
-<!--Form controller-->
-<section class="view-content-bottom">
-  {#if view.isRendered(ButtonId.AddNew)}
-    <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Save, !$isUpdateMode$)}
-    <Button
-      action={useSaveOrUpdateAction}
-      bind:this={btnSaveRef}
-      btnType={ButtonType.Save}
-      disabled={view.isDisabled(ButtonId.Save, form.errors.any())}
-      running={$saveRunning$} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Edit, $isReadOnlyMode$ && $isUpdateMode$)}
-    <Button btnType={ButtonType.Edit} on:click={onEdit} disabled={view.isDisabled(ButtonId.Edit)} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Update, !$isReadOnlyMode$ && $isUpdateMode$)}
-    <Button
-      action={useSaveOrUpdateAction}
-      bind:this={btnUpdateRef}
-      btnType={ButtonType.Update}
-      disabled={view.isDisabled(ButtonId.Update, form.errors.any())}
-      running={$saveRunning$} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
-    <Button
-      btnType={ButtonType.Delete}
-      on:click={onDelete}
-      disabled={view.isDisabled(ButtonId.Delete)}
-      running={$deleteRunning$} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Config)}
-    <Button btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
-    <Button
-      btnType={ButtonType.TrashRestore}
-      on:click={onTrashRestore}
-      disabled={view.isDisabled(ButtonId.TrashRestore)} />
-  {/if}
-</section>
-<!--//Form controller-->

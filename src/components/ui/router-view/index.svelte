@@ -2,22 +2,17 @@
   import { routerLinkStore } from '../router-link/store';
   import Page404 from '@/pages/404/index.svelte';
   import PageIntro from '@/pages/intro/index.svelte';
-  import Page from 'page';
   import { roleControlStore } from '@/store/role-control';
   import { take, first, catchError, skip } from 'rxjs/operators';
-  import {AppStore, appStore } from '@/store/app';
+  import { AppStore, appStore } from '@/store/app';
 
   let TheComponent;
   const { currentComponentUri$ } = routerLinkStore;
-  export let hashbang: boolean = true;
   let menuPath: string;
   let fullControl = false;
   let roleControls = [];
 
-  const {isLogged$} = AppStore;
-  Page.start({
-    hashbang,
-  });
+  const { isLogged$ } = AppStore;
 
   const loadComponent = (uri: string) => {
     if (uri && uri.length > 0) {
@@ -59,7 +54,6 @@
       loadRoleControl(uri);
     }
   }
-
 </script>
 
 {#if $isLogged$}

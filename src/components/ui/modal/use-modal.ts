@@ -1,8 +1,6 @@
 import { Window } from '@/lib/js/window';
-import { UrlUtil } from '@/lib/js/url-util';
 import { Settings } from '@/model/settings';
 import { settingsStore } from '@/store/settings';
-import { ModalType } from '@/components/ui/modal/types';
 import { ButtonPressed } from '@/components/ui/button/types';
 
 export const createModal = (menuPath: string, widthInPixel: number = null, heightInPixel: number = null) => {

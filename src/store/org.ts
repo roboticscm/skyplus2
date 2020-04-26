@@ -1,8 +1,12 @@
 import { RxHttp } from '@/lib/js/rx-http';
 import { getMethodNameInSnackCase } from '@/lib/js/util';
+import { BehaviorSubject } from 'rxjs';
+import { OwnerOrg } from '@/modules/sys/owner-org/model';
 
 const BASE_URL = 'sys/owner-org/';
 export class OrgStore {
+  static currentCompany$ = new BehaviorSubject<OwnerOrg>(null);
+
   sysGetAvailableDepartmentTreeForMenu(menuId: any) {
     return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
       menuId,

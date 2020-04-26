@@ -2,9 +2,11 @@
   import { onMount, tick } from 'svelte';
   import Split from 'split-grid';
   import { applyLayout } from './helper';
-  // import { appStore } from '@/store/app';
+  import { appStore } from '@/store/app';
   // import { settingsStore } from '@/store/settings';
   import { App } from '@/lib/js/constants';
+
+  const defaultHeaderHeight = '80px';
 
   onMount(async () => {
     Split({
@@ -23,9 +25,9 @@
         let [headerHeight] = gridEle.style['grid-template-rows'].split(' ');
 
         if (headerHeight && +headerHeight.replace('px', '') > App.MAX_HEADER_HEIGHT) {
-          headerHeight = '100px';
+          headerHeight = defaultHeaderHeight;
           const gridEle: any = document.querySelector('.layout-container');
-          gridEle.style['grid-template-rows'] = `${headerHeight} 2px auto`;
+          gridEle.style['grid-template-rows'] = `${headerHeight} 10px auto`;
           // applyLayout();
         }
         // settingsStore.saveUserSettings({
@@ -38,15 +40,14 @@
     });
 
     // apply main layout - header height
-    // const gridEle: any = document.querySelector('.layout-container');
-
-    // const unSub = appStore.theme$.subscribe((theme) => {
-    //   if (theme) {
-    //     gridEle.style['grid-template-rows'] = `${theme.headerHeight} 2px auto`;
-    //   }
-    // });
-    // await tick();
-    // unSub.unsubscribe();
+    const gridEle: any = document.querySelector('.layout-container');
+    appStore.theme$.subscribe((theme) => {
+      if (theme) {
+        gridEle.style['grid-template-rows'] = `${defaultHeaderHeight} 10px auto`;
+      } else {
+        gridEle.style['grid-template-rows'] = `46px 10px auto`;
+      }
+    });
 
     // applyLayout();
   });

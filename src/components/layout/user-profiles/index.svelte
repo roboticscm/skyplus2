@@ -2,17 +2,22 @@
   import { logout } from '@/lib/js/security';
   import { API } from '@/lib/js/constants';
   import { T } from '@/lib/js/locale/locale';
-  import { appStore } from '@/store/app';
-
+  import { AppStore, appStore } from '@/store/app';
   // import ThemeConfigModal from '@/components/modal/theme-config-modal/index.vue';
   const { user$ } = appStore;
+
+  // @ts-ignore
+  const { isLogged$ } = AppStore;
+
+  // @ts-ignore
+  const qrcode = require('../../../../public/images/qrcode.png').default;
 
   let user;
   // @ts-ignore
   $: user = $user$;
 
   const onLogout = (event) => {
-    logout(API.API_SERVER);
+    logout();
   };
 
   const showUserProfiles = () => {
@@ -32,11 +37,10 @@
 
 </style>
 
-<div style="height: 100%; display: flex; align-items: center;">
+<div class="user-profiles-wrapper">
   <!--        <theme-config-modal ref="themeConfigModalRef" id="themeConfigModalId"> </theme-config-modal>-->
-  {#if user}
+  {#if $isLogged$ && user}
     <div class="user-profiles" on:mouseover|stopPropagation={showPopup} on:mouseout={hidePopup}>
-
       {#if user.useFontIcon}
         <span class="user-profiles__icon">
           {@html user.fontIcon}
@@ -61,5 +65,12 @@
         </div>
       </div>
     </div>
+  {:else}
+    <div class="no-user-profiles">
+      <span class="no-user-profiles__img">
+        <img src={qrcode} alt="SKYHUB" />
+      </span>
+    </div>
   {/if}
+  <i class="fa fa-sort-down" />
 </div>

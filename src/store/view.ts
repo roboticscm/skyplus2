@@ -2,7 +2,7 @@ import { menuStore } from '@/store/menu';
 import { T } from '@/lib/js/locale/locale';
 import { StringUtil } from '@/lib/js/string-util';
 import { BehaviorSubject, forkJoin, fromEvent, Observable, of, Subscription } from 'rxjs';
-import { tableUtilStore } from '@/store/table-util';
+import { TableUtilStore } from '@/store/table-util';
 import { catchError, concatMap, filter, first, skip, switchMap, take } from 'rxjs/operators';
 import { App } from '@/lib/js/constants';
 import { AxiosResponse } from 'axios';
@@ -68,7 +68,7 @@ export class ViewStore {
   }
 
   loadTableMetaData = () => {
-    tableUtilStore.getAllColumnsOfTable(this.tableName).subscribe((res) => {
+    TableUtilStore.getAllColumnsOfTable(this.tableName).subscribe((res) => {
       this.allColumns = res.data;
       this.allColumns$.next(res.data);
     });
@@ -91,17 +91,16 @@ export class ViewStore {
   };
 
   getSimpleList = (textSearch = '') => {
-    tableUtilStore
-      .getSimpleList({
-        tableName: this.tableName,
-        columns: this.columns.join(','),
-        orderBy: this.orderBy.join(','),
-        textSearch: textSearch,
-        page: this.page,
-        pageSize: this.pageSize,
-        onlyMe: this.onlyMe,
-        includeDisabled: this.includeDisabled,
-      })
+    TableUtilStore.getSimpleList({
+      tableName: this.tableName,
+      columns: this.columns.join(','),
+      orderBy: this.orderBy.join(','),
+      textSearch: textSearch,
+      page: this.page,
+      pageSize: this.pageSize,
+      onlyMe: this.onlyMe,
+      includeDisabled: this.includeDisabled,
+    })
       .pipe(take(1))
       .subscribe((res: AxiosResponse) => {
         const data: PayloadRes = res.data;
@@ -408,7 +407,7 @@ export class ViewStore {
   };
 
   doShowTrashRestoreModal = (onlyMe: boolean, trashRestoreModalRef: any, snackbarRef: any) => {
-    tableUtilStore.getAllDeletedRecords(this.tableName, this.trashRestoreColumns, onlyMe).then((res: any) => {
+    TableUtilStore.getAllDeletedRecords(this.tableName, this.trashRestoreColumns, onlyMe).then((res: any) => {
       const newData = res
         ? res.map((item: any, index: any) => {
             item.restore = false;
@@ -440,7 +439,7 @@ export class ViewStore {
                 .map((it: any) => it.id)
                 .join(',');
 
-              tableUtilStore.restoreOrForeverDelete(this.tableName, deletedIds, restoreIds).then(() => {
+              TableUtilStore.restoreOrForeverDelete(this.tableName, deletedIds, restoreIds).then(() => {
                 if (deletedIds && deletedIds.split(',').length === newData.length) {
                   snackbarRef.showTrashEmpty();
                 } else {
@@ -459,7 +458,7 @@ export class ViewStore {
   };
 
   checkDeletedRecord = (onlyMe: boolean) => {
-    tableUtilStore.hasAnyDeletedRecord(this.tableName, onlyMe).then((data: any) => {
+    TableUtilStore.hasAnyDeletedRecord(this.tableName, onlyMe).then((data: any) => {
       if (data.length > 0) {
         this.hasAnyDeletedRecord$.next(data[0].exists);
       }
@@ -467,13 +466,12 @@ export class ViewStore {
   };
 
   getOneById = (id: string) => {
-    return tableUtilStore.getOneById(this.tableName, id);
+    return TableUtilStore.getOneById(this.tableName, id);
   };
 
   doDelete = (id: string, snackbarRef: any, doAddNew: Function) => {
     this.deleteRunning$.next(true);
-    tableUtilStore
-      .softDeleteMany(this.tableName, [id])
+    TableUtilStore.softDeleteMany(this.tableName, [id])
       .pipe(take(1))
       .subscribe({
         next: (res) => {

@@ -2,6 +2,7 @@ import { SJSON } from '@/lib/js/sjson';
 // @ts-ignore
 const axios = require('axios');
 import { API } from './constants';
+import { logout } from '@/lib/js/security';
 
 export class Http {
   public static async callApi(method: string, url: string, params: any, jsonData: any) {
@@ -35,12 +36,17 @@ export class Http {
           } else {
             reject(error);
           }
+          logout();
         });
     });
   }
 
   public static async get(url: string, params: any = null) {
     return Http.callApi('get', url, params, null);
+  }
+
+  public static async options(url: string, params: any = null) {
+    return Http.callApi('options', url, params, null);
   }
 
   public static async post(url: string, jsonData: string) {

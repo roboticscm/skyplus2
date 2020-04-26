@@ -119,6 +119,16 @@
   // =========================//HOOK===========================
 </script>
 
+<div style="margin-top: 1px;">
+  <Pagination
+    {menuPath}
+    totalRecords={$fullCount$}
+    smallSize={true}
+    on:loadPage={onLoadPage}
+    on:init={onPaginationInit}
+    bind:this={pageRef} />
+</div>
+
 <div style="height: calc(100% - 20px);">
   <SelectableTable
     startRowCount={(view.page - 1) * view.pageSize + 1}
@@ -129,13 +139,4 @@
     showRowNumber={true}
     data={$dataList$}
     id={tableId} />
-</div>
-<div style="margin-top: 1px;">
-  <Pagination
-    {menuPath}
-    totalRecords={$fullCount$}
-    smallSize={true}
-    on:loadPage={onLoadPage}
-    on:init={onPaginationInit}
-    bind:this={pageRef} />
 </div>

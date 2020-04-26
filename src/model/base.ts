@@ -31,3 +31,9 @@ export interface RoleControl {
   confirm: boolean;
   requirePassword: boolean;
 }
+
+export interface AuthRequest {
+  resetToken?: string;
+  username: string;
+  password: string;
+}

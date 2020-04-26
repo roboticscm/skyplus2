@@ -39,3 +39,15 @@ export class App {
   static MAX_HEADER_HEIGHT = 100;
   static MIN_HEADER_HEIGHT = 30;
 }
+
+export class Image {
+  // @ts-ignore
+  static NO_IMAGE = require('../../../public/images/no-image.png').default;
+}
+
+export class Session {
+  static SCREEN_LOCK_MINUTE = 15;
+  static EXP_MINUTE = 30;
+  static CHECK_TIME = 60*1000; // ms
+  static DELAY_TIME = 10; // ms
+}

@@ -451,7 +451,7 @@
     width: 100%;
   }
   .language-grid {
-    height: calc(100% - 2.2rem * 2 - #{$footer_height});
+    height: calc(100% - 2.2rem * 2 - #{$controller-height});
   }
   .full-language-grid {
     /*overflow: auto;*/

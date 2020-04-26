@@ -22,7 +22,6 @@
   const onChange = (event) => {
     _selectedId = event.target.value;
     if (saveState) {
-      console.log('save', menuPath, id, _selectedId);
       settingsStore.saveUserSettings({
         menuPath,
         controlId: id,

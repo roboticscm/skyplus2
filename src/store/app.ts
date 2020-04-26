@@ -1,17 +1,13 @@
-import { RxHttp } from '@/lib/js/rx-http';
 import { BehaviorSubject } from 'rxjs';
 import { User } from '@/model/user';
 import { settingsStore } from '@/store/settings';
 import HumanOrOrgStore from '@/modules/sys/user/store';
-import { getMethodNameInSnackCase } from '@/lib/js/util';
 import { NavBarConfig } from '@/model/nav-bar-config';
-import { Menu, RoleMenu } from '@/modules/sys/menu/model';
-import { take } from 'rxjs/operators';
-import { T } from '@/lib/js/locale/locale';
-import { StringUtil } from '@/lib/js/string-util';
 
 export class AppStore {
-  static isLogged$ = new BehaviorSubject<boolean>( false);
+  static isLogged$ = new BehaviorSubject<boolean>(false);
+  static screenLock$ = new BehaviorSubject<number>(0);
+  static rememberLogin = false;
 
   user$ = new BehaviorSubject<User>(null);
   user: User;

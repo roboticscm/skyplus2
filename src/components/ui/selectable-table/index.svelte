@@ -27,7 +27,7 @@
   let tableRef: any;
 
   onMount(() => {
-    if(saveState) {
+    if (saveState) {
       loadSettings();
     }
   });
@@ -243,7 +243,7 @@
   };
 
   const onMouseUpHeader = (event) => {
-    if(saveState) {
+    if (saveState) {
       saveSettings();
     }
   };

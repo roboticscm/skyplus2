@@ -106,7 +106,6 @@
     import('@/components/ui/handson-table/index.svelte').then((res) => {
       // @ts-ignore
       TableComponent = res.default;
-      console.log('loaded');
     });
   });
 

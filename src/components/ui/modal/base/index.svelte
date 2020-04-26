@@ -6,7 +6,7 @@
   import { onMount, createEventDispatcher, onDestroy } from 'svelte';
   import { StringUtil } from '@/lib/js/string-util';
   import { T } from '@/lib/js/locale/locale';
-  import PasswordInput from '@/components/ui/input/password-input/index.svelte';
+  import CustomPasswordInput from '@/components/ui/input/custom-password-input/index.svelte';
   import TextInput from '@/components/ui/input/text-input/index.svelte';
   import { appStore } from '@/store/app';
   import Form from '@/lib/js/form/form';
@@ -14,6 +14,7 @@
   import { catchError } from 'rxjs/operators';
   import { of } from 'rxjs';
   import { App } from '@/lib/js/constants';
+  import { passwordChar } from '@/components/ui/input/autocomplete/helper';
 
   const dispatch = createEventDispatcher();
   export let id: string;
@@ -31,10 +32,12 @@
   export let cancelButtonTitle: string = undefined;
   export let defaultHeight: number = undefined; // in pixel
   export let defaultWidth: number = undefined; // in pixel
+  export let transparent = true;
 
   let modalWrapperRef: any;
   let modalRef: any;
   let passwordRef: any;
+  let displayPasswordChar = passwordChar();
 
   const useModal = createModal(menuPath, defaultWidth, defaultHeight);
 
@@ -52,7 +55,7 @@
   // @ts-ignore
   const resizeObserver = new ResizeObserver(onResize);
 
-  let form = new Form({
+  let form: any = new Form({
     username: appStore.user.username,
     password: '',
   });
@@ -73,7 +76,7 @@
       });
       if (passwordRef) {
         setTimeout(() => {
-          passwordRef.focus();
+          passwordRef && passwordRef.focus();
         }, 200);
       }
       modalWrapperRef.classList.add('show-modal');
@@ -105,6 +108,7 @@
   });
 
   function loginWithoutGenToken() {
+    form.password = passwordRef.getPassword();
     form
       .post(`sys/auth/${getMethodNameInSnackCase()}`)
       .pipe(
@@ -194,7 +198,7 @@
 
 </style>
 
-<div bind:this={modalWrapperRef} class="modal-wrapper">
+<div bind:this={modalWrapperRef} class="modal-wrapper {transparent ? '' : 'modal-wrapper-background'}">
   <form on:submit|preventDefault={loginWithoutGenToken} on:keydown={(e) => form.errors.clear(e.currentTarget.name)}>
     <div bind:this={modalRef} {id} class="modal" on:mouseup={onMouseUp}>
       <div id={id + 'header'} class="modal-header">
@@ -235,7 +239,7 @@
           <div class="row">
             <div style="text-align: right;" class="label col-6">{T('COMMON.LABEL.PASSWORD')}:</div>
             <div class="col-18">
-              <PasswordInput name="password" bind:value={form.password} bind:this={passwordRef} />
+              <CustomPasswordInput displayChar={displayPasswordChar} name="password" bind:this={passwordRef} />
               {#if form.errors.has('password')}
                 <div class="error">{form.errors.get('password')}</div>
               {/if}

@@ -20,6 +20,7 @@ export class OwnerOrg {
   skype = '';
   disabled = false;
   sort = 0;
+  default_org = false;
 }
 
 export enum OrgType {

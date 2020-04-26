@@ -34,6 +34,10 @@ export class RxHttp {
     return RxHttp.callApi('get', url, params, null);
   }
 
+  public static options(url: string, params: any = null) {
+    return RxHttp.callApi('options', url, params, null);
+  }
+
   public static post(url: string, jsonData: string) {
     return RxHttp.callApi('post', url, null, jsonData);
   }

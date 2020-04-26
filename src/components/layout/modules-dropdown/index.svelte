@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { App } from '@/lib/js/constants';
   import { T } from '@/lib/js/locale/locale';
   import { settingsStore } from '@/store/settings';
@@ -41,17 +42,23 @@
   };
 
   const loadData = () => {
-    orgStore.sysGetRoledDepartmentListByUserId().subscribe((res: any) => {
-      modules = res.data;
-      const filterDep = modules.filter((dep: any) => dep.departmentId == appStore.org.departmentId);
-      if (filterDep.length > 0) {
-        selectedDep = filterDep[0];
-        appStore.org.selectedDepartment = selectedDep;
+    appStore.org$.subscribe((org: any) => {
+      if (org) {
+        orgStore.sysGetRoledDepartmentListByUserId().subscribe((res: any) => {
+          modules = res.data;
+          const filterDep = modules.filter((dep: any) => dep.departmentId == org.departmentId);
+          if (filterDep.length > 0) {
+            selectedDep = filterDep[0];
+            appStore.org.selectedDepartment = selectedDep;
+          }
+        });
       }
     });
   };
 
-  loadData();
+  onMount(() => {
+    loadData();
+  });
 </script>
 
 <style lang="scss" scoped>
@@ -62,29 +69,27 @@
   <div>
     <div>
       {#if selectedDep}
-        <DropdownItem
-          inline={false}
-          useFontIcon={selectedDep.depUseFontIcon}
-          fontIcon={selectedDep.depFontIcon}
-          iconData={selectedDep.depIconData}
-          text={selectedDep.departmentName} />
+        <div class="modules__name">
+          <i class="dropdown-icon fa fa-angle-down">
+            {@html ' ' + selectedDep.departmentName}
+          </i>
+
+          <div class="dropdown-content">
+            {#each modules as module, index}
+              <DropdownItem
+                on:click={(e) => onNavigate(e, module.departmentId)}
+                useFontIcon={module.depUseFontIcon}
+                fontIcon={module.depFontIcon}
+                iconData={module.depIconData}
+                text={module.departmentName}
+                selected={isSelectedItem(module.departmentId)} />
+            {/each}
+          </div>
+        </div>
       {:else}
         {@html App.PROGRESS_BAR}
       {/if}
     </div>
-    <div class="modules__arrow">
-      <i class="fa fa-angle-double-down" />
-      <div class="right-dropdown-content">
-        {#each modules as module, index}
-          <DropdownItem
-            on:click={(e) => onNavigate(e, module.departmentId)}
-            useFontIcon={module.depUseFontIcon}
-            fontIcon={module.depFontIcon}
-            iconData={module.depIconData}
-            text={module.departmentName}
-            selected={isSelectedItem(module.departmentId)} />
-        {/each}
-      </div>
-    </div>
+
   </div>
 </div>

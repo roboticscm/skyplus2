@@ -3,7 +3,6 @@
   import { createEventDispatcher } from 'svelte';
   import { take, skip } from 'rxjs/operators';
   import { T } from '@/lib/js/locale/locale';
-  import Page from 'page';
   import { menuStore } from '@/store/menu';
   import { StringUtil } from '@/lib/js/string-util';
 
@@ -15,9 +14,6 @@
   export let activeClass: string = '';
   export let className: string = '';
 
-  export let useFontIcon = false;
-  export let fontIcon: string;
-  export let iconData: string;
   export let menuName: string;
 
   // @ts-ignore
@@ -28,28 +24,41 @@
     const comUri = `modules${path}/index.svelte`;
     dispatch('navigate', path);
 
-    menuStore.dataList$.pipe(skip(1), take(1)).subscribe((_) => {
-      currentComponentUri$.next(comUri);
-    });
+    currentComponentUri$.next(comUri);
+    // menuStore.dataList$.pipe(skip(1), take(1)).subscribe((_) => {
+    //   currentComponentUri$.next(comUri);
+    // });
   };
 
-  Page(__path, navigate);
-
-  const isActiveComponent = () => {
+  let isActiveComponent;
+  // @ts-ignore
+  $: {
     // @ts-ignore
     const uri = StringUtil.replaceAll($currentComponentUri$, '/', '--');
     const path = __path.replace('/', '--') + '--';
-    return uri.includes(path);
+    isActiveComponent = uri.includes(path);
+  }
+
+  const onMouseoverMore = (event, menuCode: string) => {
+    console.log(menuCode);
+    return false;
+  };
+
+  const onClick = (path: string) => {
+    window.history.pushState('', '', path);
+    const _path = path.replace('--', '/');
+    const comUri = `modules${_path}/index.svelte`;
+    dispatch('navigate', _path);
+    currentComponentUri$.next(comUri);
   };
 </script>
 
-<a href={__path} class="{className} {isActiveComponent() ? activeClass : ''}">
-  {#if !useFontIcon && iconData}
-    <img src={iconData} alt={name} />
-  {:else}
-    <span>
-      {@html fontIcon || '<i class="fa fa-bars"></i>'}
-    </span>
-  {/if}
+<div
+  id={__path.replace('/', '')}
+  on:click={() => onClick(__path)}
+  class="nav-item {className}
+  {isActiveComponent ? activeClass : ''}">
   {@html name}
-</a>
+  <span>&nbsp;&nbsp;</span>
+  <i class="fa fa-angle-down" on:mouseover={(e) => onMouseoverMore(e, menuName)} />
+</div>

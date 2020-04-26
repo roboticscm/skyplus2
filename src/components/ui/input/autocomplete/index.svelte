@@ -3,7 +3,6 @@
   import { SObject } from '@/lib/js/sobject';
   import { markStringSearch } from '@/lib/js/util';
   import { StringUtil } from '@/lib/js/string-util';
-  import { Debug } from '@/lib/js/debug';
   import { TableColumn } from '@/model/base';
   import ProgressBar from '@/components/ui/progress-bar';
   import { BehaviorSubject, Observable } from 'rxjs';
@@ -11,6 +10,9 @@
   import { fromEvents } from '@/lib/js/rx';
   import SelectableTable from '@/components/ui/selectable-table';
   import { settingsStore } from '@/store/settings';
+  import { SearchType } from '@/components/layout/search-bar/types';
+  import { AppStore } from '@/store/app';
+  import { passwordChar } from './helper';
 
   export let columns: TableColumn[];
   export let height = '50vh';
@@ -19,30 +21,35 @@
   export let disabled = false;
   export let menuPath: string;
   export let searchFunc: Function;
-  export let popupWidth: number = undefined;
   export let className: string;
   export let type = 'search';
   export let placeholder = '';
+  export let container: any = undefined;
+
+  // @ts-ignore
+  const { isLogged$ } = AppStore;
 
   let inputWrapperRef: any;
   let inputRef: any;
   let inputWidth: number;
   let tableRef: any;
 
+  let password = '';
+  let memoryPassword = '';
+
   let dropdownFocused = false;
   let textSearch = '';
   let selectedItem: any = undefined;
   let markData: any[] = [];
   let disableAutocomplete;
+  let showBackButton;
   let searching$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-
   const dispatch = createEventDispatcher();
-
+  const displayChar = passwordChar();
   // @ts-ignore
   $: {
     disableAutocomplete = type === 'password';
-    console.log('.... change type', type, disableAutocomplete);
-
+    showBackButton = type === 'password';
   }
   const showAutoDropdown = () => {
     if (disableAutocomplete) {
@@ -50,15 +57,14 @@
     }
 
     dispatch('showPopup', undefined);
-    if(!popupWidth) {
+    if (!container) {
       document.querySelector(`#${id}`).addEventListener('focusout', hideOnLostFocus);
       inputWidth = window['$'](inputRef).width();
     } else {
-      inputWidth = popupWidth;
+      inputWidth = window['$'](container).width();
     }
 
     (document.querySelector(`#dropdown${id}`) as any).style.width = inputWidth + 'px';
-
     tableRef.unSelectAll();
     document.querySelector(`#${'dropdown' + id}`).classList.add('show-auto-dropdown');
   };
@@ -67,7 +73,7 @@
     dispatch('hidePopup', undefined);
     setTimeout(() => {
       dropdownFocused = false;
-    }, 100);
+    }, 200);
 
     document.querySelector(`#${'dropdown' + id}`).classList.remove('show-auto-dropdown');
   };
@@ -75,11 +81,16 @@
     if (data && data.length > 0) {
       //highligth text search
       const temp = SObject.clone(data);
-      markData = temp.map((item) => {
-        const markedName = markStringSearch(item.name, textSearch, true);
-        item.name = markedName;
-        return item;
-      });
+      if (type !== 'password') {
+        markData = temp.map((item) => {
+          const markedName = markStringSearch(item.name, textSearch, true);
+          item.name = markedName;
+          return item;
+        });
+      } else {
+        markData = temp;
+      }
+
       showAutoDropdown();
       searching$.next(false);
     } else {
@@ -104,10 +115,24 @@
 
     if (event.code === 'Enter') {
       if (!dropdownFocused) {
-        dispatch('change', {
-          id: undefined,
-          name: inputRef.value
-        });
+        // @ts-ignore
+        if (type === 'password') {
+          dispatch('change', {
+            id: SearchType.Login,
+            name: getPassword(),
+          });
+          // @ts-ignore
+        } else if (!$isLogged$) {
+          dispatch('change', {
+            id: SearchType.Login,
+            name: inputRef.value,
+          });
+        } else {
+          dispatch('change', {
+            id: undefined,
+            name: inputRef.value,
+          });
+        }
       }
       hideAutoDropdown();
       return false;
@@ -132,10 +157,20 @@
           return before.value === after.value && after.type !== 'click';
         }),
         tap((event: any) => {
-          textSearch = event.value;
+          if (type !== 'password') {
+            textSearch = event.value;
+          } else {
+            textSearch = getPassword();
+          }
           searching$.next(true);
         }),
-        switchMap((event: any) => searchFunc(event.value)),
+        switchMap((event: any) => {
+          if (type !== 'password') {
+            return searchFunc(event.value);
+          } else {
+            return searchFunc(getPassword());
+          }
+        }),
       )
       .subscribe({
         next: (res) => {
@@ -148,11 +183,11 @@
   };
 
   const hideOnLostFocus = () => {
-    const inputEle: any = document.querySelector(`#${'dropdownInput' + id}`);
+    // const inputEle: any = document.querySelector(`#${'dropdownInput' + id}`);
 
     setTimeout(() => {
-      if (document.activeElement !== inputEle) {
-        if (StringUtil.isEmpty(inputEle.value)) {
+      if (document.activeElement !== inputRef) {
+        if (StringUtil.isEmpty(inputRef.value)) {
           selectItem([
             {
               id: '',
@@ -162,7 +197,7 @@
         }
         hideAutoDropdown();
       }
-    }, 300);
+    }, 30);
   };
 
   export const getSelectedItem = () => {
@@ -223,12 +258,20 @@
   onMount(() => {
     doSearch();
     inputWrapperRef && inputWrapperRef.addEventListener('focusout', hideOnLostFocus);
+    if (inputRef) {
+      inputRef.focus();
+    }
   });
 
   const selectItem = (data: any) => {
     if (data.length >= 0) {
       if (data[0] && data[0].name) {
-        textSearch = StringUtil.removeMark(data[0].name);
+        if (type !== 'password') {
+          textSearch = StringUtil.removeMark(data[0].name);
+        } else {
+          textSearch = getPassword();
+        }
+
         selectedItem = data[0];
         if (saveState) {
           settingsStore.saveUserSettings({
@@ -240,7 +283,7 @@
         }
         dispatch('change', {
           id: data[0].id,
-          name: textSearch
+          name: textSearch,
         });
       }
     }
@@ -252,41 +295,103 @@
   };
 
   const onTableKeyup = (event: any) => {
-    if (event.detail.event.code === 'Enter') {
-      selectItem(event.detail.data);
-      hideAutoDropdown();
+    if (dropdownFocused) {
+      if (event.detail.event.code === 'Enter') {
+        selectItem(event.detail.data);
+        hideAutoDropdown();
+      }
+    } else {
+      if (event.detail.event.code === 'Enter') {
+        if (type === 'password') {
+          selectItem({
+            id: SearchType.Login,
+            name: getPassword(),
+          });
+        } else {
+          selectItem({
+            id: undefined,
+            name: inputRef.value,
+          });
+        }
+
+        hideAutoDropdown();
+      }
     }
   };
 
   export const focus = () => {
     inputRef.focus();
-  }
+  };
 
   export const clear = () => {
-    inputRef.value='';
-  }
+    inputRef.value = '';
+    memoryPassword = '';
+  };
 
-  const onFocus = (event) => {
-    inputRef.removeAttribute('readonly');
+  const onClickBack = () => {
+    dispatch('clickBack', undefined);
+  };
+
+  const onClickNext = () => {
+    dispatch('change', {
+      id: SearchType.Login,
+      name: getPassword(),
+    });
+  };
+
+  const onKeyup = (event: any) => {
+    if (type !== 'password') {
+      return;
+    }
+
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      const start = inputRef.selectionStart;
+      const end = inputRef.selectionStart;
+      if (start === 0 && end === 0) {
+        memoryPassword = '';
+      } else {
+        memoryPassword = memoryPassword.slice(0, start) + memoryPassword.slice(start + 1, memoryPassword.length);
+      }
+    } else if (event.code.startsWith('Key') || event.code.startsWith('Digit')) {
+      const pos = inputRef.selectionStart;
+      memoryPassword = StringUtil.insertAt(memoryPassword, event.key, pos);
+    }
+
+    inputRef.value = new Array(inputRef.value.length).fill(displayChar).join('');
+  };
+
+  const onChange = () => {
+    // if(!dropdownFocused) {
+    //   if (type === 'password') {
+    //     dispatch('change', getPassword());
+    //   } else {
+    //     dispatch('change', inputRef.value);
+    //   }
+    // }
+  };
+
+  export const getPassword = () => {
+    return memoryPassword;
   };
 </script>
 
 <div class="w-100 auto-dropdown-wrapper" {id} bind:this={inputWrapperRef}>
-  <div style="display:none">
-    <input type="password" tabindex="-1"/>
-  </div>
-
   <input
+    required
+    on:keyup={onKeyup}
+    on:change={onChange}
+    bind:value={password}
     bind:this={inputRef}
     autocomplete="off"
-    {type}
+    type="search"
     {placeholder}
-    class="form-control"
-    id={'dropdownInput' + id}
-      readonly
-    on:focus={onFocus}
+    class="input {showBackButton ? 'input-left-indent input-large-spacing hide-search-icon' : 'search-mode'}"
     {disabled} />
-
+  {#if showBackButton}
+    <i on:click={onClickBack} class="back-button fa fa-arrow-left" />
+    <i on:click={onClickNext} class="next-button fa fa-arrow-right" />
+  {/if}
+  <i class="search-icon fa fa-search" />
   <ProgressBar loading$={searching$} smallSize={true} />
   <div style={`height: ${height};`} class="auto-dropdown {className}" id={'dropdown' + id}>
     <SelectableTable
@@ -300,6 +405,5 @@
       {menuPath}
       {saveState}
       showHeader={false} />
-    <!--    <HandsonTable on:beforeKeyDown={onBeforeKeyDownTable} bind:this={tableRef} id={'table' + id} data={markData} {columns} {menuPath} showHeader={false} />-->
   </div>
 </div>

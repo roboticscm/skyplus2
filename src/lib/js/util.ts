@@ -1,4 +1,3 @@
-import { UrlUtil } from './url-util';
 import { StringUtil } from './string-util';
 import { Browser } from './browser';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,7 +12,7 @@ export const getMethodNameInSnackCase = () => {
     name = /at \w+\.(\w+)/.exec(err.stack.split('\n')[2])[1];
   }
 
-  return UrlUtil.convertToSnackCase(name || '');
+  return StringUtil.toSnackCase(name || '', '-');
 };
 
 export const unccentVietnamese = (str: string) => {
@@ -67,4 +66,10 @@ export const markStringSearch = (source: string, search: string, removeAccent: b
 
 export const genUUID = () => {
   return 'id' + uuidv4();
+};
+
+export const getRandomInt = (min: number, max: number) => {
+  const _min = Math.ceil(min);
+  const _max = Math.floor(max);
+  return Math.floor(Math.random() * (_max - _min + 1)) + _min;
 };

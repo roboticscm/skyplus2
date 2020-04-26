@@ -8,7 +8,6 @@ export const useView = (view: ViewStore) => {
   const registerShortcutKey = () => {
     const controlS$ = fromEvent(document, 'keydown').pipe(
       // concatMap(() => view.isReadOnlyMode$),
-      tap(console.log),
       filter((e: any) => {
         if (e.keyCode == 83 && (navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)) {
           e.preventDefault();

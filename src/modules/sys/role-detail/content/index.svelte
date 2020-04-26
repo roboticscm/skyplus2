@@ -274,21 +274,23 @@
 
   const createCheckboxesHeader = (delay = 1000) => {
     setTimeout(() => {
-      // checked
-      excelGridRef.createCheckboxHeader(4, true);
-      // private
-      excelGridRef.createCheckboxHeader(7, true);
-      // approve
-      excelGridRef.createCheckboxHeader(9, true);
+      if (excelGridRef) {
+        // checked
+        excelGridRef.createCheckboxHeader(4, true);
+        // private
+        excelGridRef.createCheckboxHeader(7, true);
+        // approve
+        excelGridRef.createCheckboxHeader(9, true);
 
-      // Render
-      excelGridRef.createCheckboxHeader(12, true);
-      // Disabled
-      excelGridRef.createCheckboxHeader(13, true);
-      // Confirm
-      excelGridRef.createCheckboxHeader(14, true);
-      // Require password
-      excelGridRef.createCheckboxHeader(15, true);
+        // Render
+        excelGridRef.createCheckboxHeader(12, true);
+        // Disabled
+        excelGridRef.createCheckboxHeader(13, true);
+        // Confirm
+        excelGridRef.createCheckboxHeader(14, true);
+        // Require password
+        excelGridRef.createCheckboxHeader(15, true);
+      }
     }, delay);
   };
 

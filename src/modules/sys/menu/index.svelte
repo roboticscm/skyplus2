@@ -9,7 +9,6 @@
   import TwoColumnView from '@/components/layout/two-column-view';
   import WorkList from './work-list/index.svelte';
   import MainContent from './content/index.svelte';
-  import ViewTitle from '@/components/layout/view-title';
   import ProgressBar from '@/components/ui/progress-bar';
   import { Store } from './store';
 
@@ -52,9 +51,6 @@
 
 <ProgressBar loading$={view.loading$} />
 
-{#if showTitle}
-  <ViewTitle {view} />
-{/if}
 <TwoColumnView id={'mainLayout' + view.getViewName()} {showTitle} {menuPath}>
   <div style="height: 100%;" slot="viewLeft">
     <WorkList {view} {store} {menuPath} {callFrom} />

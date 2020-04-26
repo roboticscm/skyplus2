@@ -286,7 +286,6 @@
    * @return {void}.
    */
   onMount(() => {
-    console.log('Language content mount');
     // reset form
     doAddNew();
     // Capture hot key (Ctrl - S) for save or update
