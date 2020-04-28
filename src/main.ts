@@ -42,19 +42,15 @@ const startApp = () => {
         .pipe(take(1))
         .subscribe((res) => {
           OrgStore.currentCompany$.next(SObject.convertFieldsToCamelCase(res.data[0]));
-
-          const rememberLogin = getRememberLogin();
-          if (rememberLogin === 'true') {
-            const userId = getUserId();
-            const token = getToken();
-            if (userId && token) {
-              AppStore.rememberLogin = true;
-              loginSuccess(userId, token);
-              setHeader(userId, token);
-              loadMenuAndUserSettings(_companyId);
-            } else {
-              logout();
-            }
+          const userId = getUserId();
+          const token = getToken();
+          if (userId && token) {
+            AppStore.rememberLogin = getRememberLogin() === 'true';
+            loginSuccess(userId, token);
+            setHeader(userId, token);
+            loadMenuAndUserSettings(_companyId);
+          } else {
+            logout();
           }
         });
       new App({
@@ -136,3 +132,7 @@ declare var ResizeObserver: ResizeObserver;
 // mobile detect
 const md = new MobileDetect(window.navigator.userAgent);
 (window as any).isSmartPhone = md.mobile() !== null && md.phone() !== null;
+
+
+console.log(process.env.WS_PROTOCOL);
+console.log(process.env.API_SERVER_PORT);

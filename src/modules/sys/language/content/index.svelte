@@ -203,7 +203,7 @@
       )
       .subscribe({
         /* do something after form submit*/
-        next: (res) => {
+        next: (res: any) => {
           if (res.response && res.response.data) {
             // if error
             if (res.response.data.message) {
@@ -255,7 +255,7 @@
       const query = view.createQuerySubscription(true);
       view.selectedData$
         .pipe(
-          switchMap((it) => {
+          switchMap((it: any) => {
             if (!it) return EMPTY;
             return apolloClient.subscribe({
               query,

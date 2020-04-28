@@ -390,7 +390,7 @@
         }),
       )
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           didSearch(res.data);
           view.loading$.next(false);
         },

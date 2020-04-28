@@ -69,22 +69,23 @@
   <div>
     <div>
       {#if selectedDep}
-        <div class="modules__name">
-          <i class="dropdown-icon fa fa-angle-down">
-            {@html ' ' + selectedDep.departmentName}
+        <div class="modules__content">
+          <i class="modules__content__icon dropdown-mark-icon fa fa-angle-down" style="padding-right: 6px;">
+            <div class="dropdown-content">
+              {#each modules as module, index}
+                <DropdownItem
+                  on:click={(e) => onNavigate(e, module.departmentId)}
+                  useFontIcon={module.depUseFontIcon}
+                  fontIcon={module.depFontIcon}
+                  iconData={module.depIconData}
+                  text={module.departmentName}
+                  selected={isSelectedItem(module.departmentId)} />
+              {/each}
+            </div>
           </i>
-
-          <div class="dropdown-content">
-            {#each modules as module, index}
-              <DropdownItem
-                on:click={(e) => onNavigate(e, module.departmentId)}
-                useFontIcon={module.depUseFontIcon}
-                fontIcon={module.depFontIcon}
-                iconData={module.depIconData}
-                text={module.departmentName}
-                selected={isSelectedItem(module.departmentId)} />
-            {/each}
-          </div>
+          <span class="modules__content__name">
+            {@html ' ' + selectedDep.departmentName}
+          </span>
         </div>
       {:else}
         {@html App.PROGRESS_BAR}

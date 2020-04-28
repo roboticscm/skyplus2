@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
+    "baseUrl": "types",
+//    "baseUrl": ".",
+    "typeRoots": ["types"],
     "outDir": "dist/lib",
     "noImplicitAny": false,
-    "baseUrl": ".",
     "resolveJsonModule": true,
     "paths": {
       "@/*": ["src/*"]

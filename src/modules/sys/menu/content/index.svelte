@@ -10,14 +10,15 @@
   import { Menu } from '../model';
   import { SObject } from '@/lib/js/sobject';
   import { apolloClient } from '@/lib/js/hasura-client';
-  import { ButtonPressed } from '@/components/ui/button/types';
-  import { SDate } from '@/lib/js/sdate';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import { validation } from './validation';
   import { ModalType } from '@/components/ui/modal/types';
-  import { StringUtil } from '@/lib/js/string-util';
+  import FloatTextInput from '@/components/ui/float-input/text-input';
+  import FloatNumberInput from '@/components/ui/float-input/number-input';
+  import FloatCheckbox from '@/components/ui/float-input/checkbox';
+  import Error from '@/components/ui/error';
 
-  import Button from '@/components/ui/button';
+  import Button from '@/components/ui/flat-button';
   import NumberInput from '@/components/ui/input/number-input';
   import TextInput from '@/components/ui/input/text-input';
   import Checkbox from '@/components/ui/input/checkbox';
@@ -228,7 +229,7 @@
       )
       .subscribe({
         /* do something after form submit*/
-        next: (res) => {
+        next: (res: any) => {
           if (res.response && res.response.data) {
             // if error
             if (res.response.data.message) {
@@ -282,7 +283,7 @@
       const query = view.createQuerySubscription(true);
       view.selectedData$
         .pipe(
-          switchMap((it) => {
+          switchMap((it: any) => {
             if (!it) return EMPTY;
             return apolloClient.subscribe({
               query,
@@ -428,28 +429,25 @@
         <div class="row">
           <!-- Code -->
           <div class="col-xs-24 col-sm-12">
-            <div class="row">
-              <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">{T('COMMON.LABEL.CODE')}:</div>
-              <div class="col-sm-24 col-lg-16">
-                <TextInput name="code" disabled={$isReadOnlyMode$} bind:value={form.code} bind:this={codeRef} />
-                {#if form.errors.has('code')}
-                  <span class="error">{form.errors.get('code')}</span>
-                {/if}
-              </div>
-            </div>
+            <FloatTextInput
+              placeholder={T('COMMON.LABEL.CODE')}
+              name="code"
+              disabled={$isReadOnlyMode$}
+              bind:value={form.code}
+              bind:this={codeRef} />
+            <Error {form} field="code" />
           </div>
           <!-- //Code -->
 
           <!-- Name -->
           <div class="col-xs-24 col-sm-12 pl-xs-0 pl-sm-2 pl-md-0">
-            <div class="row">
-              <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">{T('COMMON.LABEL.NAME')}:</div>
-              <div class="col-sm-24 col-lg-16">
-                <TextInput name="name" disabled={$isReadOnlyMode$} bind:value={form.name} />
-                {#if form.errors.has('name')}
-                  <span class="error">{form.errors.get('name')}</span>
-                {/if}
-              </div>
+            <div class="col-xs-24 col-sm-12">
+              <FloatTextInput
+                placeholder={T('COMMON.LABEL.NAME')}
+                name="name"
+                disabled={$isReadOnlyMode$}
+                bind:value={form.name} />
+              <Error {form} field="name" />
             </div>
           </div>
           <!-- //Name -->
@@ -458,39 +456,31 @@
         <div class="row">
           <!-- Path -->
           <div class="col-xs-24 col-sm-12">
-            <div class="row">
-              <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">{T('COMMON.LABEL.PATH')}:</div>
-              <div class="col-sm-24 col-lg-16">
-                <TextInput name="path" disabled={$isReadOnlyMode$} bind:value={form.path} />
-                {#if form.errors.has('path')}
-                  <span class="error">{form.errors.get('path')}</span>
-                {/if}
-              </div>
-            </div>
+            <FloatTextInput
+              placeholder={T('COMMON.LABEL.PATH')}
+              name="path"
+              disabled={$isReadOnlyMode$}
+              bind:value={form.path} />
+            <Error {form} field="path" />
           </div>
           <!-- //Path -->
 
           <!-- Font Icon -->
-          <div class="col-xs-24 col-sm-12 pl-xs-0 pl-sm-2 pl-md-0">
-            <div class="row">
-              <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">
-                <Checkbox name="useFontIcon" disabled={$isReadOnlyMode$} bind:checked={form.useFontIcon} />
-                {T('COMMON.LABEL.FONT_ICON')}:
-              </div>
-              <div class="col-sm-24 col-lg-14">
-                <div class="col-sm-24 col-lg-16">
-                  <TextInput name="fontIcon" disabled={$isReadOnlyMode$} bind:value={form.fontIcon} />
-                </div>
-              </div>
+          <div style="display: flex;" class="col-xs-24 col-sm-12 pl-xs-0 pl-sm-2 pl-md-0">
+            <FloatTextInput
+              bind:checked={form.useFontIcon}
+              placeholder={T('COMMON.LABEL.FONT_ICON')}
+              name="fontIcon"
+              disabled={$isReadOnlyMode$}
+              bind:value={form.fontIcon} />
 
-              <div class="col-sm-24 col-lg-2 pl-md-0 pl-lg-1">
-                {#if form.fontIcon && form.fontIcon.includes('<')}
-                  <span class="menu-font-icon">
-                    {@html form.fontIcon}
-                  </span>
-                {/if}
-              </div>
-            </div>
+            {#if form.fontIcon && form.fontIcon.includes('<')}
+              <span
+                style="display: flex; flex-direction: column; justify-content: flex-end; margin-bottom: 5px;"
+                class="menu-font-icon">
+                {@html form.fontIcon}
+              </span>
+            {/if}
           </div>
           <!--  //Font Icon -->
         </div>
@@ -498,27 +488,22 @@
         <div class="row">
           <!--  Sort -->
           <div class="col-xs-24 col-sm-12">
-            <div class="row">
-              <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">{T('COMMON.LABEL.SORT')}:</div>
-              <div class="col-sm-24 col-lg-16">
-                <NumberInput name="sort" disabled={$isReadOnlyMode$} bind:value={form.sort} />
-                {#if form.errors.has('sort')}
-                  <span class="error">{form.errors.get('sort')}</span>
-                {/if}
-              </div>
-            </div>
+            <FloatNumberInput
+              placeholder={T('COMMON.LABEL.SORT')}
+              name="sort"
+              disabled={$isReadOnlyMode$}
+              bind:value={form.sort} />
+            <Error {form} field="sort" />
             <!--  //Sort -->
           </div>
 
           <!--  Disabled -->
           <div class="col-xs-24 col-sm-12 pl-xs-0 pl-sm-2 pl-md-0">
-            <div class="row">
-              <div class="col-sm-24 col-lg-8" />
-              <div class="label col-sm-24 col-lg-16">
-                <Checkbox disabled={$isReadOnlyMode$} name="disabled" bind:checked={form.disabled} />
-                {T('COMMON.LABEL.DISABLED')}
-              </div>
-            </div>
+            <FloatCheckbox
+              text={T('COMMON.LABEL.DISABLED')}
+              name="disabled"
+              disabled={$isReadOnlyMode$}
+              bind:checked={form.disabled} />
           </div>
           <!-- //Disabled -->
         </div>

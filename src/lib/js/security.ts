@@ -63,16 +63,25 @@ export const getUserId = () => {
 };
 
 export const getToken = () => {
-  return localStorage.getItem(Token.TOKEN_KEY);
+  return decodeToken(localStorage.getItem(Token.TOKEN_KEY));
 };
 
 export const getRememberLogin = () => {
   return localStorage.getItem('remember');
 };
 
-export const loginSuccess = function(userId: string, rawToken: string) {
+export const encodeToken = (token: string) => {
+  const index = token.length / 2;
+  return token.slice(0, index) + getBrowserID() + token.slice(index);
+};
+
+export const decodeToken = (token: string) => {
+  return token && token.replace(getBrowserID(), '');
+};
+
+export const loginSuccess = function(userId: string, token: string) {
   localStorage.setItem('userId', userId);
-  localStorage.setItem(Token.TOKEN_KEY, rawToken);
+  localStorage.setItem(Token.TOKEN_KEY, encodeToken(token));
   AppStore.isLogged$.next(true);
   if (AppStore.rememberLogin) {
     localStorage.setItem('remember', 'true');
@@ -88,8 +97,7 @@ export const logout = function() {
   appStore.theme$.next(null);
 };
 
-export const setHeader = function(userId: string, rawToken: string) {
-  const token = rawToken.replace(getBrowserID(), '');
+export const setHeader = function(userId: string, token: string) {
   const authHeader = `${userId}||| ${token}`;
 
   axios.defaults.headers['Authorization'] = authHeader;

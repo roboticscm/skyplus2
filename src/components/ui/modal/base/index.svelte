@@ -15,6 +15,7 @@
   import { of } from 'rxjs';
   import { App } from '@/lib/js/constants';
   import { passwordChar } from '@/components/ui/input/autocomplete/helper';
+  import { Browser } from '@/lib/js/browser';
 
   const dispatch = createEventDispatcher();
   export let id: string;
@@ -53,8 +54,12 @@
   };
 
   // @ts-ignore
-  const resizeObserver = new ResizeObserver(onResize);
+  let resizeObserver: any;
 
+  if (Browser.getBrowser() !== 'Safari') {
+    // @ts-ignore
+    resizeObserver = new ResizeObserver(onResize);
+  }
   let form: any = new Form({
     username: appStore.user.username,
     password: '',
@@ -98,12 +103,12 @@
   onMount(() => {
     useModal.loadSettings(modalRef);
     useModal.dragElement(modalRef);
-    resizeObserver.observe(modalRef);
+    resizeObserver && resizeObserver.observe(modalRef);
   });
 
   onDestroy(() => {
     if (modalRef) {
-      resizeObserver.unobserve(modalRef);
+      resizeObserver && resizeObserver.unobserve(modalRef);
     }
   });
 

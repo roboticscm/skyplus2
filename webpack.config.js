@@ -11,6 +11,7 @@ const magicImporter = require('node-sass-magic-importer');
 const sveltePreprocess = require('svelte-preprocess');
 const CopyPlugin = require('copy-webpack-plugin');
 const onwarn = (warning, onwarn) => warning.code === 'css-unused-selector' || onwarn(warning);
+const Dotenv = require('dotenv-webpack');
 
 const alias = {
       svelte: path.resolve('node_modules', 'svelte'),
@@ -119,6 +120,7 @@ module.exports = {
   },
   mode,
   plugins: [
+    new Dotenv(),
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',

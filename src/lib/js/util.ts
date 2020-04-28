@@ -7,6 +7,7 @@ export const getMethodNameInSnackCase = () => {
   let name: string | null = '';
   if (Browser.getBrowser() === 'Safari') {
     name = err.stack.split('\n')[1].trim();
+    name = name.split('@')[0];
   } else {
     // @ts-ignore
     name = /at \w+\.(\w+)/.exec(err.stack.split('\n')[2])[1];

@@ -226,7 +226,7 @@
       )
       .subscribe({
         /* do something after form submit*/
-        next: (res) => {
+        next: (res: any) => {
           if (res.response && res.response.data) {
             // if error
             if (res.response.data.message) {

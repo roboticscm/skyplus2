@@ -348,7 +348,7 @@
       const query = view.createQuerySubscription(true);
       view.selectedData$
         .pipe(
-          switchMap((it) => {
+          switchMap((it: any) => {
             if (!it) return EMPTY;
             return apolloClient.subscribe({
               query,

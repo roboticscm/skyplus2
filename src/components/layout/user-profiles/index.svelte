@@ -25,10 +25,19 @@
     // themeConfigModalRef.value.show();
   };
   const showPopup = () => {
+    // @ts-ignore
+    if (!$isLogged$) {
+      return;
+    }
     (document.querySelector('#userProfilesDropdown') as any).classList.add('show-dropdown');
   };
 
   const hidePopup = () => {
+    // @ts-ignore
+    if (!$isLogged$) {
+      return;
+    }
+
     (document.querySelector('#userProfilesDropdown') as any).classList.remove('show-dropdown');
   };
 </script>
@@ -37,10 +46,10 @@
 
 </style>
 
-<div class="user-profiles-wrapper">
+<div class="user-profiles-wrapper" on:mouseover|stopPropagation={showPopup} on:mouseout={hidePopup}>
   <!--        <theme-config-modal ref="themeConfigModalRef" id="themeConfigModalId"> </theme-config-modal>-->
   {#if $isLogged$ && user}
-    <div class="user-profiles" on:mouseover|stopPropagation={showPopup} on:mouseout={hidePopup}>
+    <div class="user-profiles">
       {#if user.useFontIcon}
         <span class="user-profiles__icon">
           {@html user.fontIcon}

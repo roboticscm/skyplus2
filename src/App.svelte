@@ -53,21 +53,25 @@
     <div class="layout-header__top">
       <div class="layout-header__top__left">
         <BranchDropdown />
-        <div class="separator" />
         {#if $isLogged$}
+          <div class="separator" />
+
           <ModulesDropdown id="moduleId" />
-        {:else}
-          <div class="layout-header__top__left__welcome">
-            <span>
-              <i class="fa fa-sign-in-alt" />
-              {@html `${T('SYS.MSG.WELCOME_TO')} <b>SKYHUB</b>`}
-            </span>
-          </div>
         {/if}
       </div>
+      {#if !$isLogged$}
+        <div class="layout-header__top__welcome">
+          <span>
+            <i class="fa fa-sign-in-alt" />
+            {@html `${T('SYS.MSG.WELCOME_TO')} <b>SKYHUB</b>`}
+          </span>
+        </div>
+      {/if}
       <SearchBar id="mainSearchBarId" menuPath="intro" />
-      <Notification />
-      <UserProfiles />
+      <div class="layout-header__top__right">
+        <Notification />
+        <UserProfiles />
+      </div>
     </div>
     <nav class="layout-header__bottom">
       {#if $isLogged$}

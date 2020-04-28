@@ -6,7 +6,7 @@
   // import { settingsStore } from '@/store/settings';
   import { App } from '@/lib/js/constants';
 
-  const defaultHeaderHeight = '80px';
+  const defaultHeaderHeight = '88px';
 
   onMount(async () => {
     Split({

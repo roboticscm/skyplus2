@@ -20,10 +20,10 @@
   import Button from '@/components/ui/button';
   import FloatTextInput from '@/components/ui/float-input/text-input';
   import FloatNumberInput from '@/components/ui/float-input/number-input';
+  import Error from '@/components/ui/error';
   import FloatSelect from '@/components/ui/float-input/float-select';
   import Select from '@/components/ui/input/select';
   import FloatCheckbox from '@/components/ui/float-input/checkbox';
-  import Error from '@/components/ui/error';
   import SC from '@/components/set-common';
   import SimpleImageSelector from '@/components/ui/simple-image-selector';
   import TreeView from '@/components/ui/tree-view';
@@ -287,7 +287,7 @@
       const query = view.createQuerySubscription(true);
       view.selectedData$
         .pipe(
-          switchMap((it) => {
+          switchMap((it: any) => {
             if (!it) return EMPTY;
             return apolloClient.subscribe({
               query,

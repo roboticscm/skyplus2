@@ -14,7 +14,7 @@
     {#if $currentCompany$}
       <span style="display: flex; align-content: center; align-items: center;">
         {#if $isLogged$}
-          <i class="fa fa-sort-down" style="padding-right: 5px; " />
+          <i class="fa fa-sort-down" style="padding-right: 20px; " />
         {/if}
         {#if $currentCompany$.useFontIcon}
           <span>
@@ -32,17 +32,17 @@
       {@html App.PROGRESS_BAR}
     {/if}
 
-    {#if $isLogged$}
-      <div class="left-dropdown-content">
-        <a class="left-dropdown-content__text" href="'#'">
-          <i class="fa fa-cog" />
-          setting
-        </a>
-        <a class="left-dropdown-content__text" href="'#'">
-          <i class="fa fa-folder" />
-          directory
-        </a>
-      </div>
-    {/if}
+    <!--    {#if $isLogged$}-->
+    <!--      <div class="left-dropdown-content">-->
+    <!--        <a class="left-dropdown-content__text" href="'#'">-->
+    <!--          <i class="fa fa-cog" />-->
+    <!--          setting-->
+    <!--        </a>-->
+    <!--        <a class="left-dropdown-content__text" href="'#'">-->
+    <!--          <i class="fa fa-folder" />-->
+    <!--          directory-->
+    <!--        </a>-->
+    <!--      </div>-->
+    <!--    {/if}-->
   </div>
 </div>

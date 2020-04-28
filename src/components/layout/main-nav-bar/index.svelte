@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
   import { T } from '@/lib/js/locale/locale';
   import { menuStore, historyMenuStore } from '@/store/menu';
   import { appStore } from '@/store/app';
@@ -11,6 +11,7 @@
 
   const { dataList$ } = menuStore;
   const { navBarConfig$ } = appStore;
+  const dispatch = createEventDispatcher();
 
   let routerLink: any;
   let visibleCountItem = 0;
@@ -96,7 +97,7 @@
       {:else if window['$']('#mainNavBarId').width() >= containerWidth - 250 && !document.querySelector('#mainNavBarMoreId')}
         <div class="more nav-item" on:mouseover|stopPropagation={onMouseoverMore} on:mouseout={onMouseoutMore}>
           <span>{T('COMMON.LABEL.MORE')} &nbsp;&nbsp;</span>
-          <i class="fa fa-angle-down" />
+          <i class="dropdown-mark-icon fa fa-angle-down" />
 
           <div id="mainNavBarMoreId" class="right-dropdown-content">
             {#each dataList as row}

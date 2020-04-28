@@ -1,8 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import jexcel from 'jexcel';
-  import { Settings } from '@/model/settings';
-  import { UrlUtil } from '@/lib/js/url-util';
   import { Debug } from '@/lib/js/debug';
   import { settingsStore } from '@/store/settings';
   import { T } from '@/lib/js/locale/locale';
