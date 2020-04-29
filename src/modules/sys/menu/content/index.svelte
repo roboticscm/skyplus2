@@ -374,7 +374,7 @@
 <!--//Invisible Element-->
 
 <!--Form controller-->
-<section class="view-content-bottom">
+<section class="view-content-controller">
   {#if view.isRendered(ButtonId.AddNew)}
     <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
   {/if}

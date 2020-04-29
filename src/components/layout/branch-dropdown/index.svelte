@@ -2,7 +2,12 @@
   import { OrgStore } from '@/store/org';
   import { AppStore } from '@/store/app';
   import { App } from '@/lib/js/constants';
+  import OrgIconMark from '@/components/layout/icons/org-mark';
+  import SkyhubLogo from '@/components/layout/icons/skyhub';
+  import NewsStore from '@/pages/intro/store';
 
+  // @ts-ignore
+  const { dataList$ } = NewsStore;
   // @ts-ignore
   const { isLogged$ } = AppStore;
   // @ts-ignore
@@ -11,11 +16,9 @@
 
 <div class="branch">
   <div class="branch__logo">
-    {#if $currentCompany$}
+    {#if $isLogged$}
       <span style="display: flex; align-content: center; align-items: center;">
-        {#if $isLogged$}
-          <i class="fa fa-sort-down" style="padding-right: 20px; " />
-        {/if}
+        <OrgIconMark />
         {#if $currentCompany$.useFontIcon}
           <span>
             {@html $currentCompany$.fontIcon}
@@ -28,8 +31,8 @@
           </span>
         {/if}
       </span>
-    {:else}
-      {@html App.PROGRESS_BAR}
+    {:else if $dataList$ && $dataList$.length > 0}
+      <SkyhubLogo className="skyhub-small-logo" />
     {/if}
 
     <!--    {#if $isLogged$}-->

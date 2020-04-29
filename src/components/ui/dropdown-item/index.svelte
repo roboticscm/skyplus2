@@ -8,6 +8,9 @@
   export let selected = false;
   export let inline = true;
 
+  useFontIcon;
+  fontIcon;
+  iconData;
   const dispatch = createEventDispatcher();
   const onClick = () => {
     dispatch('click');
@@ -18,19 +21,19 @@
   class="{inline ? 'dropdown-item' : ''}
   {selected ? 'dropdown-content__selected' : ''}"
   on:click|stopPropagation={onClick}>
-  {#if useFontIcon}
-    <span>
-      {@html fontIcon}
-    </span>
-  {:else if iconData}
-    <span>
-      <img src={iconData} alt="" />
-    </span>
-  {:else}
-    <span>
-      <i class="fa fa-bars" />
-    </span>
-  {/if}
+  <!--  {#if useFontIcon}-->
+  <!--    <span>-->
+  <!--      {@html fontIcon}-->
+  <!--    </span>-->
+  <!--  {:else if iconData}-->
+  <!--    <span>-->
+  <!--      <img src={iconData} alt="" />-->
+  <!--    </span>-->
+  <!--  {:else}-->
+  <!--    <span>-->
+  <!--      <i class="fa fa-bars" />-->
+  <!--    </span>-->
+  <!--  {/if}-->
   <span style="white-space: nowrap">
     {@html text}
   </span>

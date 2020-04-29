@@ -7,6 +7,7 @@
   import { appStore } from '@/store/app';
   import { orgStore } from '@/store/org';
   import DropdownItem from '@/components/ui/dropdown-item';
+  import DepIconMark from '@/components/layout/icons/dep-mark';
 
   export let id: string;
 
@@ -70,7 +71,8 @@
     <div>
       {#if selectedDep}
         <div class="modules__content">
-          <i class="modules__content__icon dropdown-mark-icon fa fa-angle-down" style="padding-right: 6px;">
+          <DepIconMark>
+            <!--          <i class="modules__content__icon dropdown-mark-icon fa fa-angle-down" style="padding-right: 6px;">-->
             <div class="dropdown-content">
               {#each modules as module, index}
                 <DropdownItem
@@ -82,7 +84,8 @@
                   selected={isSelectedItem(module.departmentId)} />
               {/each}
             </div>
-          </i>
+            <!--          </i>-->
+          </DepIconMark>
           <span class="modules__content__name">
             {@html ' ' + selectedDep.departmentName}
           </span>

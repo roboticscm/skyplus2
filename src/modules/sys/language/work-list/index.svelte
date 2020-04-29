@@ -63,4 +63,3 @@
   <!--  <HandsonWorkList on:selection={onSelection} {view} {workListContainerId} {tableId} {menuPath} />-->
   <SimpleWorkList on:selection={onSelection} {view} {tableId} {menuPath} />
 </section>
-<div class="view-left-bottom" />

@@ -17,7 +17,8 @@
   import SC from '@/components/set-common';
 
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
-  import Button from '@/components/ui/button';
+  import Button from '@/components/ui/flat-button';
+  import Checkbox from '@/components/ui/input/checkbox';
   import { catchError, concatMap, switchMap, filter } from 'rxjs/operators';
   import { fromEvent, of, Observable } from 'rxjs';
   import { fromPromise } from 'rxjs/internal-compatibility';
@@ -234,7 +235,6 @@
             }
           } else {
             // success
-            // @ts-ignore
             beforeData = SObject.clone(editedData);
             scRef.snackbarRef().showUpdateSuccess();
             // @ts-ignore
@@ -368,32 +368,16 @@
   }
 </script>
 
-<!--Main content-->
-<section id={tableContainerId} class="view-content-main">
-  <!--Invisible Element-->
-  <SC bind:this={scRef} {view} {menuPath} />
-  <!--//Invisible Element-->
-
-  <svelte:component
-    this={ExcelGrid}
-    {menuPath}
-    bind:this={excelGridRef}
-    id={'roleControlGrid' + view.getViewTitle() + 'Id'}
-    gridNestedHeaders={_nestedHeaders}
-    {columns}
-    data={roleDetails}
-    height={tableHeight}
-    gridMergeCells={useMergeCell ? mergeCells : {}}>
-    <div slot="label">
-      <span class="label">{T('SYS.LABEL.MENU')} - {T('SYS.LABEL.ROLE_CONTROL')}:</span>
-    </div>
-  </svelte:component>
-</section>
-
 <!--Form controller-->
-<section class="view-content-bottom">
-  <input on:change={onChangeUseMerge} type="checkbox" bind:checked={useMergeCell} />
-  <span style="color:var(--primary)">{T('SYS.LABEL.USE_MERGE_CELL')}</span>
+<section class="view-content-controller">
+  <div style="display: flex; flex-direction: column; justify-content: center;">
+    <Checkbox
+      disabled={$selectedData$ === null}
+      text={T('SYS.LABEL.USE_MERGE_CELL')}
+      on:change={onChangeUseMerge}
+      bind:checked={useMergeCell} />
+  </div>
+
   {#if $selectedData$ !== null}
     <Button btnType={ButtonType.Reset} on:click={onReset} />
   {/if}
@@ -414,4 +398,27 @@
     <Button btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
   {/if}
 
+</section>
+<!--//Form controller-->
+
+<!--Main content-->
+<section id={tableContainerId} class="view-content-main">
+  <!--Invisible Element-->
+  <SC bind:this={scRef} {view} {menuPath} />
+  <!--//Invisible Element-->
+
+  <svelte:component
+    this={ExcelGrid}
+    {menuPath}
+    bind:this={excelGridRef}
+    id={'roleControlGrid' + view.getViewTitle() + 'Id'}
+    gridNestedHeaders={_nestedHeaders}
+    {columns}
+    data={roleDetails}
+    height={tableHeight}
+    gridMergeCells={useMergeCell ? mergeCells : {}}>
+    <div slot="label">
+      <span class="label">{T('SYS.LABEL.MENU')} - {T('SYS.LABEL.ROLE_CONTROL')}:</span>
+    </div>
+  </svelte:component>
 </section>

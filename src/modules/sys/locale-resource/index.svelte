@@ -32,10 +32,8 @@
 
 <ProgressBar loading$={view.loading$} />
 
-{#if showTitle}
-  <ViewTitle {view} />
-{/if}
-
 <main class="view-container">
-  <MainContent {view} {menuPath} />
+  <section class="view-content">
+    <MainContent {view} {menuPath} />
+  </section>
 </main>

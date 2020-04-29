@@ -45,9 +45,6 @@
 
 <ProgressBar loading$={view.loading$} />
 
-{#if showTitle}
-  <ViewTitle {view} />
-{/if}
 <TwoColumnView id={'mainLayout' + view.getViewName()} {showTitle} {menuPath}>
   <div style="height: 100%;" slot="viewLeft">
     <WorkList {view} {store} {menuPath} />

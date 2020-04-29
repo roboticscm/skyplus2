@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import Store from './store';
   import NewsItem from './news-item/index.svelte';
+  import SkyhubLogo from '@/components/layout/icons/skyhub';
 
   const { dataList$ } = Store;
 
@@ -15,17 +16,19 @@
 
   .news-content {
     height: 100%;
-    max-width: 1300px;
+    width: 100%;
+    /*max-width: 1300px;*/
     margin: 0 auto;
     padding-left: $large-padding;
     padding-right: $large-padding;
     padding-top: $default-padding;
+    background: var(--bg-primary);
   }
 
   .news {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 auto;
+    margin-top: 50px;
     justify-content: center;
     align-content: space-evenly;
   }
@@ -33,11 +36,12 @@
 
 <div class="news-content">
   <div class="news">
-    <!--      <div class="row">-->
-    {#each $dataList$ as item}
-      <!--      <div class="col-xs-24 col-md-12 col-lg-6 ">-->
-      <NewsItem news={item} />
-      <!--      </div>-->
-    {/each}
+    {#if $dataList$ && $dataList$.length > 0}
+      {#each $dataList$ as item}
+        <NewsItem news={item} />
+      {/each}
+    {:else}
+      <SkyhubLogo />
+    {/if}
   </div>
 </div>

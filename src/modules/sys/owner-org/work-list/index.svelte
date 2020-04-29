@@ -126,4 +126,3 @@
 <section id={workListContainerId} class="view-left-main">
   <TreeView bind:this={treeRef} data={$orgData$} id={treeId} on:click={onClickTree} />
 </section>
-<div class="view-left-bottom" />

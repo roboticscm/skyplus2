@@ -156,4 +156,3 @@
       bind:this={pageRef} />
   </div>
 </section>
-<section class="view-left-bottom" />

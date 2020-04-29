@@ -68,4 +68,3 @@
 <section id={workListContainerId} class="view-left-main">
   <SimpleWorkList {view} {menuPath} {tableId} on:selection={onSelection} />
 </section>
-<div class="view-left-bottom" />

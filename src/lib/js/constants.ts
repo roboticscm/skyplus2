@@ -14,16 +14,16 @@ export class Proxy {
 }
 
 export class API {
-  static API_DOMAIN = 'localhost';
+  // static API_DOMAIN = 'localhost';
   // static API_DOMAIN = '192.168.10.3';
   // static API_DOMAIN = '172.16.30.19';
-  // static API_DOMAIN = 'frontend.com.vn';
+  static API_DOMAIN = 'frontend.com.vn';
   static API_SERVER = `${Protocol.HTTP}://${API.API_DOMAIN}:7581`;
 
   static BASE_URL = `${API.API_SERVER}/api/`;
 }
 
-export const GUTTER_WIDTH = 10; //pixel
+export const GUTTER_WIDTH = 8; //pixel
 
 export class Hasura {
   static HTTP_URL = `${Protocol.HTTP}://${API.API_DOMAIN}:7580/v1/graphql`;

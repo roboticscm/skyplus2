@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
-  import Button from '@/components/ui/button';
+  import Button from '@/components/ui/flat-button';
   import ViewWrapperModal from '@/components/modal/view-wrapper';
   import { T } from '@/lib/js/locale/locale';
   import { ViewStore } from '@/store/view';
@@ -9,12 +9,12 @@
   import { string } from 'prop-types';
   import { distinctUntilChanged, skip, switchMap, take, tap, map, debounce } from 'rxjs/operators';
   import { forkJoin, fromEvent, Observable } from 'rxjs';
-  import Select from '@/components/ui/input/select';
-  import Autocomplete from '@/components/ui/input/autocomplete';
+  import FloatSelect from '@/components/ui/float-input/select';
+  import Autocomplete from '@/components/ui/float-input/simple-autocomplete';
   import { Store } from '../store';
   import { settingsStore } from '@/store/settings';
   import { Debug } from '@/lib/js/debug';
-  import QuickSearch from '@/components/ui/input/quick-search';
+  import QuickSearch from '@/components/ui/float-input/quick-search';
   import { TableColumn } from '@/model/base';
   import ProgressBar from '@/components/ui/progress-bar';
   import { StringUtil } from '@/lib/js/string-util';
@@ -167,6 +167,8 @@
 
     let selectedTypeGroupId = langTypeGroupAutoRef && langTypeGroupAutoRef.getSelectedId();
     const typeGroupText = langTypeGroupAutoRef && langTypeGroupAutoRef.getInputText();
+
+    console.log('xxx ', selectedTypeGroupId, typeGroupText);
 
     if (StringUtil.isEmpty(selectedTypeGroupId) && !StringUtil.isEmpty(typeGroupText)) {
       selectedTypeGroupId = typeGroupText;
@@ -451,11 +453,11 @@
     width: 100%;
   }
   .language-grid {
-    height: calc(100% - 2.2rem * 2 - #{$controller-height});
+    height: calc(100% - 2.2rem * 3 - #{$controller-height});
   }
   .full-language-grid {
     /*overflow: auto;*/
-    height: calc(100% - 2.2rem * 2 - 10px);
+    height: calc(100% - 2.2rem * 3 - 13px);
   }
 </style>
 
@@ -484,22 +486,32 @@
 </ViewWrapperModal>
 <!--//Invisible Element-->
 
+<section class="view-content-controller">
+  <Button btnType={ButtonType.AddNew} title={T('COMMON.BUTTON.ADD_NEW_LANGUAGE')} on:click={onAddNewLanguage} />
+  {#if view.isRendered(ButtonId.Config)}
+    <Button btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
+    <Button
+      btnType={ButtonType.TrashRestore}
+      on:click={onTrashRestore}
+      disabled={view.isDisabled(ButtonId.TrashRestore)} />
+  {/if}
+</section>
+
 <section class="view-content-main">
   <!-- Change language -->
   <div class="row">
     <div class="col-xs-24 col-md-12 col-lg-7">
-      <div class="row">
-        <div class="label col-xs-24 sm-12 col-lg-10 text-xs-left text-xx-right">{T('COMMON.LABEL.LANGUAGE')}:</div>
-        <div class="col-xs-24 sm-12 col-lg-14">
-          <Select
-            id={view.getViewName() + 'UsedLanguageSelectId'}
-            {menuPath}
-            saveState={true}
-            autoLoad={true}
-            data={$usedLanguages$}
-            bind:this={languageDropdownRef} />
-        </div>
-      </div>
+      <FloatSelect
+        autoLoad={true}
+        saveState={true}
+        {menuPath}
+        id={view.getViewName() + 'UsedLanguageSelectId'}
+        bind:this={languageDropdownRef}
+        data={$usedLanguages$}
+        placeholder={T('COMMON.LABEL.LANGUAGE')} />
     </div>
     <div class="col-xs-24 col-md-12 col-lg-3">
       <Button btnType={ButtonType.Apply} on:click={onApplyLanguage} />
@@ -510,53 +522,41 @@
   <div class="row">
     <!-- Company -->
     <div class="col-xs-24 col-md-8 col-lg-7">
-      <div class="row">
-        <div class="label col-md-24 col-lg-10 text-md-left text-xx-right">{T('COMMON.LABEL.COMPANY')}:</div>
-        <div class="col-md-24 col-lg-14">
-          <Select
-            id={view.getViewName() + 'CompanySelectId'}
-            {menuPath}
-            on:change={onSearch}
-            saveState={true}
-            data={$companies$}
-            bind:this={companyDropdownRef} />
-        </div>
-      </div>
+      <FloatSelect
+        placeholder={T('COMMON.LABEL.COMPANY')}
+        id={view.getViewName() + 'CompanySelectId'}
+        {menuPath}
+        on:change={onSearch}
+        saveState={true}
+        data={$companies$}
+        bind:this={companyDropdownRef} />
     </div>
     <!-- //Company -->
     <!-- Category -->
     <div class="col-xs-24 col-md-8 col-lg-7 pl-xs-0 pl-md-1 pl-lg-0">
-      <div class="row">
-        <div class="label col-md-24 col-lg-10 text-md-left text-xx-right">{T('COMMON.LABEL.CATEGORY')}:</div>
-        <div class="col-md-24 col-lg-14">
-          <Autocomplete
-            columns={[{ name: 'name', title: 'Name', type: 'html' }]}
-            searchFunc={doCategorySearch}
-            id={view.getViewName() + 'CategoryAutoId'}
-            {menuPath}
-            bind:this={langCategoryAutoRef}
-            saveState={true}
-            on:change={onSearch} />
-        </div>
-      </div>
+      <Autocomplete
+        placeholder={T('COMMON.LABEL.CATEGORY')}
+        columns={[{ name: 'name', title: 'Name', type: 'html' }]}
+        searchFunc={doCategorySearch}
+        id={view.getViewName() + 'CategoryAutoId'}
+        {menuPath}
+        bind:this={langCategoryAutoRef}
+        saveState={true}
+        on:change={onSearch} />
     </div>
     <!-- //Category -->
 
     <!-- Type Group -->
     <div class="col-xs-24 col-md-8 col-lg-7 pl-xs-0 pl-md-1 pl-lg-0">
-      <div class="row">
-        <div class="label col-md-24 col-lg-10 text-md-left text-xx-right">{T('COMMON.LABEL.TYPE_GROUP')}:</div>
-        <div class="col-md-24 col-lg-14">
-          <Autocomplete
-            columns={[{ name: 'name' }]}
-            searchFunc={doTypeGroupSearch}
-            id={view.getViewName() + 'TypeGroupAutoId'}
-            {menuPath}
-            bind:this={langTypeGroupAutoRef}
-            saveState={true}
-            on:change={onSearch} />
-        </div>
-      </div>
+      <Autocomplete
+        placeholder={T('COMMON.LABEL.TYPE_GROUP')}
+        columns={[{ name: 'name' }]}
+        searchFunc={doTypeGroupSearch}
+        id={view.getViewName() + 'TypeGroupAutoId'}
+        {menuPath}
+        bind:this={langTypeGroupAutoRef}
+        saveState={true}
+        on:change={onSearch} />
     </div>
     <!-- //Type Group -->
     <!-- Search or Filter-->
@@ -565,8 +565,18 @@
     </div>
     <!-- //Search or Filter-->
   </div>
+
+  <div style="margin-top: 10px;">
+    <Pagination
+      {menuPath}
+      totalRecords={$fullCount$}
+      on:loadPage={onLoadPage}
+      on:init={onPaginationInit}
+      bind:this={pageRef} />
+
+  </div>
   <!--  Language Grid-->
-  <div id="languageGridContainer" class="'row' {$fullCount$ > 0 ? 'language-grid' : 'full-language-grid'} ">
+  <div id="languageGridContainer" class="row {$fullCount$ > 0 ? 'language-grid' : 'full-language-grid'} ">
     <div class="col-24">
       <svelte:component
         this={ExcelGrid}
@@ -583,28 +593,4 @@
     </div>
   </div>
   <!--  //Language Grid -->
-
-  <div style="margin-top: 1px;">
-    <Pagination
-      {menuPath}
-      totalRecords={$fullCount$}
-      on:loadPage={onLoadPage}
-      on:init={onPaginationInit}
-      bind:this={pageRef} />
-
-  </div>
-</section>
-
-<section class="view-content-bottom">
-  <Button btnType={ButtonType.AddNew} title={T('COMMON.BUTTON.ADD_NEW_LANGUAGE')} on:click={onAddNewLanguage} />
-  {#if view.isRendered(ButtonId.Config)}
-    <Button btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
-    <Button
-      btnType={ButtonType.TrashRestore}
-      on:click={onTrashRestore}
-      disabled={view.isDisabled(ButtonId.TrashRestore)} />
-  {/if}
 </section>

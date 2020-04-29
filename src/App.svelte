@@ -50,24 +50,30 @@
 {/if}
 <MainLayout>
   <section slot="header" class="layout-header">
-    <div class="layout-header__top">
+    <div class="layout-header__top {!$isLogged$ ? 'layout-header__large_top' : ''}">
       <div class="layout-header__top__left">
         <BranchDropdown />
         {#if $isLogged$}
           <div class="separator" />
-
           <ModulesDropdown id="moduleId" />
         {/if}
+
+        {#if !$isLogged$}
+          <div class="layout-header__top__center__welcome">
+            <span>
+              <i class="fa fa-sign-in-alt" />
+              {@html `${T('SYS.MSG.WELCOME_TO')} <b>SKYHUB</b>`}
+            </span>
+          </div>
+
+          <SearchBar id="mainSearchBarId" menuPath="intro" />
+        {/if}
       </div>
-      {#if !$isLogged$}
-        <div class="layout-header__top__welcome">
-          <span>
-            <i class="fa fa-sign-in-alt" />
-            {@html `${T('SYS.MSG.WELCOME_TO')} <b>SKYHUB</b>`}
-          </span>
-        </div>
-      {/if}
-      <SearchBar id="mainSearchBarId" menuPath="intro" />
+      <div class="layout-header__top__center">
+        {#if $isLogged$}
+          <SearchBar id="mainSearchBarId" menuPath="intro" />
+        {/if}
+      </div>
       <div class="layout-header__top__right">
         <Notification />
         <UserProfiles />

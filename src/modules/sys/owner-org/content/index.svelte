@@ -10,23 +10,17 @@
   import { OwnerOrg, OrgType } from '../model';
   import { SObject } from '@/lib/js/sobject';
   import { apolloClient } from '@/lib/js/hasura-client';
-  import { ButtonPressed } from '@/components/ui/button/types';
-  import { SDate } from '@/lib/js/sdate';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import { validation } from './validation';
-  import { ModalType } from '@/components/ui/modal/types';
-  import { StringUtil } from '@/lib/js/string-util';
 
-  import Button from '@/components/ui/button';
+  import Button from '@/components/ui/flat-button';
   import FloatTextInput from '@/components/ui/float-input/text-input';
   import FloatNumberInput from '@/components/ui/float-input/number-input';
   import Error from '@/components/ui/error';
-  import FloatSelect from '@/components/ui/float-input/float-select';
-  import Select from '@/components/ui/input/select';
+  import FloatSelect from '@/components/ui/float-input/select';
   import FloatCheckbox from '@/components/ui/float-input/checkbox';
   import SC from '@/components/set-common';
   import SimpleImageSelector from '@/components/ui/simple-image-selector';
-  import TreeView from '@/components/ui/tree-view';
   import Store from '../store';
   import { Debug } from '@/lib/js/debug';
 
@@ -179,7 +173,7 @@
     // reset status flag
     isReadOnlyMode$.next(false);
     isUpdateMode$.next(false);
-    view.selectedData$.next(null);
+    // view.selectedData$.next(null);
 
     // reset form
     form = resetForm();
@@ -331,9 +325,13 @@
       if (newCompany) {
         form.parentId = '';
         form.type = OrgType.Campany;
+        // @ts-ignore
+      } else if ($selectedData$) {
+        // @ts-ignore
+        form.type = getOrgType($selectedData$.type);
+      } else {
+        form.type = OrgType.Campany;
       }
-      // @ts-ignore
-      form.type = getOrgType($selectedData$.type);
     }
   };
   // ============================== //HELPER ==========================
@@ -404,6 +402,55 @@
 <SC bind:this={scRef} {view} {menuPath} />
 <!--//Invisible Element-->
 
+<!--Form controller-->
+<section class="view-content-controller">
+  {#if view.isRendered(ButtonId.AddNew)}
+    <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Save, !$isUpdateMode$)}
+    <Button
+      action={useSaveOrUpdateAction}
+      bind:this={btnSaveRef}
+      btnType={ButtonType.Save}
+      disabled={view.isDisabled(ButtonId.Save, form.errors.any())}
+      running={$saveRunning$} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Edit, $isReadOnlyMode$ && $isUpdateMode$)}
+    <Button btnType={ButtonType.Edit} on:click={onEdit} disabled={view.isDisabled(ButtonId.Edit)} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Update, !$isReadOnlyMode$ && $isUpdateMode$)}
+    <Button
+      action={useSaveOrUpdateAction}
+      bind:this={btnUpdateRef}
+      btnType={ButtonType.Update}
+      disabled={view.isDisabled(ButtonId.Update, form.errors.any())}
+      running={$saveRunning$} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
+    <Button
+      btnType={ButtonType.Delete}
+      on:click={onDelete}
+      disabled={view.isDisabled(ButtonId.Delete)}
+      running={$deleteRunning$} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Config)}
+    <Button btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
+    <Button
+      btnType={ButtonType.TrashRestore}
+      on:click={onTrashRestore}
+      disabled={view.isDisabled(ButtonId.TrashRestore)} />
+  {/if}
+</section>
+<!--//Form controller-->
+
 <!--Main content-->
 <section class="view-content-main">
   <form class="form" on:keydown={(event) => form.errors.clear(event.target.name)}>
@@ -427,7 +474,6 @@
             <FloatCheckbox text={T('COMMON.LABEL.NEW_COMPANY')} disabled={$isUpdateMode$} bind:checked={newCompany} />
           </div>
           <!-- // New company -->
-
         </div>
 
         <div class="row">
@@ -449,7 +495,7 @@
               name="name"
               disabled={$isReadOnlyMode$}
               bind:value={form.name} />
-
+            <Error {form} field="name" />
           </div>
           <!-- //Name -->
 
@@ -581,18 +627,11 @@
             <Error {form} field="sort" />
           </div>
           <!-- //Sort -->
-
         </div>
       </div>
       <div class="image-container col-xs-24 col-lg-3">
         <!-- Disabled -->
-
-        <FloatCheckbox
-          text={T('COMMON.LABEL.DISABLED')}
-          name="disabled"
-          disabled={$isReadOnlyMode$}
-          bind:checked={form.disabled} />
-
+        <FloatCheckbox text={T('COMMON.LABEL.DISABLED')} disabled={$isReadOnlyMode$} bind:checked={form.disabled} />
         <!-- //Disabled -->
       </div>
     </div>
@@ -600,52 +639,3 @@
   </form>
 </section>
 <!--//Main content-->
-
-<!--Form controller-->
-<section class="view-content-bottom">
-  {#if view.isRendered(ButtonId.AddNew)}
-    <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Save, !$isUpdateMode$)}
-    <Button
-      action={useSaveOrUpdateAction}
-      bind:this={btnSaveRef}
-      btnType={ButtonType.Save}
-      disabled={view.isDisabled(ButtonId.Save, form.errors.any())}
-      running={$saveRunning$} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Edit, $isReadOnlyMode$ && $isUpdateMode$)}
-    <Button btnType={ButtonType.Edit} on:click={onEdit} disabled={view.isDisabled(ButtonId.Edit)} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Update, !$isReadOnlyMode$ && $isUpdateMode$)}
-    <Button
-      action={useSaveOrUpdateAction}
-      bind:this={btnUpdateRef}
-      btnType={ButtonType.Update}
-      disabled={view.isDisabled(ButtonId.Update, form.errors.any())}
-      running={$saveRunning$} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
-    <Button
-      btnType={ButtonType.Delete}
-      on:click={onDelete}
-      disabled={view.isDisabled(ButtonId.Delete)}
-      running={$deleteRunning$} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Config)}
-    <Button btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
-    <Button
-      btnType={ButtonType.TrashRestore}
-      on:click={onTrashRestore}
-      disabled={view.isDisabled(ButtonId.TrashRestore)} />
-  {/if}
-</section>
-<!--//Form controller-->

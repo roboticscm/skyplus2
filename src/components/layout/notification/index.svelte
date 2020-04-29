@@ -34,6 +34,7 @@
     top: 3px;
     z-index: 1;
     font-size: 10px;
+    font-weight: 500;
   }
 
   .badge-chat {

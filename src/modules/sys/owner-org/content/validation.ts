@@ -1,3 +1,4 @@
+// @ts-ignore
 import { CommonValidation } from '@/lib/js/common-validation';
 
 export const validation = (form: any) => {

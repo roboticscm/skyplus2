@@ -5,8 +5,12 @@
   import { appStore } from '@/store/app';
   // import { settingsStore } from '@/store/settings';
   import { App } from '@/lib/js/constants';
+  import { AppStore } from '@/store/app';
+
+  const { isLogged$ } = AppStore;
 
   const defaultHeaderHeight = '88px';
+  const gutterHeight = '7px';
 
   onMount(async () => {
     Split({
@@ -25,9 +29,11 @@
         let [headerHeight] = gridEle.style['grid-template-rows'].split(' ');
 
         if (headerHeight && +headerHeight.replace('px', '') > App.MAX_HEADER_HEIGHT) {
+          // @ts-ignore
+          // headerHeight = $isLogged$ ? defaultHeaderHeight : '46px';
           headerHeight = defaultHeaderHeight;
           const gridEle: any = document.querySelector('.layout-container');
-          gridEle.style['grid-template-rows'] = `${headerHeight} 10px auto`;
+          gridEle.style['grid-template-rows'] = `${headerHeight} ${gutterHeight} auto`;
           // applyLayout();
         }
         // settingsStore.saveUserSettings({
@@ -42,11 +48,13 @@
     // apply main layout - header height
     const gridEle: any = document.querySelector('.layout-container');
     appStore.theme$.subscribe((theme) => {
-      if (theme) {
-        gridEle.style['grid-template-rows'] = `${defaultHeaderHeight} 10px auto`;
-      } else {
-        gridEle.style['grid-template-rows'] = `46px 10px auto`;
-      }
+      gridEle.style['grid-template-rows'] = `${defaultHeaderHeight} 10px auto`;
+
+      // if (theme) {
+      //   gridEle.style['grid-template-rows'] = `${defaultHeaderHeight} 10px auto`;
+      // } else {
+      //   gridEle.style['grid-template-rows'] = `46px ${gutterHeight} auto`;
+      // }
     });
 
     // applyLayout();

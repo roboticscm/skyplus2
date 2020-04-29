@@ -7,28 +7,25 @@
   import { T } from '@/lib/js/locale/locale';
   import Form from '@/lib/js/form/form';
   import { ViewStore } from '@/store/view';
-  import { Menu } from '../model';
   import { User } from '@/model/user';
   import { SObject } from '@/lib/js/sobject';
   import { apolloClient } from '@/lib/js/hasura-client';
-  import { ButtonPressed } from '@/components/ui/button/types';
-  import { SDate } from '@/lib/js/sdate';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import { validation } from './validation';
-  import { ModalType } from '@/components/ui/modal/types';
   import { StringUtil } from '@/lib/js/string-util';
 
-  import Button from '@/components/ui/button';
-  import NumberInput from '@/components/ui/input/number-input';
-  import TextInput from '@/components/ui/input/text-input';
-  import PasswordInput from '@/components/ui/input/password-input';
-  import Checkbox from '@/components/ui/input/checkbox';
+  import Button from '@/components/ui/flat-button';
+  import FloatTextInput from '@/components/ui/float-input/text-input';
+  import Error from '@/components/ui/error';
+  import FloatPasswordInput from '@/components/ui/float-input/password-input';
+  import FloatCheckbox from '@/components/ui/float-input/checkbox';
   import SC from '@/components/set-common';
   import SimpleImageSelector from '@/components/ui/simple-image-selector';
   import TreeView from '@/components/ui/tree-view';
   import Store from '../store';
   import { Debug } from '@/lib/js/debug';
   import { SJSON } from '@/lib/js/sjson';
+
   // Props
   export let view: ViewStore;
   export let store: Store;
@@ -438,157 +435,8 @@
 <SC bind:this={scRef} {view} {menuPath} />
 <!--//Invisible Element-->
 
-<!--Main content-->
-<section class="view-content-main">
-  <form class="form" on:keydown={(event) => form.errors.clear(event.target.name)}>
-    <div class="row ">
-      <div class="col-xs-24 col-lg-21">
-        <div class="row">
-          <!-- Full name -->
-          <div class="col-xs-24 col-sm-12">
-            <div class="row">
-              <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">{T('COMMON.LABEL.FULL_NAME')}:</div>
-              <div class="col-sm-24 col-lg-16">
-                <TextInput name="name" disabled={$isReadOnlyMode$} bind:value={form.name} bind:this={nameRef} />
-                {#if form.errors.has('name')}
-                  <span class="error">{form.errors.get('name')}</span>
-                {/if}
-              </div>
-            </div>
-          </div>
-          <!-- //Full name -->
-
-          <!-- Username -->
-          <div class="col-xs-24 col-sm-12 pl-xs-0 pl-sm-2 pl-md-0">
-            <div class="row">
-              <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">{T('COMMON.LABEL.USERNAME')}:</div>
-              <div class="col-sm-24 col-lg-16">
-                <TextInput name="username" disabled={$isReadOnlyMode$} bind:value={form.username} />
-                {#if form.errors.has('username')}
-                  <span class="error">{form.errors.get('username')}</span>
-                {/if}
-              </div>
-            </div>
-          </div>
-          <!-- //Username -->
-        </div>
-
-        <div class="row">
-          <!-- Email -->
-          <div class="col-xs-24 col-sm-12">
-            <div class="row">
-              <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">{T('COMMON.LABEL.EMAIL')}:</div>
-              <div class="col-sm-24 col-lg-16">
-                <TextInput name="email" disabled={$isReadOnlyMode$} bind:value={form.email} />
-                {#if form.errors.has('email')}
-                  <span class="error">{form.errors.get('email')}</span>
-                {/if}
-              </div>
-            </div>
-          </div>
-          <!-- //Email -->
-
-          <!-- Password -->
-          <div class="col-xs-24 col-sm-12 pl-xs-0 pl-sm-2 pl-md-0">
-            <div class="row">
-              <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">{T('COMMON.LABEL.PASSWORD')}:</div>
-              <div class="col-sm-24 col-lg-16">
-                <div class="col-sm-24 col-lg-16">
-                  <PasswordInput name="password" disabled={$isReadOnlyMode$} bind:value={form.password} />
-                </div>
-                {#if form.errors.has('password')}
-                  <span class="error">{form.errors.get('password')}</span>
-                {/if}
-              </div>
-            </div>
-          </div>
-          <!--  //Password -->
-        </div>
-
-        <div class="row">
-          <!--  Font Icon -->
-          <div class="col-xs-24 col-sm-12 pl-xs-0 pl-sm-2 pl-md-0">
-            <div class="row">
-              <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">
-                <Checkbox name="useFontIcon" disabled={$isReadOnlyMode$} bind:checked={form.useFontIcon} />
-                {T('COMMON.LABEL.FONT_ICON')}:
-              </div>
-              <div class="col-sm-24 col-lg-14">
-                <div class="col-sm-24 col-lg-16">
-                  <TextInput name="fontIcon" disabled={$isReadOnlyMode$} bind:value={form.fontIcon} />
-                </div>
-              </div>
-
-              <div class="col-sm-24 col-lg-2 pl-md-0 pl-lg-1">
-                {#if form.fontIcon && form.fontIcon.includes('<')}
-                  <span class="menu-font-icon">
-                    {@html form.fontIcon}
-                  </span>
-                {/if}
-              </div>
-            </div>
-          </div>
-          <!--  //Font Icon -->
-
-          <!--  Activated -->
-          <div class="col-xs-24 col-sm-12 pl-xs-0 pl-sm-2 pl-md-0">
-            <div class="row">
-              <div class="col-sm-24 col-lg-8" />
-              <div class="label col-sm-24 col-lg-16">
-                <Checkbox disabled={$isReadOnlyMode$} name="activated" bind:checked={form.activated} />
-                {T('COMMON.LABEL.ACTIVATED')}
-              </div>
-            </div>
-          </div>
-          <!-- //Activated -->
-        </div>
-      </div>
-
-      <!-- Image Selector -->
-      <div class="image-container col-xs-24 col-lg-3 mt-xs-0 mt-sm-6 mt-md-0">
-        <SimpleImageSelector
-          id={view.getViewName() + 'ViewerId'}
-          src={form.iconData}
-          disabled={$isReadOnlyMode$}
-          on:imageChange={onImageChange} />
-      </div>
-      <!--  //Image Selector -->
-    </div>
-
-    <!--  Department Tree -->
-    <div class="row">
-      <div class="default-border col-sm-24 col-md-12">
-        <TreeView
-          on:check={onCheckAvailTree}
-          bind:this={availableDepTreeRef}
-          id={'availableDepTree' + view.getViewName() + 'Id'}
-          data={$availableDep$}
-          disabled={$isReadOnlyMode$}
-          isCheckableNode={true}>
-          <div slot="label" class="label">{T('SYS.LABEL.AVAILABLE_DEPARTMENT')}:</div>
-        </TreeView>
-      </div>
-      <div class="default-border col-sm-24 col-md-12 pl-md-0 pl-lg-1 pt-md-1 pt-lg-0">
-        <TreeView
-          on:check={onCheckAssignedDepTree}
-          bind:this={defaultDepTreeRef}
-          id={'assignedDepTree' + view.getViewName() + 'Id'}
-          data={$assignedDep$}
-          disabled={$isReadOnlyMode$}
-          radioType="all">
-          <div slot="label" class="label">{T('SYS.LABEL.DEFAULT_DEPARTMENT')}:</div>
-        </TreeView>
-        {#if form.errors.has('defaultOwnerOrgId')}
-          <span class="error">{form.errors.get('defaultOwnerOrgId')}</span>
-        {/if}
-      </div>
-    </div>
-  </form>
-</section>
-<!--//Main content-->
-
 <!--Form controller-->
-<section class="view-content-bottom">
+<section class="view-content-controller">
   {#if view.isRendered(ButtonId.AddNew)}
     <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
   {/if}
@@ -635,3 +483,127 @@
   {/if}
 </section>
 <!--//Form controller-->
+
+<!--Main content-->
+<section class="view-content-main">
+  <form class="form" on:keydown={(event) => form.errors.clear(event.target.name)}>
+    <div class="row ">
+      <div class="col-xs-24 col-lg-21">
+        <div class="row">
+          <!-- Full name -->
+          <div class="col-xs-24 col-sm-12">
+            <FloatTextInput
+              bind:this={nameRef}
+              placeholder={T('COMMON.LABEL.NAME')}
+              name="name"
+              disabled={$isReadOnlyMode$}
+              bind:value={form.name} />
+            <Error {form} field="name" />
+          </div>
+          <!-- //Full name -->
+
+          <!-- Username -->
+          <div class="col-xs-24 col-sm-12 pl-xs-0 pl-sm-2 pl-md-0">
+            <FloatTextInput
+              placeholder={T('COMMON.LABEL.USERNAME')}
+              name="username"
+              disabled={$isReadOnlyMode$}
+              bind:value={form.username} />
+            <Error {form} field="username" />
+          </div>
+          <!-- //Username -->
+        </div>
+
+        <div class="row">
+          <!-- Email -->
+          <div class="col-xs-24 col-sm-12">
+            <FloatTextInput
+              placeholder={T('COMMON.LABEL.EMAIL')}
+              name="email"
+              disabled={$isReadOnlyMode$}
+              bind:value={form.email} />
+            <Error {form} field="email" />
+          </div>
+          <!-- //Email -->
+
+          <!-- Password -->
+          <div class="col-xs-24 col-sm-12 pl-xs-0 pl-sm-2 pl-md-0">
+            <FloatPasswordInput
+              placeholder={T('COMMON.LABEL.PASSWORD')}
+              name="password"
+              disabled={$isReadOnlyMode$}
+              bind:value={form.password} />
+            <Error {form} field="password" />
+          </div>
+          <!--  //Password -->
+        </div>
+
+        <div class="row">
+          <!--  Font Icon -->
+          <div class="col-xs-24 col-sm-12 pl-xs-0 pl-sm-2 pl-md-0">
+            <FloatTextInput
+              bind:checked={form.useFontIcon}
+              placeholder={T('COMMON.LABEL.FONT_ICON')}
+              name="fontIcon"
+              disabled={$isReadOnlyMode$}
+              bind:value={form.fontIcon} />
+            {#if form.fontIcon && form.fontIcon.includes('<')}
+              <span
+                style="display: flex; flex-direction: column; justify-content: flex-end; margin-bottom: 5px;"
+                class="menu-font-icon">
+                {@html form.fontIcon}
+              </span>
+            {/if}
+          </div>
+          <!--  //Font Icon -->
+
+          <!--  Activated -->
+          <div class="col-xs-24 col-sm-12 pl-xs-0 pl-sm-2 pl-md-0">
+            <FloatCheckbox text={T('COMMON.LABEL.DISABLED')} disabled={$isReadOnlyMode$} bind:checked={form.disabled} />
+          </div>
+          <!-- //Activated -->
+        </div>
+      </div>
+
+      <!-- Image Selector -->
+      <div class="image-container col-xs-24 col-lg-3 mt-xs-0 mt-sm-6 mt-md-0">
+        <SimpleImageSelector
+          id={view.getViewName() + 'ViewerId'}
+          src={form.iconData}
+          disabled={$isReadOnlyMode$}
+          on:imageChange={onImageChange} />
+      </div>
+      <!--  //Image Selector -->
+    </div>
+
+    <!--  Department Tree -->
+    <div class="row" style="margin-top: 10px;">
+      <div class="default-border col-sm-24 col-md-12">
+        <TreeView
+          on:check={onCheckAvailTree}
+          bind:this={availableDepTreeRef}
+          id={'availableDepTree' + view.getViewName() + 'Id'}
+          data={$availableDep$}
+          disabled={$isReadOnlyMode$}
+          isCheckableNode={true}>
+          <div slot="label" class="label">{T('SYS.LABEL.AVAILABLE_DEPARTMENT')}:</div>
+        </TreeView>
+      </div>
+      <div class="default-border col-sm-24 col-md-12 pl-md-0 pl-lg-1 pt-md-1 pt-lg-0">
+        <TreeView
+          on:check={onCheckAssignedDepTree}
+          bind:this={defaultDepTreeRef}
+          id={'assignedDepTree' + view.getViewName() + 'Id'}
+          data={$assignedDep$}
+          disabled={$isReadOnlyMode$}
+          radioType="all">
+          <div slot="label" class="label">{T('SYS.LABEL.DEFAULT_DEPARTMENT')}:</div>
+        </TreeView>
+        {#if form.errors.has('defaultOwnerOrgId')}
+          <span class="error">{form.errors.get('defaultOwnerOrgId')}</span>
+        {/if}
+      </div>
+    </div>
+  </form>
+</section>
+<!--//Main content-->

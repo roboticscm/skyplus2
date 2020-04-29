@@ -1,5 +1,4 @@
 <script lang="ts">
-  export let name: string;
   export let text: string;
   export let disabled = false;
   export let className = '';
@@ -14,14 +13,7 @@
   };
 </script>
 
-<div class="floating-wrapper">
-  <input
-    {title}
-    {name}
-    type="checkbox"
-    {disabled}
-    class="{className} floating__input"
-    bind:checked
-    bind:this={inputRef} />
+<div class="floating-wrapper" style="min-height: 35px;">
+  <input {title} type="checkbox" {disabled} class="{className} floating__input" bind:checked bind:this={inputRef} />
   <label>{text}</label>
 </div>

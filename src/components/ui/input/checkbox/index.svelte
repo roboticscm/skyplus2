@@ -4,6 +4,7 @@
   export let disabled = false;
   export let className = '';
   export let checked;
+  export let text = '';
 
   let inputRef: any;
   export const focus = () => {
@@ -13,4 +14,7 @@
   };
 </script>
 
-<input {name} type="checkbox" {disabled} class={className} bind:checked bind:this={inputRef} />
+<div>
+  <input {name} type="checkbox" {disabled} class={className} bind:checked bind:this={inputRef} on:change />
+  <label class={disabled ? 'readonly' : ''}>{text}</label>
+</div>

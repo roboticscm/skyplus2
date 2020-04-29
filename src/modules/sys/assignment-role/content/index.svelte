@@ -7,6 +7,7 @@
   import { Store } from '../store';
   import { userColumns, roleColumns, applyAssignedRole } from './helper';
   import { T } from '@/lib/js/locale/locale';
+  import FlatButton from '@/components/ui/flat-button';
   import Button from '@/components/ui/button';
   import { ButtonType, ButtonId, ButtonPressed } from '@/components/ui/button/types';
   import { catchError, concatMap, switchMap, take, filter } from 'rxjs/operators';
@@ -270,6 +271,27 @@
 </style>
 
 <SC {view} {menuPath} bind:this={scRef} />
+<section class="view-content-controller">
+  {#if $roleData$ !== null}
+    <FlatButton btnType={ButtonType.Reset} on:click={onReset} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Edit, $isReadOnlyMode$ && $isUpdateMode$ && selectedUser !== null)}
+    <FlatButton btnType={ButtonType.Edit} on:click={onEdit} disabled={view.isDisabled(ButtonId.Edit)} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Update, !$isReadOnlyMode$ && $isUpdateMode$)}
+    <FlatButton
+      action={useSaveOrUpdateAction}
+      btnType={ButtonType.Update}
+      disabled={view.isDisabled(ButtonId.Update, selectedUser == null)}
+      running={$saveRunning$} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Config)}
+    <FlatButton btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
+  {/if}
+</section>
 <section class="view-content-main">
   <div class="row">
     <div class="default-border col-sm-24 col-md-8">
@@ -315,26 +337,4 @@
       </ExcelGrid>
     </div>
   </div>
-</section>
-
-<section class="view-content-bottom">
-  {#if $roleData$ !== null}
-    <Button btnType={ButtonType.Reset} on:click={onReset} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Edit, $isReadOnlyMode$ && $isUpdateMode$ && selectedUser !== null)}
-    <Button btnType={ButtonType.Edit} on:click={onEdit} disabled={view.isDisabled(ButtonId.Edit)} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Update, !$isReadOnlyMode$ && $isUpdateMode$)}
-    <Button
-      action={useSaveOrUpdateAction}
-      btnType={ButtonType.Update}
-      disabled={view.isDisabled(ButtonId.Update, selectedUser == null)}
-      running={$saveRunning$} />
-  {/if}
-
-  {#if view.isRendered(ButtonId.Config)}
-    <Button btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
-  {/if}
 </section>

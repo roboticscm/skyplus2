@@ -77,44 +77,44 @@
   class="nav-item {className}
   {isActiveComponent ? activeClass : ''}">
   {@html name}
-  <span>&nbsp;&nbsp;</span>
-  <i
-    class="dropdown-mark-icon fa fa-angle-down"
-    on:mouseover={() => onMouseoverMore(menuName)}
-    on:mouseout={() => onMouseoutMore(menuName)}>
-    {#if menuName === 'MENU'}
-      <div id="dropdownMENU" class="dropdown-content">
-        {#each exampleDropdownList as item}
-          <DropdownItem
-            on:click={(e) => onClickItem('MENU', item)}
-            useFontIcon={item.useFontIcon}
-            fontIcon={item.fontIcon}
-            iconData={item.iconData}
-            text={item.name} />
-        {/each}
-      </div>
-    {:else if menuName === 'ROLE_DETAIL'}
-      <div id="dropdownROLE_DETAIL" class="dropdown-content">
-        {#each exampleDropdownList as item}
-          <DropdownItem
-            on:click={(e) => onClickItem('ROLE_DETAIL', item)}
-            useFontIcon={item.useFontIcon}
-            fontIcon={item.fontIcon}
-            iconData={item.iconData}
-            text={item.name} />
-        {/each}
-      </div>
-    {:else if menuName === 'ASSIGNMENT_ROLE'}
-      <div id="dropdownASSIGNMENT_ROLE" class="dropdown-content">
-        {#each exampleDropdownList as item}
-          <DropdownItem
-            on:click={(e) => onClickItem('ASSIGNMENT_ROLE', item)}
-            useFontIcon={item.useFontIcon}
-            fontIcon={item.fontIcon}
-            iconData={item.iconData}
-            text={item.name} />
-        {/each}
-      </div>
-    {/if}
-  </i>
+
+  <!--  <i-->
+  <!--    class="dropdown-mark-icon fa fa-angle-down"-->
+  <!--    on:mouseover={() => onMouseoverMore(menuName)}-->
+  <!--    on:mouseout={() => onMouseoutMore(menuName)}>-->
+  <!--    {#if menuName === 'MENU'}-->
+  <!--      <div id="dropdownMENU" class="dropdown-content">-->
+  <!--        {#each exampleDropdownList as item}-->
+  <!--          <DropdownItem-->
+  <!--            on:click={(e) => onClickItem('MENU', item)}-->
+  <!--            useFontIcon={item.useFontIcon}-->
+  <!--            fontIcon={item.fontIcon}-->
+  <!--            iconData={item.iconData}-->
+  <!--            text={item.name} />-->
+  <!--        {/each}-->
+  <!--      </div>-->
+  <!--    {:else if menuName === 'ROLE_DETAIL'}-->
+  <!--      <div id="dropdownROLE_DETAIL" class="dropdown-content">-->
+  <!--        {#each exampleDropdownList as item}-->
+  <!--          <DropdownItem-->
+  <!--            on:click={(e) => onClickItem('ROLE_DETAIL', item)}-->
+  <!--            useFontIcon={item.useFontIcon}-->
+  <!--            fontIcon={item.fontIcon}-->
+  <!--            iconData={item.iconData}-->
+  <!--            text={item.name} />-->
+  <!--        {/each}-->
+  <!--      </div>-->
+  <!--    {:else if menuName === 'ASSIGNMENT_ROLE'}-->
+  <!--      <div id="dropdownASSIGNMENT_ROLE" class="dropdown-content">-->
+  <!--        {#each exampleDropdownList as item}-->
+  <!--          <DropdownItem-->
+  <!--            on:click={(e) => onClickItem('ASSIGNMENT_ROLE', item)}-->
+  <!--            useFontIcon={item.useFontIcon}-->
+  <!--            fontIcon={item.fontIcon}-->
+  <!--            iconData={item.iconData}-->
+  <!--            text={item.name} />-->
+  <!--        {/each}-->
+  <!--      </div>-->
+  <!--    {/if}-->
+  <!--  </i>-->
 </div>

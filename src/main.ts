@@ -133,6 +133,5 @@ declare var ResizeObserver: ResizeObserver;
 const md = new MobileDetect(window.navigator.userAgent);
 (window as any).isSmartPhone = md.mobile() !== null && md.phone() !== null;
 
-
 console.log(process.env.WS_PROTOCOL);
 console.log(process.env.API_SERVER_PORT);

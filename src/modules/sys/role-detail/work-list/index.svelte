@@ -124,6 +124,7 @@
 
   const onClickRoleTree = (event: any) => {
     filterMenu$.next(undefined);
+    prevHideColumn = 'com';
     const treeNode: any = event.detail.treeNode;
 
     if (treeNode.isParent) {
@@ -164,6 +165,7 @@
       prevHideColumn = 'bra';
     } else if (treeNode.type === OrgType.Department) {
       if (prevHideColumn !== 'dep') {
+        console.log('hide hideDepartmentColumn$');
         hideDepartmentColumn$.next(Date.now());
       }
       prevHideColumn = 'dep';
@@ -209,7 +211,7 @@
 </script>
 
 <!--Main content-->
-<section class="view-content-main">
+<section class="view-left-main">
   <TreeView id={roleTreeId} on:click={onClickRoleTree} bind:this={roleTreeRef} data={$roles$}>
     <div slot="label" class="label">{T('SYS.LABEL.AVAILABLE_ROLE')}:</div>
   </TreeView>
@@ -218,12 +220,9 @@
     <div slot="label" class="label">{T('SYS.LABEL.FILTER_ORG')}:</div>
   </TreeView>
 
-  <div style="max-height: 200px; overflow: auto;">
-    <CheckList on:change={onChangeFilterMenu} data={filterMenu} id={'menuList' + view.getViewName() + 'Id'}>
+  <div style="max-height: 300px; overflow: auto;">
+    <CheckList on:change={onChangeFilterMenu} data={filterMenu}>
       <div class="label">{T('COMMON.LABEL.FILTER_MENU')}:</div>
     </CheckList>
   </div>
 </section>
-
-<!--Form controller-->
-<section class="view-content-bottom" />

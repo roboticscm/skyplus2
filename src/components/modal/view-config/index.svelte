@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import Modal from '@/components/ui/modal/base/index.svelte';
   import { T } from '@/lib/js/locale/locale';
 
@@ -51,6 +52,9 @@
     return new Promise((resolve, reject) => {
       import('@/components/ui/excel-grid/index.svelte').then((res) => {
         ExcelGridComponent = res.default;
+        tick().then(() => {
+          excelGridRef && excelGridRef.createCheckboxHeader(1);
+        });
         resolve(modalRef.show());
       });
     });

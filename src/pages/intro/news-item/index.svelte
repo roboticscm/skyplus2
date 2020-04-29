@@ -14,9 +14,9 @@
     border: $default-border;
     border-radius: $default-border-radius;
     background: var(--bg-primary);
-    min-width: 300px;
-    max-width: 300px;
-    height: 400px;
+    min-width: 400px;
+    max-width: 400px;
+    height: 500px;
     min-height: 400px;
     margin-bottom: calc(3 * #{$default-padding});
     margin-left: $large-padding;

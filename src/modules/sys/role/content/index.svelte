@@ -10,20 +10,15 @@
   import { Role } from '../model';
   import { SObject } from '@/lib/js/sobject';
   import { apolloClient } from '@/lib/js/hasura-client';
-  import { ButtonPressed } from '@/components/ui/button/types';
-  import { SDate } from '@/lib/js/sdate';
-  import { ModalType } from '@/components/ui/modal/types';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import TreeView from '@/components/ui/tree-view';
   import { validation } from './validation';
 
-  import { StringUtil } from '@/lib/js/string-util';
-
-  import Button from '@/components/ui/button';
-  import NumberInput from '@/components/ui/input/number-input';
-  import TextInput from '@/components/ui/input/text-input';
+  import Button from '@/components/ui/flat-button';
+  import FloatNumberInput from '@/components/ui/float-input/number-input';
+  import FloatTextInput from '@/components/ui/float-input/text-input';
+  import Error from '@/components/ui/error';
   import SC from '@/components/set-common';
-  import Snackbar from '@/components/ui/snackbar';
   import { Debug } from '@/lib/js/debug';
   import { Store } from '../store';
 
@@ -362,65 +357,8 @@
 <SC bind:this={scRef} {view} {menuPath} />
 <!--//Invisible Element-->
 
-<!--Main content-->
-<section class="view-content-main">
-  <form class="form" on:keydown={(event) => form.errors.clear(event.target.name)}>
-    <div class="row">
-      <div class="col-xs-24 col-sm-12">
-        <div class="row ">
-          <!-- Code -->
-          <div class="label col-24">{T('COMMON.LABEL.CODE')}:</div>
-          <div class="col-24">
-            <TextInput name="code" disabled={$isReadOnlyMode$} bind:value={form.code} bind:this={codeRef} />
-            {#if form.errors.has('code')}
-              <span class="error">{form.errors.get('code')}</span>
-            {/if}
-          </div>
-          <!-- // Code -->
-
-          <!-- Name -->
-          <div class="label col-24">{T('COMMON.LABEL.NAME')}:</div>
-          <div class="col-24">
-            <TextInput name="name" disabled={$isReadOnlyMode$} bind:value={form.name} />
-            {#if form.errors.has('name')}
-              <span class="error">{form.errors.get('name')}</span>
-            {/if}
-          </div>
-          <!-- // Name -->
-
-          <!-- Sort -->
-          <div class="label col-24">{T('COMMON.LABEL.SORT')}:</div>
-          <div class="col-24">
-            <NumberInput name="sort" disabled={$isReadOnlyMode$} bind:value={form.sort} />
-            {#if form.errors.has('sort')}
-              <span class="error">{form.errors.get('sort')}</span>
-            {/if}
-          </div>
-          <!-- // Sort -->
-        </div>
-      </div>
-      <div class="default-border col-xs-24 col-sm-12">
-        <TreeView
-          on:check={onCheckOrgTree}
-          bind:this={orgTreeRef}
-          id={'orgTree' + view.getViewName() + 'Id'}
-          data={$orgData$}
-          disabled={$isReadOnlyMode$}
-          radioType="all">
-          <div slot="label" class="label">{T('SYS.LABEL.ORG')}:</div>
-        </TreeView>
-        {#if form.errors.has('ownerOrgId')}
-          <span class="error">{form.errors.get('ownerOrgId')}</span>
-        {/if}
-      </div>
-    </div>
-
-  </form>
-</section>
-<!--//Main content-->
-
 <!--Form controller-->
-<section class="view-content-bottom">
+<section class="view-content-controller">
   {#if view.isRendered(ButtonId.AddNew)}
     <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
   {/if}
@@ -467,3 +405,67 @@
   {/if}
 </section>
 <!--//Form controller-->
+
+<!--Main content-->
+<section class="view-content-main">
+  <form class="form" on:keydown={(event) => form.errors.clear(event.target.name)}>
+    <div class="row">
+      <div class="col-xs-24 col-sm-12">
+        <!-- Code -->
+        <div class="row" style="grid-column-gap:0">
+          <div class="col-24">
+            <FloatTextInput
+              placeholder={T('COMMON.LABEL.CODE')}
+              name="code"
+              disabled={$isReadOnlyMode$}
+              bind:value={form.code}
+              bind:this={codeRef} />
+            <Error {form} field="code" />
+          </div>
+        </div>
+        <!-- // Code -->
+
+        <!-- Name -->
+        <div class="row " style="grid-column-gap:0">
+          <div class="col-24">
+            <FloatTextInput
+              placeholder={T('COMMON.LABEL.NAME')}
+              name="name"
+              disabled={$isReadOnlyMode$}
+              bind:value={form.name} />
+            <Error {form} field="name" />
+          </div>
+        </div>
+        <!-- // Name -->
+
+        <!-- Sort -->
+        <div class="row " style="grid-column-gap:0">
+          <div class="col-24">
+            <FloatNumberInput
+              placeholder={T('COMMON.LABEL.SORT')}
+              name="sort"
+              disabled={$isReadOnlyMode$}
+              bind:value={form.sort} />
+            <Error {form} field="sort" />
+          </div>
+        </div>
+        <!-- // Sort -->
+      </div>
+      <div class="default-border col-xs-24 col-sm-12">
+        <TreeView
+          on:check={onCheckOrgTree}
+          bind:this={orgTreeRef}
+          id={'orgTree' + view.getViewName() + 'Id'}
+          data={$orgData$}
+          disabled={$isReadOnlyMode$}
+          radioType="all">
+          <div slot="label" class="label">{T('SYS.LABEL.ORG')}:</div>
+        </TreeView>
+        {#if form.errors.has('ownerOrgId')}
+          <span class="error">{form.errors.get('ownerOrgId')}</span>
+        {/if}
+      </div>
+    </div>
+  </form>
+</section>
+<!--//Main content-->

@@ -62,7 +62,6 @@
 
     dispatch('showPopup', undefined);
     if (!container) {
-      document.querySelector(`#${id}`).addEventListener('focusout', hideOnLostFocus);
       inputWidth = window['$'](inputRef).width();
     } else {
       inputWidth = window['$'](container).width();
@@ -186,21 +185,17 @@
   };
 
   const hideOnLostFocus = () => {
-    // const inputEle: any = document.querySelector(`#${'dropdownInput' + id}`);
-
-    setTimeout(() => {
-      if (document.activeElement !== inputRef) {
-        if (StringUtil.isEmpty(inputRef.value)) {
-          selectItem([
-            {
-              id: '',
-              name: '',
-            },
-          ]);
-        }
-        hideAutoDropdown();
+    if (document.activeElement !== inputRef) {
+      if (StringUtil.isEmpty(inputRef.value)) {
+        selectItem([
+          {
+            id: '',
+            name: '',
+          },
+        ]);
       }
-    }, 30);
+      hideAutoDropdown();
+    }
   };
 
   export const getSelectedItem = () => {
@@ -260,7 +255,9 @@
 
   onMount(() => {
     doSearch();
-    inputWrapperRef && inputWrapperRef.addEventListener('focusout', hideOnLostFocus);
+    document.addEventListener('click', () => {
+      hideOnLostFocus();
+    });
     if (inputRef) {
       inputRef.focus();
     }
@@ -271,6 +268,7 @@
       if (data[0] && data[0].name) {
         if (type !== 'password') {
           textSearch = StringUtil.removeMark(data[0].name);
+          inputRef.value = textSearch;
         } else {
           textSearch = getPassword();
         }
@@ -293,6 +291,7 @@
   };
 
   const onTableClick = (event) => {
+    console.log('xxxx', event.detail.data);
     selectItem(event.detail.data);
     hideAutoDropdown();
   };

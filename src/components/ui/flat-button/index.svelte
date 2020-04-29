@@ -16,12 +16,13 @@
   export let disabled = false;
   export let running = false;
   export let action: any = undefined;
-  export let showIcon = true;
-  export let dropdownList: ButtonDropdown[] = [
-    { id: 'ITEM1', name: 'Demo Item1', useFontIcon: true, fontIcon: '<i class="fab fa-skyatlas"></i>' },
-    { id: 'ITEM2', name: 'Demo Item2', useFontIcon: true, fontIcon: '<i class="fa fa-adjust"></i>' },
-    { id: 'ITEM3', name: 'Demo Item3', useFontIcon: true, fontIcon: '<i class="fa fa-allergies"></i>' },
-  ];
+  export let showIcon = false;
+  export let dropdownList: ButtonDropdown[] = [];
+  // export let dropdownList: ButtonDropdown[] = [
+  //   { id: 'ITEM1', name: 'Demo Item1', useFontIcon: true, fontIcon: '<i class="fab fa-skyatlas"></i>' },
+  //   { id: 'ITEM2', name: 'Demo Item2', useFontIcon: true, fontIcon: '<i class="fa fa-adjust"></i>' },
+  //   { id: 'ITEM3', name: 'Demo Item3', useFontIcon: true, fontIcon: '<i class="fa fa-allergies"></i>' },
+  // ];
 
   const dispatch = createEventDispatcher();
   let btnRef: any;
@@ -82,7 +83,7 @@
         preset(undefined, 'CANCEL', '<i class="fa fa-times"></i>', 'btn-danger');
         break;
       case ButtonType.Apply:
-        preset(undefined, 'APPLY', '<i class="fa fa-check"></i>', 'btn-success');
+        preset(undefined, 'APPLY', '<i class="fa fa-check"></i>', 'btn-flat');
         break;
       case ButtonType.SelectAll:
         preset(undefined, undefined, '<i class="fa fa-check-double"></i>', 'btn-small-info');

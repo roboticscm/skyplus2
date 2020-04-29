@@ -10,18 +10,15 @@
   import { Language } from '../model';
   import { SObject } from '@/lib/js/sobject';
   import { apolloClient } from '@/lib/js/hasura-client';
-  import { ButtonPressed } from '@/components/ui/button/types';
-  import { SDate } from '@/lib/js/sdate';
-  import { ModalType } from '@/components/ui/modal/types';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import { validation } from './validation';
+  import FloatTextInput from '@/components/ui/float-input/text-input';
+  import FloatNumberInput from '@/components/ui/float-input/number-input';
+  import FloatCheckbox from '@/components/ui/float-input/checkbox';
+  import Error from '@/components/ui/error';
 
-  import { StringUtil } from '@/lib/js/string-util';
-  import Button from '@/components/ui/button';
-  import NumberInput from '@/components/ui/input/number-input';
-  import TextInput from '@/components/ui/input/text-input';
+  import Button from '@/components/ui/flat-button';
   import SC from '@/components/set-common';
-  import Snackbar from '@/components/ui/snackbar';
   import { Debug } from '@/lib/js/debug';
 
   // Props
@@ -336,58 +333,8 @@
 <SC bind:this={scRef} {view} {menuPath} />
 <!--//Invisible Element-->
 
-<!--Main content-->
-<section class="view-content-main">
-  <form class="form" on:keydown={(event) => form.errors.clear(event.target.name)}>
-    <div class="row ">
-      <!-- Name -->
-      <div class="col-xs-24 col-sm-8">
-        <div class="row">
-          <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">{T('COMMON.LABEL.NAME')}:</div>
-          <div class="col-sm-24 col-lg-16">
-            <TextInput name="name" disabled={$isReadOnlyMode$} bind:value={form.name} bind:this={nameRef} />
-            {#if form.errors.has('name')}
-              <span class="error">{form.errors.get('name')}</span>
-            {/if}
-          </div>
-        </div>
-      </div>
-      <!-- // Name -->
-
-      <!-- Locale -->
-      <div class="col-xs-24 col-sm-8 pl-xs-0 pl-sm-2 pl-md-0">
-        <div class="row">
-          <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">{T('COMMON.LABEL.LOCALE')}:</div>
-          <div class="col-sm-24 col-lg-16">
-            <TextInput name="locale" disabled={$isReadOnlyMode$} bind:value={form.locale} />
-            {#if form.errors.has('locale')}
-              <span class="error">{form.errors.get('locale')}</span>
-            {/if}
-          </div>
-        </div>
-      </div>
-      <!-- // Locale -->
-
-      <!-- Sort -->
-      <div class="col-xs-24 col-sm-8">
-        <div class="row">
-          <div class="label text-sm-left text-xx-right col-sm-24 col-lg-8">{T('COMMON.LABEL.SORT')}:</div>
-          <div class="col-sm-24 col-lg-16">
-            <NumberInput name="sort" disabled={$isReadOnlyMode$} bind:value={form.sort} />
-            {#if form.errors.has('sort')}
-              <span class="error">{form.errors.get('sort')}</span>
-            {/if}
-          </div>
-        </div>
-      </div>
-      <!-- // Sort -->
-    </div>
-  </form>
-</section>
-<!--//Main content-->
-
 <!--Form controller-->
-<section class="view-content-bottom">
+<section class="view-content-controller">
   {#if view.isRendered(ButtonId.AddNew)}
     <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
   {/if}
@@ -434,3 +381,47 @@
   {/if}
 </section>
 <!--//Form controller-->
+
+<!--Main content-->
+<section class="view-content-main">
+  <form class="form" on:keydown={(event) => form.errors.clear(event.target.name)}>
+    <div class="row ">
+      <!-- Name -->
+      <div class="col-xs-24 col-sm-8">
+        <FloatTextInput
+          bind:this={nameRef}
+          placeholder={T('COMMON.LABEL.NAME')}
+          name="name"
+          disabled={$isReadOnlyMode$}
+          bind:value={form.name} />
+        <Error {form} field="name" />
+      </div>
+      <!-- // Name -->
+
+      <!-- Locale -->
+      <div class="col-xs-24 col-sm-8 pl-xs-0 pl-sm-2 pl-md-0">
+        <FloatTextInput
+          placeholder={T('COMMON.LABEL.LOCALE')}
+          name="locale"
+          disabled={$isReadOnlyMode$}
+          bind:value={form.locale} />
+        <Error {form} field="locale" />
+      </div>
+      <!-- // Locale -->
+
+      <!-- Sort -->
+      <div class="col-xs-24 col-sm-8">
+        <div class="col-xs-24 col-sm-12">
+          <FloatNumberInput
+            placeholder={T('COMMON.LABEL.SORT')}
+            name="sort"
+            disabled={$isReadOnlyMode$}
+            bind:value={form.sort} />
+          <Error {form} field="sort" />
+        </div>
+        <!-- // Sort -->
+      </div>
+    </div>
+  </form>
+</section>
+<!--//Main content-->

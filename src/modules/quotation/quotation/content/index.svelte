@@ -6,4 +6,4 @@
 </script>
 
 <section class="view-content-main">Content</section>
-<div class="view-content-bottom" />
+<div class="view-content-controller" />
