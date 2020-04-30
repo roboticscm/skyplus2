@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { ViewStore } from '@/store/view';
+
   export let menuPath: string;
   export let callFrom = 'Self';
   export let view: ViewStore;

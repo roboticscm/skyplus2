@@ -1,6 +1,8 @@
 <script lang="ts">
   export let title: string = '';
   export let collapse = true;
+  export let showBorder = true;
+  export let roundedBorder = true;
 
   let open = true;
 
@@ -9,7 +11,7 @@
   };
 </script>
 
-<div class="section">
+<div class="section {showBorder ? 'border' : ''} {roundedBorder ? 'border-radius' : ''}">
   {#if title && title.length > 0}
     <div on:click={onToggle} class="section__title {collapse ? 'link' : ''}">
       {title}

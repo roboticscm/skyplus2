@@ -1,9 +1,9 @@
 <script lang="ts">
-  export let text: string;
+  export let name: string;
   export let disabled = false;
   export let className = '';
-  export let checked = false;
-  export let title = '';
+  export let checked;
+  export let text = '';
 
   let inputRef: any;
   export const focus = () => {
@@ -13,7 +13,13 @@
   };
 </script>
 
-<div class="floating-wrapper" style="min-height: 35px;">
-  <input {title} type="checkbox" {disabled} class="{className} floating__input" bind:checked bind:this={inputRef} />
-  <label>{text}</label>
+<style lang="scss">
+  .floating-checkbox {
+    margin-top: 25px;
+  }
+</style>
+
+<div class="floating-checkbox">
+  <input {name} type="checkbox" {disabled} class={className} bind:checked bind:this={inputRef} on:change />
+  <label class={disabled ? 'readonly' : ''}>{text}</label>
 </div>

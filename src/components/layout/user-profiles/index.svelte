@@ -81,5 +81,5 @@
       </span>
     </div>
   {/if}
-  <i class="fa fa-sort-down" />
+  <i class="user-profiles-mark fa fa-sort-down" />
 </div>

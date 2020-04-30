@@ -10,7 +10,7 @@
   $notify-icon-height: 24px;
   $badge-width: 16px;
   $badge-height: 16px;
-  $badge-space: 20px;
+  $badge-space: 10px;
   $default-padding: 4px;
 
   .icon {

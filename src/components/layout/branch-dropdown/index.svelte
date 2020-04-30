@@ -34,18 +34,5 @@
     {:else if $dataList$ && $dataList$.length > 0}
       <SkyhubLogo className="skyhub-small-logo" />
     {/if}
-
-    <!--    {#if $isLogged$}-->
-    <!--      <div class="left-dropdown-content">-->
-    <!--        <a class="left-dropdown-content__text" href="'#'">-->
-    <!--          <i class="fa fa-cog" />-->
-    <!--          setting-->
-    <!--        </a>-->
-    <!--        <a class="left-dropdown-content__text" href="'#'">-->
-    <!--          <i class="fa fa-folder" />-->
-    <!--          directory-->
-    <!--        </a>-->
-    <!--      </div>-->
-    <!--    {/if}-->
   </div>
 </div>

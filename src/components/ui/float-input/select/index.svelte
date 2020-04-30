@@ -6,25 +6,28 @@
   import { settingsStore } from '@/store/settings';
 
   export let id: string;
-  export let name: string;
+  export let menuPath: string;
+
+  export let name: string = undefined;
   export let disabled = false;
   export let className = '';
   export let placeholder: string;
   export let checked: boolean = undefined;
   export let rightCheck: boolean = false;
   export let data: any[] = [];
+  export let data$: Observable<any> = undefined;
   export let saveState = false;
   export let showAllItem = false;
   export let value: any = undefined;
   export let autoLoad = false;
   export let selectedId: string = undefined;
-  export let menuPath: string;
 
   const dispatch = createEventDispatcher();
 
   let _selectedId = selectedId;
 
   let inputRef: any;
+  let _data: any[] = [];
 
   export const focus = () => {
     if (inputRef) {
@@ -68,7 +71,7 @@
 
   export const getSelectedItem = () => {
     const selectedId = getSelectedId();
-    const selectedItem = data.filter((item: any) => item.id == selectedId);
+    const selectedItem = _data.filter((item: any) => item.id == selectedId);
     if (selectedItem && selectedItem.length > 0) {
       return selectedItem[0];
     } else {
@@ -101,6 +104,17 @@
         .subscribe();
     }
   });
+
+  // @ts-ignore
+  $: {
+    // @ts-ignore
+    if ($data$) {
+      // @ts-ignore
+      _data = $data$;
+    } else {
+      _data = data;
+    }
+  }
 </script>
 
 <div class="floating-wrapper">
@@ -121,7 +135,7 @@
       <option value={undefined}>{'--- ' + T('COMMON.LABEL.ALL') + ' ---'}</option>
     {/if}
 
-    {#each data as item}
+    {#each _data as item}
       <option value={item.id} selected={item.id == _selectedId}>{item.name}</option>
     {/each}
   </select>

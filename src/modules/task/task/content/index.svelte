@@ -10,8 +10,13 @@
   import Form from '@/lib/js/form/form';
   import { Task } from '../../types';
   import FloatSelect from '@/components/ui/float-input/select';
+  import FloatCheckbox from '@/components/ui/float-input/checkbox';
+  import FloatLabel from '@/components/ui/float-input/label';
+  import RichEditor from '@/components/ui/input/rich-editor';
   import { T } from '@/lib/js/locale/locale';
   import Section from '@/components/ui/section';
+  import FloatTextInput from '@/components/ui/float-input/text-input';
+  import Error from '@/components/ui/error';
 
   // Props
   export let view: ViewStore;
@@ -26,7 +31,8 @@
 
   // Refs
   let scRef: any;
-  let titleRef: any;
+  let taskNameRef: any;
+  let taskDescRef: any;
 
   let selectedData: Task;
 
@@ -52,10 +58,12 @@
    * @return {void}.
    */
   const onAddNew = (event) => {
+    console.log(taskDescRef.getTextContent());
+    console.log(taskDescRef.getHtmlContent());
     // verify permission
     view.verifyAddNewAction(event.currentTarget.id, scRef).then((_) => {
       // if everything is OK, call the action
-      doAddNew();
+      // doAddNew();
     });
   };
 
@@ -71,7 +79,7 @@
       isReadOnlyMode$.next(false);
       tick().then(() => {
         // the moving focus to the first element
-        titleRef.focus();
+        taskNameRef.focus();
       });
     });
   };
@@ -126,7 +134,7 @@
 
     // moving focus to the first element after DOM updated
     tick().then(() => {
-      titleRef.focus();
+      taskNameRef.focus();
     });
   };
   // ============================== // FUNCTIONAL ==========================
@@ -198,7 +206,54 @@
 <!--Main content-->
 <section class="view-content-main">
   <!-- Task Info-->
-  <Section title={T('TASK.LABEL.TASK')}>Test</Section>
+  <Section title={T('TASK.LABEL.TASK')}>
+    <div class="row">
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <!-- Project -->
+        <FloatSelect
+          id={view.getViewName() + 'ProjectId'}
+          placeholder={T('TASK.LABEL.PROJECT')}
+          {menuPath}
+          disabled={$isReadOnlyMode$}
+          data$={projects$} />
+
+      </div>
+      <!-- // Project -->
+
+      <!-- Name -->
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <FloatTextInput
+          bind:this={taskNameRef}
+          placeholder={T('COMMON.LABEL.NAME')}
+          name="name"
+          disabled={$isReadOnlyMode$}
+          bind:value={form.name} />
+        <Error {form} field="name" />
+      </div>
+      <!-- // Name -->
+
+      <!-- Private task -->
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <FloatCheckbox text={T('COMMON.LABEL.PRIVATE')} disabled={$isReadOnlyMode$} bind:checked={form.private} />
+      </div>
+      <!-- // Private task -->
+
+      <!-- Last status -->
+      <div class="danger col-xs-24 col-md-12 col-lg-6">
+        <FloatLabel text={form.lastStatusName} disabled={$isReadOnlyMode$} />
+
+      </div>
+      <!-- // Last status -->
+    </div>
+
+    <!-- Task Description -->
+    <div class="row">
+      <div class="col-24">
+        <RichEditor bind:this={taskDescRef}>{T('TASK.LABEL.TASK_DESCRIPTION')}</RichEditor>
+      </div>
+    </div>
+    <!-- // Task Description -->
+  </Section>
   <!-- //Task Info-->
 </section>
 <!--//Main content-->

@@ -79,13 +79,21 @@ export const createModal = (menuPath: string, widthInPixel: number = null, heigh
       return;
     }
 
-    if (!modalRef.style.left || modalRef.style.left.includes('-')) {
+    if (
+      !modalRef.style.left ||
+      modalRef.style.left.includes('-') ||
+      +modalRef.style.left.replace('px', '') + +modalRef.style.width.replace('px', '') > window.innerWidth
+    ) {
       state.left = '0';
     } else {
       state.left = modalRef.style.left;
     }
 
-    if (!modalRef.style.top || modalRef.style.top.includes('-')) {
+    if (
+      !modalRef.style.top ||
+      modalRef.style.top.includes('-') ||
+      +modalRef.style.top.replace('px', '') + +modalRef.style.top.replace('px', '') > window.innerHeight
+    ) {
       state.top = '0';
     } else {
       state.top = modalRef.style.top;
@@ -140,6 +148,27 @@ export const createModal = (menuPath: string, widthInPixel: number = null, heigh
             modalRef.style.top = `${pos.top}px`;
           }
         }
+
+        const sw = window.innerWidth;
+        const sh = window.innerHeight;
+        let outOfSize = false;
+        if (+modalRef.style.width.replace('px', '') >= sw) {
+          modalRef.style.width = `${sw * 0.8}px`;
+          outOfSize = true;
+        }
+
+        if (+modalRef.style.height.replace('px', '') >= sh) {
+          modalRef.style.height = `${sh * 0.8}px`;
+          outOfSize = true;
+        }
+
+        if (outOfSize) {
+          const left = (sw * 0.2) / 2;
+          const top = sh * 0.1;
+          modalRef.style.left = `${left}px`;
+          modalRef.style.top = `${top}px`;
+        }
+
         state.width = modalRef.style.width;
         state.height = modalRef.style.height;
         state.top = modalRef.style.top;
