@@ -14,18 +14,18 @@
     border: $default-border;
     border-radius: $default-border-radius;
     background: var(--bg-primary);
-    min-width: 400px;
-    max-width: 400px;
-    height: 500px;
-    min-height: 400px;
+    min-width: 350px;
+    max-width: 350px;
+    height: 450px;
+    min-height: 450px;
     margin-bottom: calc(3 * #{$default-padding});
     margin-left: $large-padding;
     margin-right: $large-padding;
     display: flex;
     flex-direction: column;
     .thumbnail {
-      width: 300px;
-      height: 150px;
+      width: 350px;
+      height: 175px;
       display: block;
       border-top-left-radius: $default-border-radius;
       border-top-right-radius: $default-border-radius;

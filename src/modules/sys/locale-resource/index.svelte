@@ -10,7 +10,6 @@
   import ProgressBar from '@/components/ui/progress-bar';
   import { Store } from './store';
 
-  export let showTitle = true;
   export let menuPath: string;
   export let fullControl: boolean;
   export let roleControls: [];

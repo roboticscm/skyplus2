@@ -1,5 +1,5 @@
 import { ViewStore } from '@/store/view';
-import { getMethodNameInSnackCase } from '@/lib/js/util';
+import { toSnackCase } from '@/lib/js/util';
 import { RxHttp } from '@/lib/js/rx-http';
 import { take } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
@@ -17,7 +17,7 @@ export class Store {
   constructor(public viewStore: ViewStore) {}
 
   sysGetUsedLanguages() {
-    RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`)
+    RxHttp.get(`${BASE_URL}${toSnackCase('sysGetUsedLanguages')}`)
       .pipe(take(1))
       .subscribe((res) => {
         this.usedLanguages$.next(res.data);
@@ -25,13 +25,13 @@ export class Store {
   }
 
   static sysGetUsedLangCategories(textSearch: string) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetUsedLangCategories')}`, {
       textSearch,
     });
   }
 
   static sysGetUsedLangTypeGroups(textSearch: string) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetUsedLangTypeGroups')}`, {
       textSearch,
     });
   }
@@ -45,7 +45,7 @@ export class Store {
   };
 
   static sysGetAllLanguages(includeDeleted: boolean, includeDisabled: boolean) {
-    return Http.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return Http.get(`${BASE_URL}${toSnackCase('sysGetAllLanguages')}`, {
       includeDeleted,
       includeDisabled,
     });
@@ -59,7 +59,7 @@ export class Store {
     page: number,
     pageSize: number,
   ) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetLocaleResourceByCompanyIdAndCatAndTypeGroup')}`, {
       companyId,
       category,
       typeGroup,

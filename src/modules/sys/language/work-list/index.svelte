@@ -12,7 +12,6 @@
   export let callFrom: string;
 
   // Other vars
-  const workListContainerId = `workList${view.getViewName()}Container`;
   const tableId = `workList${view.getViewName()}${callFrom.replace('/', '__')}Table`;
   let selectedId: string = undefined;
   const dispatch = createEventDispatcher();
@@ -59,7 +58,6 @@
   });
 </script>
 
-<section id={workListContainerId} class="view-left-main">
-  <!--  <HandsonWorkList on:selection={onSelection} {view} {workListContainerId} {tableId} {menuPath} />-->
+<section class="view-left-main">
   <SimpleWorkList on:selection={onSelection} {view} {tableId} {menuPath} />
 </section>

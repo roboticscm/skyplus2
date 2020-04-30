@@ -45,6 +45,10 @@
     currentComponentUri$.next(`modules/${path}/index.svelte`);
   };
 
+  export const show404 = () => {
+    TheComponent = Page404;
+  };
+
   // @ts-ignore
   $: {
     // @ts-ignore

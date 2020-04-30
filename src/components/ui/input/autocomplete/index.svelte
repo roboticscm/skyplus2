@@ -186,7 +186,7 @@
 
   const hideOnLostFocus = () => {
     if (document.activeElement !== inputRef) {
-      if (StringUtil.isEmpty(inputRef.value)) {
+      if (inputRef && StringUtil.isEmpty(inputRef.value)) {
         selectItem([
           {
             id: '',

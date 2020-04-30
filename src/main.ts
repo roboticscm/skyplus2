@@ -22,12 +22,13 @@ import Color, { getThemeColors } from '@/lib/js/color';
 import {
   getCompanyId,
   getLanguage,
-  getRememberLogin,
+  isRememberLogin,
   getToken,
   getUserId,
   loginSuccess,
   logout,
   setHeader,
+  isLockScreen,
 } from '@/lib/js/security';
 import '@/lib/js/session';
 
@@ -44,8 +45,8 @@ const startApp = () => {
           OrgStore.currentCompany$.next(SObject.convertFieldsToCamelCase(res.data[0]));
           const userId = getUserId();
           const token = getToken();
-          if (userId && token) {
-            AppStore.rememberLogin = getRememberLogin() === 'true';
+          if (!isLockScreen() && userId && token) {
+            AppStore.rememberLogin = isRememberLogin();
             loginSuccess(userId, token);
             setHeader(userId, token);
             loadMenuAndUserSettings(_companyId);
@@ -58,7 +59,7 @@ const startApp = () => {
       });
     })
     .catch((error: any) => {
-      Debug.error('Load resource error. Exit app');
+      Debug.error('Load resource error. Exit app', error);
     });
 };
 
@@ -132,6 +133,3 @@ declare var ResizeObserver: ResizeObserver;
 // mobile detect
 const md = new MobileDetect(window.navigator.userAgent);
 (window as any).isSmartPhone = md.mobile() !== null && md.phone() !== null;
-
-console.log(process.env.WS_PROTOCOL);
-console.log(process.env.API_SERVER_PORT);

@@ -1,5 +1,5 @@
 // @ts-ignore
-import { Token } from '@/lib/js/constants';
+import { App, Token } from '@/lib/js/constants';
 import axios from 'axios';
 import { AppStore, appStore } from '@/store/app';
 
@@ -66,8 +66,20 @@ export const getToken = () => {
   return decodeToken(localStorage.getItem(Token.TOKEN_KEY));
 };
 
-export const getRememberLogin = () => {
-  return localStorage.getItem('remember');
+export const isRememberLogin = () => {
+  return localStorage.getItem('AppName') === App.NAME;
+};
+
+export const isLockScreen = () => {
+  return localStorage.getItem('PoweredBy') === App.POWERED_BY;
+};
+
+export const lockScreen = () => {
+  return localStorage.setItem('PoweredBy', App.POWERED_BY);
+};
+
+export const unlockScreen = () => {
+  return localStorage.removeItem('PoweredBy');
 };
 
 export const encodeToken = (token: string) => {
@@ -84,13 +96,14 @@ export const loginSuccess = function(userId: string, token: string) {
   localStorage.setItem(Token.TOKEN_KEY, encodeToken(token));
   AppStore.isLogged$.next(true);
   if (AppStore.rememberLogin) {
-    localStorage.setItem('remember', 'true');
+    localStorage.setItem('AppName', App.NAME);
   }
+  unlockScreen();
 };
 
 export const logout = function() {
   localStorage.removeItem('userId');
-  localStorage.removeItem('remember');
+  localStorage.removeItem('AppName');
   localStorage.removeItem(Token.TOKEN_KEY);
   AppStore.isLogged$.next(false);
   AppStore.screenLock$.next(0);

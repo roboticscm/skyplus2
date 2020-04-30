@@ -1,9 +1,11 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import TwoColumnView from '@/components/layout/two-column-view';
   import WorkList from './work-list/index.svelte';
   import MainContent from './content/index.svelte';
   import ProgressBar from '@/components/ui/progress-bar';
   import { ViewStore } from '@/store/view';
+  import Store from './store';
 
   // Props
   export let menuPath: string;
@@ -14,8 +16,21 @@
 
   fullControl;
   roleControls;
+
   // Init view
   const view = new ViewStore(menuPath);
+  view.fullControl = fullControl;
+  view.roleControls = roleControls;
+
+  const store = new Store(view);
+
+  const onceLoad = () => {
+    store.findProjects();
+  };
+
+  onMount(() => {
+    onceLoad();
+  });
 </script>
 
 <ProgressBar loading$={view.loading$} />
@@ -26,6 +41,6 @@
   </div>
 
   <div style="height: 100%" slot="default">
-    <MainContent {view} {menuPath} />
+    <MainContent {view} {menuPath} {store} />
   </div>
 </TwoColumnView>

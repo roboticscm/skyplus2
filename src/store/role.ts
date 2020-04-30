@@ -1,10 +1,10 @@
 import { RxHttp } from '@/lib/js/rx-http';
-import { getMethodNameInSnackCase } from '@/lib/js/util';
+import { toSnackCase } from '@/lib/js/util';
 
 const BASE_URL = 'sys/role/';
 export class RoleStore {
   static sysGetMenuRoleControlList(ownerOrgId: string, roleId: string) {
-    return RxHttp.get(`sys/role-detail/${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`sys/role-detail/${toSnackCase('sysGetMenuRoleControlList')}`, {
       ownerOrgId,
       roleId,
       includeDeleted: true,
@@ -13,7 +13,7 @@ export class RoleStore {
   }
 
   static sysGetRoleListByOrgId(orgId: string) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetRoleListByOrgId')}`, {
       orgId,
       includeDeleted: true,
       includeDisabled: true,

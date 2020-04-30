@@ -55,6 +55,11 @@ TYPE_GROUPS.map((item: any) => {
   QTT[item] = {};
 });
 
+export const TASK: any = {};
+TYPE_GROUPS.map((item: any) => {
+  TASK[item] = {};
+});
+
 const CATEGORIES_MAP = new Map([
   ['IMG', IMG],
   ['EMR', EMR],
@@ -63,6 +68,7 @@ const CATEGORIES_MAP = new Map([
   ['SYS', SYS],
   ['COMMON', COMMON],
   ['QTT', QTT],
+  ['TASK', TASK],
 ]);
 
 export const convertLocaleResource = function() {

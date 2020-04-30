@@ -10,13 +10,13 @@
   import { Language } from '../model';
   import { SObject } from '@/lib/js/sobject';
   import { apolloClient } from '@/lib/js/hasura-client';
-  import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import { validation } from './validation';
   import FloatTextInput from '@/components/ui/float-input/text-input';
   import FloatNumberInput from '@/components/ui/float-input/number-input';
   import FloatCheckbox from '@/components/ui/float-input/checkbox';
   import Error from '@/components/ui/error';
 
+  import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import Button from '@/components/ui/flat-button';
   import SC from '@/components/set-common';
   import { Debug } from '@/lib/js/debug';
@@ -32,9 +32,6 @@
   // Refs
   let nameRef: any;
   let scRef: any;
-
-  let btnSaveRef: any;
-  let btnUpdateRef: any;
 
   // Other vars
   let selectedData: Language;
@@ -342,7 +339,6 @@
   {#if view.isRendered(ButtonId.Save, !$isUpdateMode$)}
     <Button
       action={useSaveOrUpdateAction}
-      bind:this={btnSaveRef}
       btnType={ButtonType.Save}
       disabled={view.isDisabled(ButtonId.Save, form.errors.any())}
       running={$saveRunning$} />
@@ -355,7 +351,6 @@
   {#if view.isRendered(ButtonId.Update, !$isReadOnlyMode$ && $isUpdateMode$)}
     <Button
       action={useSaveOrUpdateAction}
-      bind:this={btnUpdateRef}
       btnType={ButtonType.Update}
       disabled={view.isDisabled(ButtonId.Update, form.errors.any())}
       running={$saveRunning$} />

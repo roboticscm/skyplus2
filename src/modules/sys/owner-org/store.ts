@@ -1,5 +1,5 @@
 import { RxHttp } from '@/lib/js/rx-http';
-import { getMethodNameInSnackCase } from '@/lib/js/util';
+import { toSnackCase } from '@/lib/js/util';
 import { ViewStore } from '@/store/view';
 import { OrgStore } from '@/store/org';
 import { OwnerOrg } from '@/modules/sys/owner-org/model';
@@ -21,7 +21,7 @@ export default class Store {
   completeLoading$ = forkJoin([this.orgData$.pipe(skip(1), take(1))]);
   constructor(public viewStore: ViewStore) {}
   static sysGetCompanyList() {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`);
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetCompanyList')}`);
   }
 
   loadOrgTree() {

@@ -2,18 +2,22 @@ import { StringUtil } from './string-util';
 import { Browser } from './browser';
 import { v4 as uuidv4 } from 'uuid';
 
-export const getMethodNameInSnackCase = () => {
-  let err: any = new Error();
-  let name: string | null = '';
-  if (Browser.getBrowser() === 'Safari') {
-    name = err.stack.split('\n')[1].trim();
-    name = name.split('@')[0];
+export const toSnackCase = (str: string = undefined) => {
+  if (str) {
+    return StringUtil.toSnackCase(str, '-');
   } else {
-    // @ts-ignore
-    name = /at \w+\.(\w+)/.exec(err.stack.split('\n')[2])[1];
-  }
+    let err: any = new Error();
+    let name: string | null = '';
+    if (Browser.isSafari()) {
+      name = err.stack.split('\n')[1].trim();
+      name = name.split('@')[0];
+    } else {
+      // @ts-ignore
+      name = /at \w+\.(\w+)/.exec(err.stack.split('\n')[2])[1];
+    }
 
-  return StringUtil.toSnackCase(name || '', '-');
+    return StringUtil.toSnackCase(name || '', '-');
+  }
 };
 
 export const unccentVietnamese = (str: string) => {

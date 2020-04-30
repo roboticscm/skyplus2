@@ -5,7 +5,7 @@ import { ViewStore } from '@/store/view';
 import { RoleStore } from '@/store/role';
 import { Role } from './model';
 import { RxHttp } from '@/lib/js/rx-http';
-import { getMethodNameInSnackCase } from '@/lib/js/util';
+import { toSnackCase } from '@/lib/js/util';
 import { OwnerOrg } from '@/modules/sys/owner-org/model';
 
 const BASE_URL = 'sys/role-detail/';
@@ -58,7 +58,7 @@ export class Store {
   };
   saveOrUpdateOrDelete(roleId: any, roleDetailWithControls: any[]) {
     return RxHttp.post(
-      `${BASE_URL}${getMethodNameInSnackCase()}`,
+      `${BASE_URL}${toSnackCase('saveOrUpdateOrDelete')}`,
       JSON.stringify({
         roleId,
         roleDetailWithControls,

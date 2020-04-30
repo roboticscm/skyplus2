@@ -3,7 +3,7 @@ import { catchError, first, skip, take, withLatestFrom, zipAll } from 'rxjs/oper
 import { BehaviorSubject, forkJoin, of, zip } from 'rxjs';
 import { ViewStore } from '@/store/view';
 import { Http } from '@/lib/js/http';
-import { getMethodNameInSnackCase } from '@/lib/js/util';
+import { toSnackCase } from '@/lib/js/util';
 import { RxHttp } from '@/lib/js/rx-http';
 
 const BASE_URL = 'sys/human-or-org/';
@@ -37,13 +37,13 @@ export default class Store {
   );
 
   static sysGetUserInfoById(userId: string) {
-    return Http.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return Http.get(`${BASE_URL}sys-get-user-info-by-id`, {
       userId,
     });
   }
 
   static sysGetUserListByOrgId(orgId: any) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetUserListByOrgId')}`, {
       orgId: orgId,
       includeDeleted: false,
       includeDisabled: false,

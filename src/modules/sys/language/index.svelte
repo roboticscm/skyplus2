@@ -9,7 +9,6 @@
   import TwoColumnView from '@/components/layout/two-column-view';
   import WorkList from './work-list/index.svelte';
   import MainContent from './content/index.svelte';
-  import ViewTitle from '@/components/layout/view-title';
   import ProgressBar from '@/components/ui/progress-bar';
 
   // Props

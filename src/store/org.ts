@@ -1,5 +1,5 @@
 import { RxHttp } from '@/lib/js/rx-http';
-import { getMethodNameInSnackCase } from '@/lib/js/util';
+import { toSnackCase } from '@/lib/js/util';
 import { BehaviorSubject } from 'rxjs';
 import { OwnerOrg } from '@/modules/sys/owner-org/model';
 
@@ -8,42 +8,42 @@ export class OrgStore {
   static currentCompany$ = new BehaviorSubject<OwnerOrg>(null);
 
   sysGetAvailableDepartmentTreeForMenu(menuId: any) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetAvailableDepartmentTreeForMenu')}`, {
       menuId,
     });
   }
 
   sysGetDepartmentTreeByMenuId(menuId: any) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetDepartmentTreeByMenuId')}`, {
       menuId,
     });
   }
 
   sysGetRoledDepartmentListByUserId() {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetRoledDepartmentListByUserId')}`, {
       includeDeleted: false,
       includeDisabled: false,
     });
   }
 
   sysGetOwnerOrgRoleTree() {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`);
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetOwnerOrgRoleTree')}`);
   }
 
   sysGetHumanOrgTree(humanId: string) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetHumanOrgTree')}`, {
       humanId,
     });
   }
 
   sysGetAssignedHumanOrgTree(humanId: string) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetAssignedHumanOrgTree')}`, {
       humanId,
     });
   }
 
   static sysGetOwnerOrgTree(parentId: string = undefined) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetOwnerOrgTree')}`, {
       parentId,
     });
   }

@@ -1,6 +1,6 @@
 import { AppStore } from '@/store/app';
 import { Session } from '@/lib/js/constants';
-import { logout } from '@/lib/js/security';
+import { lockScreen, logout } from '@/lib/js/security';
 import { fromEvent } from 'rxjs';
 import { debounceTime, filter, startWith, tap, withLatestFrom } from 'rxjs/operators';
 
@@ -13,6 +13,7 @@ AppStore.isLogged$.subscribe((isLogged) => {
     timer = setInterval(() => {
       if (!AppStore.rememberLogin && screenLockCounter >= Session.SCREEN_LOCK_MINUTE) {
         AppStore.screenLock$.next(Date.now());
+        lockScreen();
         screenLockCounter = 0;
       }
 

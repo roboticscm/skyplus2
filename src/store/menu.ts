@@ -3,7 +3,7 @@ import { Http } from '@/lib/js/http';
 import { BehaviorSubject } from 'rxjs';
 import { skip, take } from 'rxjs/operators';
 import { HistoryMenu, RoleMenu } from '@/modules/sys/menu/model';
-import { getMethodNameInSnackCase } from '@/lib/js/util';
+import { toSnackCase } from '@/lib/js/util';
 import { Debug } from '@/lib/js/debug';
 import { SJSON } from '@/lib/js/sjson';
 
@@ -15,7 +15,7 @@ class MenuStore {
   selectedData: RoleMenu = null;
 
   sysGetRoledMenuPathListByUserId() {
-    RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    RxHttp.get(`${BASE_URL}${toSnackCase('sysGetRoledMenuPathListByUserId')}`, {
       includeDeleted: false,
       includeDisabled: false,
     })
@@ -29,13 +29,13 @@ class MenuStore {
   }
 
   sysGetMenuByPath(menuPath: string) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetMenuByPath')}`, {
       menuPath,
     });
   }
 
   sysGetRoledMenuListByUserIdAndDepId(depId: any, isSubscribed = true) {
-    const ob$ = RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    const ob$ = RxHttp.get(`${BASE_URL}${toSnackCase('sysGetRoledMenuListByUserIdAndDepId')}`, {
       depId,
       includeDeleted: false,
       includeDisabled: false,
@@ -71,7 +71,7 @@ export const menuStore = new MenuStore();
 const BASE_URL_HISTORY = 'sys/menu-history/';
 class HistoryMenuStore {
   saveOrUpdate(obj: HistoryMenu) {
-    return Http.post(`${BASE_URL_HISTORY}${getMethodNameInSnackCase()}`, SJSON.stringify(obj));
+    return Http.post(`${BASE_URL_HISTORY}${toSnackCase('saveOrUpdate')}`, SJSON.stringify(obj));
   }
 }
 export const historyMenuStore = new HistoryMenuStore();

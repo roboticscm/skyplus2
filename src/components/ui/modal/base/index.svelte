@@ -10,7 +10,7 @@
   import TextInput from '@/components/ui/input/text-input/index.svelte';
   import { appStore } from '@/store/app';
   import Form from '@/lib/js/form/form';
-  import { getMethodNameInSnackCase } from '@/lib/js/util';
+  import { toSnackCase } from '@/lib/js/util';
   import { catchError } from 'rxjs/operators';
   import { of } from 'rxjs';
   import { App } from '@/lib/js/constants';
@@ -115,7 +115,7 @@
   function loginWithoutGenToken() {
     form.password = passwordRef.getPassword();
     form
-      .post(`sys/auth/${getMethodNameInSnackCase()}`)
+      .post(`sys/auth/${toSnackCase('loginWithoutGenToken')}`)
       .pipe(
         catchError((error) => {
           return of(error);

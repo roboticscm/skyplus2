@@ -1,5 +1,5 @@
 import { RxHttp } from '@/lib/js/rx-http';
-import { getMethodNameInSnackCase } from '@/lib/js/util';
+import { toSnackCase } from '@/lib/js/util';
 import { Http } from '@/lib/js/http';
 import { Settings } from '@/model/settings';
 import { appStore } from '@/store/app';
@@ -9,20 +9,20 @@ const BASE_URL = 'sys/user-settings/';
 
 class SettingsStore {
   sysGetUserSettings(companyId: string) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetUserSettings')}`, {
       companyId,
     });
   }
 
   getUserSettings(controlId: string, menuPath: string) {
-    return Http.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return Http.get(`${BASE_URL}${toSnackCase('getUserSettings')}`, {
       menuPath,
       controlId,
     });
   }
 
   saveUserSettings(obj: Settings) {
-    return Http.post(`${BASE_URL}save-or-update`, SJSON.stringify(obj));
+    return Http.post(`${BASE_URL}${toSnackCase('saveOrUpdate')}`, SJSON.stringify(obj));
   }
 }
 

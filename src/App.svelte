@@ -14,6 +14,9 @@
   import RouterView from '@/components/ui/router-view';
   import { skip, take } from 'rxjs/operators';
   import { ModalType } from '@/components/ui/modal/types';
+  import { unlockScreen } from '@/lib/js/security';
+  import { getMenuPathFromUrl } from '@/lib/js/url-util';
+  import { StringUtil } from '@/lib/js/string-util';
 
   let routerView: any;
   let confirmPasswordModalRef: any;
@@ -26,14 +29,31 @@
   onMount(() => {
     if (routerView) {
       menuStore.dataList$.pipe(skip(1), take(1)).subscribe((_) => {
-        routerView.show(appStore.org.menuPath);
+        const savedMenuPath = getMenuPathFromUrl();
+        console.log(savedMenuPath);
+        if (StringUtil.isEmpty(savedMenuPath)) {
+          routerView.show(appStore.org.menuPath);
+        } else {
+          // TODO Check if menuPath in list
+          // else page 404
+          menuStore.menuPaths$.subscribe((res: string[]) => {
+            if (res.indexOf(savedMenuPath) >= 0) {
+              routerView.show(savedMenuPath);
+            } else {
+              routerView.show404();
+            }
+          });
+        }
       });
     }
   });
 
   // @ts-ignore
   $: if ($screenLock$) {
-    confirmPasswordModalRef && confirmPasswordModalRef.show();
+    confirmPasswordModalRef &&
+      confirmPasswordModalRef.show().then(() => {
+        unlockScreen();
+      });
   }
 </script>
 

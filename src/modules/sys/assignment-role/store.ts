@@ -1,6 +1,6 @@
 import { ViewStore } from '@/store/view';
 import { RxHttp } from '@/lib/js/rx-http';
-import { getMethodNameInSnackCase } from '@/lib/js/util';
+import { toSnackCase } from '@/lib/js/util';
 import { BehaviorSubject, forkJoin, of } from 'rxjs';
 import { catchError, first, skip, zip } from 'rxjs/operators';
 import { User } from '@/model/user';
@@ -34,7 +34,7 @@ export class Store {
   constructor(public viewStore: ViewStore) {}
 
   sysGetAllAssignmentRoleUserList() {
-    RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    RxHttp.get(`${BASE_URL}${toSnackCase('sysGetAllAssignmentRoleUserList')}`, {
       includeDeleted: false,
       includeDisabled: true,
     }).subscribe((res) => {
@@ -62,7 +62,7 @@ export class Store {
   }
 
   static sysGetRoleListOfUsers(userIds: string) {
-    return RxHttp.get(`${BASE_URL}${getMethodNameInSnackCase()}`, {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetRoleListOfUsers')}`, {
       userIds,
       includeDeleted: false,
       includeDisabled: true,
@@ -71,7 +71,7 @@ export class Store {
 
   saveOrUpdateOrDelete(users: any[], roles: any[]) {
     return RxHttp.post(
-      `${BASE_URL}${getMethodNameInSnackCase()}`,
+      `${BASE_URL}${toSnackCase('saveOrUpdateOrDelete')}`,
       JSON.stringify({
         users,
         roles,

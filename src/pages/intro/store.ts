@@ -1,8 +1,9 @@
 import { RxHttp } from '@/lib/js/rx-http';
-import { getMethodNameInSnackCase } from '@/lib/js/util';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { Http } from '@/lib/js/http';
+import { toSnackCase } from '../../lib/js/util';
+import { Browser, getClientInfo } from '@/lib/js/browser';
 
 const BASE_URL = 'sys/news/';
 
@@ -10,8 +11,8 @@ export default class Store {
   static dataList$ = new BehaviorSubject<any[]>([]);
 
   static getList() {
-    Http.get(`${BASE_URL}${getMethodNameInSnackCase()}`).then((res) => {
-      this.dataList$.next(res);
+    Http.get(`${BASE_URL}${toSnackCase('getList')}`).then((res) => {
+      Store.dataList$.next(res);
     });
   }
 }

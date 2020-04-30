@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "baseUrl": "types",
+//    "baseUrl": "types",
 //    "baseUrl": ".",
+    "baseUrl": ".",
     "typeRoots": ["types"],
     "outDir": "dist/lib",
     "noImplicitAny": false,
