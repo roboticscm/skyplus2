@@ -12,7 +12,7 @@
   export let title = '';
   export let btnType = ButtonType.Custom;
   export let icon = '';
-  export let className = '';
+  export let className = 'btn-flat';
   export let disabled = false;
   export let running = false;
   export let action: any = undefined;

@@ -3,6 +3,7 @@ import { SJSON } from '@/lib/js/sjson';
 const axios = require('axios');
 import { API } from './constants';
 import { logout } from '@/lib/js/security';
+import Axios from "axios-observable";
 
 export class Http {
   public static async callApi(method: string, url: string, params: any, jsonData: any) {
@@ -38,6 +39,31 @@ export class Http {
           }
           logout();
         });
+    });
+  }
+
+  public static upload(url: string, formData: any) {
+    let fullUrl = `${API.BASE_URL}${url}`;
+    return new Promise<any>((resolve, reject) => {
+      axios({
+        url: fullUrl,
+        method: 'post',
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then((res: any) => {
+        resolve(res.data);
+      })
+          .catch((error: any) => {
+            console.error(error);
+            if (error.response) {
+              reject(error.response.data);
+            } else {
+              reject(error);
+            }
+            logout();
+          });
     });
   }
 

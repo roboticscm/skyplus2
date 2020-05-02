@@ -30,7 +30,7 @@
   let timer: any;
   const windowFocussed = (e: any) => {
     const el = document.activeElement;
-    if (el.tagName.toLowerCase() !== 'button') {
+    if (el.getAttribute('data-id') !== 'controller') {
       timer = setTimeout(() => {
         controllerRef && controllerRef.classList.remove('show-controller');
       }, 0);
@@ -67,7 +67,7 @@
   <div class="rich-editor__body">
     <div class="rich-editor__body__controller" bind:this={controllerRef}>
       {#each controllers as item}
-        <button title={item.title} on:click={() => execCmd(item.cmd)}>
+        <button data-id="controller" title={item.title} on:click={() => execCmd(item.cmd)}>
           {@html item.icon}
         </button>
       {/each}

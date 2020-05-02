@@ -10,3 +10,10 @@ export class Project {
   name = '';
   desc = '';
 }
+
+
+export class File {
+  id = '';
+  name = '';
+  fullPath = '';
+}

@@ -18,6 +18,10 @@
       action.register(component, param);
     }
   };
+
+  export const focus = () => {
+    inputRef.focus();
+  }
 </script>
 
 <div class="quick-search-wrapper floating-wrapper">

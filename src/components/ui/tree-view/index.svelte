@@ -1,14 +1,18 @@
 <script lang="ts">
   import { onDestroy, tick, createEventDispatcher } from 'svelte';
   import { genUUID } from '@/lib/js/util';
+  import {Observable} from "rxjs";
 
   export let id = genUUID();
   export let data: any[];
+  export let data$: Observable<any []>;
   export let disabled = false;
   export let isCheckableNode = false;
   export let radioType: string = undefined;
 
   const dispatch = createEventDispatcher();
+
+  let _data: any[] = [];
 
   // @ts-ignore
   const noDataImage = require('../../../../public/images/no-data-found.png').default;
@@ -39,14 +43,14 @@
   };
 
   export const checkNodeById = (id: any, fireClickEvent = false) => {
-    for (let row of data) {
+    for (let row of _data) {
       if (row.id && id && row.id.toString() === id.toString()) {
         row.checked = true;
       } else {
         row.checked = false;
       }
     }
-    data = [...data];
+    _data = [..._data];
   };
 
   export const getSelectedNode = () => {
@@ -123,7 +127,7 @@
       return undefined;
     }
 
-    return data.filter((it: any) => checkedIds.indexOf(it.id.toString()) >= 0);
+    return _data.filter((it: any) => checkedIds.indexOf(it.id.toString()) >= 0);
   };
 
   export const getCheckedDataParent = (checked = true) => {
@@ -132,7 +136,7 @@
       return undefined;
     }
 
-    return data.filter((it: any) => checkedIds.indexOf(it.id.toString()) >= 0);
+    return _data.filter((it: any) => checkedIds.indexOf(it.id.toString()) >= 0);
   };
 
   export const disableTree = (disable: boolean) => {
@@ -202,9 +206,20 @@
       },
     };
 
-    (window['$'] as any).fn.zTree.init(window['$']('#' + id), setting, data);
+    (window['$'] as any).fn.zTree.init(window['$']('#' + id), setting, _data);
 
     tick().then(() => disableTree(disabled));
+  }
+
+  // @ts-ignore
+  $: {
+    if(data) {
+      _data = data;
+      // @ts-ignore
+    } else if($data$){
+      // @ts-ignore
+      _data = $data$;
+    }
   }
 
   onDestroy(() => {
@@ -219,7 +234,7 @@
 <div class="tree-wrapper">
   <slot name="label" />
   <ul {id} class="stree ztree" />
-  {#if !data || data.length === 0}
+  {#if !_data || _data.length === 0}
     <div class="no-data">
       <img src={noDataImage} alt="" />
     </div>

@@ -17,6 +17,11 @@
   import Section from '@/components/ui/section';
   import FloatTextInput from '@/components/ui/float-input/text-input';
   import Error from '@/components/ui/error';
+  import CloseableList from '@/components/ui/closeable-list'
+  import UploadFiles from '@/components/ui/upload-files'
+  import SelectHumanModal from '@/components/modal/select-human'
+  import {ButtonPressed} from "@/components/ui/button/types";
+  import {SObject} from "@/lib/js/sobject";
 
   // Props
   export let view: ViewStore;
@@ -27,12 +32,15 @@
   const { selectedData$, hasAnyDeletedRecord$, deleteRunning$, saveRunning$, isReadOnlyMode$, isUpdateMode$ } = view;
 
   // @ts-ignore
-  const { projects$ } = store;
+  const { projects$, uploadFiles$, assigneeList$ } = store;
 
   // Refs
   let scRef: any;
   let taskNameRef: any;
   let taskDescRef: any;
+  let uploadFilesRef: any;
+  let assigneeRef: any;
+  let selectHumanModalRef: any;
 
   let selectedData: Task;
 
@@ -58,8 +66,6 @@
    * @return {void}.
    */
   const onAddNew = (event) => {
-    console.log(taskDescRef.getTextContent());
-    console.log(taskDescRef.getHtmlContent());
     // verify permission
     view.verifyAddNewAction(event.currentTarget.id, scRef).then((_) => {
       // if everything is OK, call the action
@@ -115,6 +121,22 @@
     view.showTrashRestoreModal(event.currentTarget.id, false, scRef);
   };
 
+
+  const onAddAssignee = () => {
+    // @ts-ignore
+    const assignee: any[] = SObject.clone($assigneeList$);
+    selectHumanModalRef.show(assignee).then((buttonPressed: ButtonPressed) => {
+
+      if(buttonPressed === ButtonPressed.OK) {
+        assigneeList$.next(assignee.map((it: any) => {
+          return {
+            id: it.id,
+            name: it.lastName + ' ' + it.firstName
+          }
+        }));
+      }
+    })
+  }
   // ============================== // EVENT HANDLE ==========================
 
   // ============================== FUNCTIONAL ==========================
@@ -137,6 +159,7 @@
       taskNameRef.focus();
     });
   };
+
   // ============================== // FUNCTIONAL ==========================
 
   /**
@@ -154,7 +177,9 @@
 
 <!--Invisible Element-->
 <SC bind:this={scRef} {view} {menuPath} />
+<SelectHumanModal id={view.getViewName() + "SelectHumanModal"} {menuPath} bind:this={selectHumanModalRef}></SelectHumanModal>
 <!--//Invisible Element-->
+
 
 <!--Form controller-->
 <section class="view-content-controller">
@@ -232,27 +257,51 @@
       </div>
       <!-- // Name -->
 
+      <!-- Last status -->
+      <div class="danger col-xs-24 col-md-12 col-lg-6">
+        <FloatTextInput
+                placeholder={T('COMMON.LABEL.STATUS')}
+                disabled={true}
+                bind:value={form.lastStatusName} />
+
+      </div>
+      <!-- // Last status -->
       <!-- Private task -->
       <div class="col-xs-24 col-md-12 col-lg-6">
         <FloatCheckbox text={T('COMMON.LABEL.PRIVATE')} disabled={$isReadOnlyMode$} bind:checked={form.private} />
       </div>
       <!-- // Private task -->
 
-      <!-- Last status -->
-      <div class="danger col-xs-24 col-md-12 col-lg-6">
-        <FloatLabel text={form.lastStatusName} disabled={$isReadOnlyMode$} />
 
-      </div>
-      <!-- // Last status -->
     </div>
 
     <!-- Task Description -->
     <div class="row">
       <div class="col-24">
-        <RichEditor bind:this={taskDescRef}>{T('TASK.LABEL.TASK_DESCRIPTION')}</RichEditor>
+        <RichEditor bind:this={taskDescRef}>{T('TASK.LABEL.TASK_DESCRIPTION')}:</RichEditor>
       </div>
     </div>
     <!-- // Task Description -->
+
+    <!-- Attach file -->
+    <div class="row">
+      <div class="col-24">
+        <UploadFiles {menuPath} id = {view.getViewName() + "UploadFiles"}>
+        </UploadFiles>
+      </div>
+    </div>
+    <!-- // Attach file -->
+
+    <!-- Assignee -->
+    <div class="row">
+      <div class="col-24">
+        <CloseableList data$={assigneeList$} bind:this={assigneeRef} {menuPath} id="{view.getViewName() + 'AssigneeId'}">
+          <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_ASSIGNEE') + '...'}></Button>
+        </CloseableList>
+      </div>
+    </div>
+    <!-- // Assignee -->
+
   </Section>
   <!-- //Task Info-->
 </section>

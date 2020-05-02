@@ -13,7 +13,7 @@
 
 <div class="section {showBorder ? 'border' : ''} {roundedBorder ? 'border-radius' : ''}">
   {#if title && title.length > 0}
-    <div on:click={onToggle} class="section__title {collapse ? 'link' : ''}">
+    <div on:click={onToggle} class="section__title {collapse ? 'link1' : ''}">
       {title}
       {#if open}
         <i class="fa fa-minus" />

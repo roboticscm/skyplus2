@@ -26,6 +26,8 @@
 
   const onceLoad = () => {
     store.findProjects();
+    // test
+    store.findUploadFiles(undefined);
   };
 
   onMount(() => {

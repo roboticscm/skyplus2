@@ -30,6 +30,18 @@ export class RxHttp {
     });
   }
 
+  public static upload(url: string, formData: any, savePath: string) {
+    let fullUrl = `${API.BASE_URL}${url}?savePath=${savePath}`;
+    return Axios.request({
+      url: fullUrl,
+      method: 'post',
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
+
   public static get(url: string, params: any = null) {
     return RxHttp.callApi('get', url, params, null);
   }
