@@ -6,6 +6,7 @@
   import { ViewStore } from '@/store/view';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import Button from '@/components/ui/flat-button';
+  import FloatingButton from '@/components/ui/button/floating';
   import Store from '../store';
   import Form from '@/lib/js/form/form';
   import { Task } from '../../types';
@@ -16,12 +17,14 @@
   import { T } from '@/lib/js/locale/locale';
   import Section from '@/components/ui/section';
   import FloatTextInput from '@/components/ui/float-input/text-input';
+  import FloatDatePicker from '@/components/ui/float-input/date-picker';
   import Error from '@/components/ui/error';
-  import CloseableList from '@/components/ui/closeable-list'
-  import UploadFiles from '@/components/ui/upload-files'
-  import SelectHumanModal from '@/components/modal/select-human'
-  import {ButtonPressed} from "@/components/ui/button/types";
-  import {SObject} from "@/lib/js/sobject";
+  import CloseableList from '@/components/ui/closeable-list';
+  import UploadFiles from '@/components/ui/upload-files';
+  import SelectHumanModal from '@/components/modal/select-human';
+  import { ButtonPressed } from '@/components/ui/button/types';
+  import { SObject } from '@/lib/js/sobject';
+  import StatusModal from '../components/status-modal/index.svelte';
 
   // Props
   export let view: ViewStore;
@@ -32,17 +35,30 @@
   const { selectedData$, hasAnyDeletedRecord$, deleteRunning$, saveRunning$, isReadOnlyMode$, isUpdateMode$ } = view;
 
   // @ts-ignore
-  const { projects$, uploadFiles$, assigneeList$ } = store;
+  const {
+    projects$,
+    uploadFiles$,
+    assigneeList$,
+    assignerList$,
+    accessorList$,
+    qualitativeComment$,
+    quantitativeComment$,
+    assigneeStatusList$,
+          assignerStatusList$
+  } = store;
 
   // Refs
   let scRef: any;
   let taskNameRef: any;
   let taskDescRef: any;
   let uploadFilesRef: any;
-  let assigneeRef: any;
+  let assigneeRef, assignerRef, accessorRef: any;
   let selectHumanModalRef: any;
+  let accessCommentRef: any;
+  let statusModalRef: any;
 
   let selectedData: Task;
+  let forAssigner = undefined;
 
   /**
    * Reset form (reset input and errors)
@@ -121,22 +137,121 @@
     view.showTrashRestoreModal(event.currentTarget.id, false, scRef);
   };
 
-
   const onAddAssignee = () => {
     // @ts-ignore
     const assignee: any[] = SObject.clone($assigneeList$);
     selectHumanModalRef.show(assignee).then((buttonPressed: ButtonPressed) => {
-
-      if(buttonPressed === ButtonPressed.OK) {
-        assigneeList$.next(assignee.map((it: any) => {
-          return {
-            id: it.id,
-            name: it.lastName + ' ' + it.firstName
-          }
-        }));
+      if (buttonPressed === ButtonPressed.OK) {
+        const checkedAssignee = selectHumanModalRef.getCheckedLeafNodes();
+        assigneeList$.next(
+          checkedAssignee.map((it: any) => {
+            return {
+              id: it.id,
+              name: it.name,
+            };
+          }),
+        );
       }
-    })
+    });
+  };
+
+  const onCloseAssignee = (event: any) => {
+    // @ts-ignore
+    const assigneeList = SObject.clone($assigneeList$);
+
+    const index = assigneeList.findIndex((it: any) => it.id === event.detail.id);
+    if (index >= 0) {
+      assigneeList.splice(index, 1);
+      assigneeList$.next(assigneeList);
+    }
+  };
+
+  const onAddAssigner = () => {
+    // @ts-ignore
+    const assigner: any[] = SObject.clone($assignerList$);
+    selectHumanModalRef.show(assigner).then((buttonPressed: ButtonPressed) => {
+      if (buttonPressed === ButtonPressed.OK) {
+        const checkedAssigner = selectHumanModalRef.getCheckedLeafNodes();
+        assignerList$.next(
+          checkedAssigner.map((it: any) => {
+            return {
+              id: it.id,
+              name: it.name,
+            };
+          }),
+        );
+      }
+    });
+  };
+
+  const onCloseAssigner = (event: any) => {
+    // @ts-ignore
+    const assignerList = SObject.clone($assignerList$);
+
+    const index = assignerList.findIndex((it: any) => it.id === event.detail.id);
+    if (index >= 0) {
+      assignerList.splice(index, 1);
+      assignerList$.next(assignerList);
+    }
+  };
+
+  const onAddEvaluator = () => {
+    // @ts-ignore
+    const evaluator: any[] = SObject.clone($accessorList$);
+    selectHumanModalRef.show(evaluator).then((buttonPressed: ButtonPressed) => {
+      if (buttonPressed === ButtonPressed.OK) {
+        const checkedEvaluator = selectHumanModalRef.getCheckedLeafNodes();
+        accessorList$.next(
+          checkedEvaluator.map((it: any) => {
+            return {
+              id: it.id,
+              name: it.name,
+            };
+          }),
+        );
+      }
+    });
+  };
+
+  const onCloseEvaluator = (event: any) => {
+    // @ts-ignore
+    const accessorList = SObject.clone($accessorList$);
+
+    const index = accessorList.findIndex((it: any) => it.id === event.detail.id);
+    if (index >= 0) {
+      accessorList.splice(index, 1);
+      accessorList$.next(accessorList);
+    }
+  };
+
+  const onAddAssignerStatus = () => {
+    forAssigner = true;
+    statusModalRef.show().then((buttonPressed: ButtonPressed) => {
+      if (buttonPressed === ButtonPressed.OK) {
+
+        assignerStatusList$.next(
+          [
+             { id: '1', date: new Date(), status: 'New status', note: 'Note xxx...'}
+          ]
+        );
+      }
+    });
   }
+
+  const onAddAssigneeStatus = () => {
+    forAssigner = false;
+    statusModalRef.show().then((buttonPressed: ButtonPressed) => {
+      if (buttonPressed === ButtonPressed.OK) {
+
+        assigneeStatusList$.next(
+                [
+                  { id: '1', date: new Date(), percent: 'New status', note: 'Note xxx...'}
+                ]
+        );
+      }
+    });
+  }
+
   // ============================== // EVENT HANDLE ==========================
 
   // ============================== FUNCTIONAL ==========================
@@ -173,13 +288,30 @@
       // doSaveOrUpdate(fromEvent(component, 'click'));
     },
   };
+
+
+  /**
+   * Use submit action directive. Register click event for Submit button
+   * @param {none}
+   * @return {void}.
+   */
+  const useSubmitAction = {
+    register(component: HTMLElement, param: any) {
+      // TODO
+      // doSaveOrUpdate(fromEvent(component, 'click'));
+    },
+  };
 </script>
+
+<style lang="scss">
+  @import '../sass/sass/helpers/variables.scss';
+</style>
 
 <!--Invisible Element-->
 <SC bind:this={scRef} {view} {menuPath} />
-<SelectHumanModal id={view.getViewName() + "SelectHumanModal"} {menuPath} bind:this={selectHumanModalRef}></SelectHumanModal>
+<SelectHumanModal id={view.getViewName() + 'SelectHumanModal'} {menuPath} bind:this={selectHumanModalRef} />
+<StatusModal forAssigner = {forAssigner} id={view.getViewName() + 'StatusModal'} {menuPath} bind:this={statusModalRef} {store} />
 <!--//Invisible Element-->
-
 
 <!--Form controller-->
 <section class="view-content-controller">
@@ -207,6 +339,14 @@
       running={$saveRunning$} />
   {/if}
 
+  {#if view.isRendered(ButtonId.Submit, !$isUpdateMode$)}
+    <Button
+            action={useSubmitAction}
+            btnType={ButtonType.Submit}
+            disabled={view.isDisabled(ButtonId.Submit, form.errors.any())}
+            running={$saveRunning$} />
+  {/if}
+
   {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
     <Button
       btnType={ButtonType.Delete}
@@ -231,7 +371,7 @@
 <!--Main content-->
 <section class="view-content-main">
   <!-- Task Info-->
-  <Section title={T('TASK.LABEL.TASK')}>
+  <Section title={T('TASK.LABEL.TASK')} {menuPath} id={view.getViewName() + 'TaskSectionId'}>
     <div class="row">
       <div class="col-xs-24 col-md-12 col-lg-6">
         <!-- Project -->
@@ -259,10 +399,7 @@
 
       <!-- Last status -->
       <div class="danger col-xs-24 col-md-12 col-lg-6">
-        <FloatTextInput
-                placeholder={T('COMMON.LABEL.STATUS')}
-                disabled={true}
-                bind:value={form.lastStatusName} />
+        <FloatTextInput placeholder={T('COMMON.LABEL.STATUS')} disabled={true} bind:value={form.lastStatusName} />
 
       </div>
       <!-- // Last status -->
@@ -271,7 +408,6 @@
         <FloatCheckbox text={T('COMMON.LABEL.PRIVATE')} disabled={$isReadOnlyMode$} bind:checked={form.private} />
       </div>
       <!-- // Private task -->
-
 
     </div>
 
@@ -286,23 +422,252 @@
     <!-- Attach file -->
     <div class="row">
       <div class="col-24">
-        <UploadFiles {menuPath} id = {view.getViewName() + "UploadFiles"}>
-        </UploadFiles>
+        <UploadFiles {menuPath} id={view.getViewName() + 'UploadFiles'} />
       </div>
     </div>
     <!-- // Attach file -->
 
-    <!-- Assignee -->
+    <!--    //beneficiary-->
+    <!--    // beneficiary organization-->
+    <!--    //-->
+
     <div class="row">
-      <div class="col-24">
-        <CloseableList data$={assigneeList$} bind:this={assigneeRef} {menuPath} id="{view.getViewName() + 'AssigneeId'}">
-          <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_ASSIGNEE') + '...'}></Button>
+      <div class="col-xs-24 col-md-12">
+        <CloseableList
+          on:close={onCloseAssignee}
+          data$={assigneeList$}
+          bind:this={assigneeRef}
+          {menuPath}
+          id={view.getViewName() + 'AssigneeId'}>
+          <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_ASSIGNEE') + '...'} />
+        </CloseableList>
+      </div>
+
+      <div class="col-xs-24 col-md-12">
+        <CloseableList
+          on:close={onCloseAssignee}
+          data$={assigneeList$}
+          bind:this={assigneeRef}
+          {menuPath}
+          id={view.getViewName() + 'AssigneeId'}>
+          <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_ASSIGNEE') + '...'} />
         </CloseableList>
       </div>
     </div>
-    <!-- // Assignee -->
+
+    <div class="row">
+      <div class="col-xs-24 col-md-12">
+        <CloseableList
+                on:close={onCloseAssignee}
+                data$={assigneeList$}
+                bind:this={assigneeRef}
+                {menuPath}
+                id={view.getViewName() + 'AssigneeId'}>
+          <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_ASSIGNEE') + '...'} />
+        </CloseableList>
+      </div>
+
+      <div class="col-xs-24 col-md-6">
+        <FloatDatePicker
+          placeholder={T('COMMON.LABEL.FIRST_PROMPT')}
+          name="firstPrompt"
+          disabled={$isReadOnlyMode$}
+          bind:value={form.firstPrompt} />
+      </div>
+
+      <div class="col-xs-24 col-md-6">
+        <FloatDatePicker
+          placeholder={T('COMMON.LABEL.SECOND_PROMPT')}
+          name="secondPrompt"
+          disabled={$isReadOnlyMode$}
+          bind:value={form.secondPrompt} />
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Assignee -->
+      <div class="col-xs-24 col-md-12">
+        <CloseableList
+          on:close={onCloseAssignee}
+          data$={assigneeList$}
+          bind:this={assigneeRef}
+          {menuPath}
+          id={view.getViewName() + 'AssigneeId'}>
+          <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_ASSIGNEE') + '...'} />
+        </CloseableList>
+      </div>
+      <!-- // Assignee -->
+
+      <!-- Assigner -->
+      <div class="col-xs-24 col-md-12">
+        <CloseableList
+          on:close={onCloseAssigner}
+          data$={assignerList$}
+          bind:this={assignerRef}
+          {menuPath}
+          id={view.getViewName() + 'AssignerId'}>
+          <Button on:click={onAddAssigner} title={T('COMMON.LABEL.ADD_ASSIGNER') + '...'} />
+        </CloseableList>
+      </div>
+      <!-- // Assigner -->
+    </div>
+
+    <!-- Evaluator -->
+    <div class="row">
+      <div class="col-24">
+        <CloseableList
+          on:close={onCloseEvaluator}
+          data$={accessorList$}
+          bind:this={accessorRef}
+          {menuPath}
+          id={view.getViewName() + 'EvaluatorId'}>
+          <Button on:click={onAddEvaluator} title={T('COMMON.LABEL.ADD_EVALUATOR') + '...'} />
+        </CloseableList>
+      </div>
+    </div>
+    <!-- // Evaluator -->
 
   </Section>
   <!-- //Task Info-->
+
+  <!-- Assigner Info-->
+  <Section title={T('TASK.LABEL.ASSIGNER')} id={view.getViewName() + 'AssignerSectionId'} {menuPath}>
+    <div class="row" style="margin-top: 6px;">
+      <div class="col-24">{T('COMMON.LABEL.STATUS_DETAIL')}:</div>
+    </div>
+    <div class="row">
+      <div class=" col-24">
+        <CloseableList
+          on:close={onCloseEvaluator}
+          customData={$assignerStatusList$}
+          customRender="modules/task/task/components/status/index.svelte"
+          bind:this={accessorRef}
+          {menuPath}
+          id={view.getViewName() + 'AssignerId'}>
+          <FloatingButton on:click={onAddAssignerStatus} title={T('TASK.LABEL.ADD_STATUS')} />
+        </CloseableList>
+      </div>
+    </div>
+  </Section>
+  <!-- // Assigner Info-->
+
+  <!-- Assignee Info-->
+  <Section title={T('TASK.LABEL.ASSIGNEE')} id={view.getViewName() + 'AssigneeSectionId'} {menuPath}>
+    <!-- Start date-->
+    <div class="row">
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <FloatDatePicker
+          placeholder={T('COMMON.LABEL.START_DATE')}
+          name="startDate"
+          disabled={$isReadOnlyMode$}
+          bind:value={form.startDate} />
+      </div>
+
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <FloatCheckbox
+          text={T('COMMON.LABEL.CONFIRM')}
+          disabled={$isReadOnlyMode$}
+          bind:checked={form.startDateConfirm} />
+      </div>
+    </div>
+    <!-- // Start date-->
+
+    {#if form.startDateConfirm}
+    <div class="row" style="margin-top: 6px;">
+      <div class="col-24">{T('COMMON.LABEL.STATUS_DETAIL')}:</div>
+    </div>
+    <div class="row">
+      <div class=" col-24">
+        <CloseableList
+          on:close={onCloseEvaluator}
+          customData={$assigneeStatusList$}
+          customRender="modules/task/task/components/status/index.svelte"
+          bind:this={accessorRef}
+          {menuPath}
+          id={view.getViewName() + 'EvaluatorId'}>
+          <FloatingButton on:click={onAddAssigneeStatus} title={T('TASK.LABEL.ADD_STATUS')} />
+        </CloseableList>
+      </div>
+    </div>
+
+    <!-- End date-->
+    <div class="row">
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <FloatDatePicker
+          placeholder={T('COMMON.LABEL.END_DATE')}
+          name="endDate"
+          disabled={$isReadOnlyMode$}
+          bind:value={form.endDate} />
+      </div>
+
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <FloatCheckbox
+          text={T('COMMON.LABEL.CONFIRM')}
+          disabled={$isReadOnlyMode$}
+          bind:checked={form.endDateConfirm} />
+      </div>
+    </div>
+    <!-- // End date-->
+
+      {/if}
+  </Section>
+  <!-- // Assignee Info-->
+
+  <!-- Evaluator Info-->
+  <Section title={T('TASK.LABEL.EVALUATOR')} id={view.getViewName() + 'EvaluatorSectionId'} {menuPath}>
+    <!-- Date-->
+    <div class="row">
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <FloatDatePicker
+          placeholder={T('COMMON.LABEL.DATE')}
+          name="accessDate"
+          disabled={$isReadOnlyMode$}
+          bind:value={form.accessDate} />
+      </div>
+    </div>
+    <!-- // Date-->
+
+    <!-- Comment-->
+    <div class="row">
+      <div class="col-24">
+        <RichEditor bind:this={accessCommentRef}>{T('TASK.LABEL.COMMENT')}:</RichEditor>
+      </div>
+    </div>
+    <!-- // Comment-->
+
+    <div class="row">
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <FloatSelect
+          id={view.getViewName() + 'QuantitativeCommentId'}
+          placeholder={T('TASK.LABEL.QUANTITATIVE_COMMENT')}
+          {menuPath}
+          disabled={$isReadOnlyMode$}
+          data$={quantitativeComment$} />
+      </div>
+
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <FloatSelect
+          id={view.getViewName() + 'QualitativeCommentId'}
+          placeholder={T('TASK.LABEL.QUALITATIVE_COMMENT')}
+          {menuPath}
+          disabled={$isReadOnlyMode$}
+          data$={qualitativeComment$} />
+      </div>
+    </div>
+
+    <!-- Status-->
+    <div class="row">
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <FloatSelect placeholder={T('COMMON.LABEL.EVALUATE_STATUS')} disabled={$isReadOnlyMode$} />
+      </div>
+
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <FloatCheckbox text={T('COMMON.LABEL.COMPLETE')} disabled={$isReadOnlyMode$} bind:checked={form.complete} />
+      </div>
+    </div>
+    <!-- // Status-->
+  </Section>
+  <!-- // Evaluator Info-->
+
 </section>
 <!--//Main content-->

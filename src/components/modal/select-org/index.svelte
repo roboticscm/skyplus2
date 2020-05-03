@@ -11,7 +11,7 @@
 
   export let menuPath: string;
   export let id: string;
-  export let excludeHumanIds = '';
+  export let excludeOrgIds = '';
 
   let modalRef: any;
   const defaultWidth = 800;
@@ -31,8 +31,9 @@
     });
   };
 
+  // TODO
   onMount(() => {
-    orgStore.sysGetOwnerOrgHumanTree('', excludeHumanIds).subscribe((res) => {
+    orgStore.sysGetOwnerOrgTree('', excludeOrgIds).subscribe((res) => {
       data = res.data;
     });
   });
@@ -71,7 +72,7 @@
   {menuPath}
   contentClass="full-modal-content"
   fontIcon="<i class='fa fa-cog'></i>"
-  title={T('COMMON.LABEL.SELECT_HUMAN')}
+  title={T('COMMON.LABEL.SELECT_ORG')}
   {id}
   bind:this={modalRef}>
   <QuickSearch action={useFilterAction} bind:this={quickSearchRef} placeholder={T('COMMON.LABEL.FILTER') + '...'} />

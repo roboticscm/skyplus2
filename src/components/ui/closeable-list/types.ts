@@ -1,5 +1,5 @@
 export interface CloseableListItem {
-    id: string;
-    name: string;
-    data?: any;
+  id: string;
+  name: string;
+  data?: any;
 }

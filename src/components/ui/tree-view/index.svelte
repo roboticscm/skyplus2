@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onDestroy, tick, createEventDispatcher } from 'svelte';
   import { genUUID } from '@/lib/js/util';
-  import {Observable} from "rxjs";
+  import { Observable } from 'rxjs';
 
   export let id = genUUID();
-  export let data: any[];
-  export let data$: Observable<any []>;
+  export let data: any[] = undefined;
+  export let data$: Observable<any[]> = undefined;
   export let disabled = false;
   export let isCheckableNode = false;
   export let radioType: string = undefined;
@@ -53,6 +53,17 @@
     _data = [..._data];
   };
 
+  export const checkNodeByIds = (ids: any[], fireClickEvent = false) => {
+    for (let row of _data) {
+      if (ids.indexOf(row.id) >= 0) {
+        row.checked = true;
+      } else {
+        row.checked = false;
+      }
+    }
+    _data = [..._data];
+  };
+
   export const getSelectedNode = () => {
     const treeObj = getTreeInstance();
 
@@ -71,6 +82,17 @@
 
     if (nodes && nodes.length > 0) {
       return nodes.filter((node: any) => !node.isParent).map((node: any) => node.id.toString());
+    } else {
+      return [];
+    }
+  };
+
+  export const getCheckedLeafNodes = (checked = true) => {
+    const treeObj = getTreeInstance();
+    let nodes = treeObj && treeObj.getCheckedNodes(checked);
+
+    if (nodes && nodes.length > 0) {
+      return nodes.filter((node: any) => !node.isParent);
     } else {
       return [];
     }
@@ -213,10 +235,10 @@
 
   // @ts-ignore
   $: {
-    if(data) {
+    if (data) {
       _data = data;
       // @ts-ignore
-    } else if($data$){
+    } else if ($data$) {
       // @ts-ignore
       _data = $data$;
     }

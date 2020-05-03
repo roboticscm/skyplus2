@@ -21,7 +21,7 @@
 
   export const focus = () => {
     inputRef.focus();
-  }
+  };
 </script>
 
 <div class="quick-search-wrapper floating-wrapper">

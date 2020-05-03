@@ -31,7 +31,7 @@ export class Hasura {
 }
 
 export class App {
-  static NAME = 'SKyHub';
+  static NAME = 'SkyHub';
   static POWERED_BY = 'Suntech';
   static DEFAULT_ICON = `<i class="fa fa-bars"></i>`;
   static USE_ANIMATION = true;

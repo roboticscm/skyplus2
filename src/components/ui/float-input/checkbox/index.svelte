@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let name: string;
+  export let name: string = undefined;
   export let disabled = false;
   export let className = '';
   export let checked;

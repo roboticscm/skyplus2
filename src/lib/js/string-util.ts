@@ -89,4 +89,8 @@ export class StringUtil {
     const splits = fullName.split(' ');
     return [splits.slice(0, length - 1).join(' '), splits[splits.length - 1]];
   };
+
+  public static toBoolean(str: string) {
+    return JSON.parse(str.toLowerCase());
+  }
 }

@@ -18,6 +18,8 @@ export enum ButtonType {
   SelectAll,
   UnSelectAll,
   ToggleSelection,
+  Submit,
+  Approve
 }
 
 export enum ButtonPressed {
@@ -38,4 +40,6 @@ export enum ButtonId {
   TrashRestore = 'btnTrashRestore',
   ViewLog = 'btnViewLog',
   Apply = 'btnApply',
+  Submit = 'btnSubmit',
+  Approve = 'btnApprove'
 }

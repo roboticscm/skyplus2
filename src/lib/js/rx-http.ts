@@ -37,8 +37,8 @@ export class RxHttp {
       method: 'post',
       data: formData,
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        'Content-Type': 'multipart/form-data',
+      },
     });
   }
 

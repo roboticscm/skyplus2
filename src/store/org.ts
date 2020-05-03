@@ -30,10 +30,11 @@ export class OrgStore {
     return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetOwnerOrgRoleTree')}`);
   }
 
-  sysGetOwnerOrgHumanTree(filter: string) {
+  sysGetOwnerOrgHumanTree(filter: string, excludeHumanIds: string) {
     console.log(filter);
     return RxHttp.get(`${BASE_URL}${toSnackCase('sysGetOwnerOrgHumanTree')}`, {
-      filter
+      filter,
+      excludeHumanIds,
     });
   }
 

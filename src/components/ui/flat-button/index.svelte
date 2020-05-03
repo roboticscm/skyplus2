@@ -94,6 +94,12 @@
       case ButtonType.ToggleSelection:
         preset(undefined, undefined, '<i class="fa fa-toggle-on"></i>', 'btn-small-primary');
         break;
+      case ButtonType.Submit:
+        preset(undefined, 'SUBMIT', '<i class="fa fa-check"></i>', 'btn-flat');
+        break;
+      case ButtonType.Approve:
+        preset(undefined, 'APPROVE', '<i class="fa fa-check"></i>', 'btn-flat');
+        break;
       default:
     }
   }

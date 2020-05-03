@@ -1,6 +1,6 @@
 <script lang="ts">
   import { App } from '@/lib/js/constants';
-  export let name: string;
+  export let name: string = undefined;
   export let disabled = false;
   export let className = '';
   export let autocomplete = App.AUTO_COMPLETE;
