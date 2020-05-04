@@ -12,6 +12,7 @@
   export let autocomplete = App.AUTO_COMPLETE;
   export let value;
   export let list: any[] = [];
+  export let excludeList: any[] = [];
   export let fullWidth = true;
   export let menuPath: string;
 
@@ -25,6 +26,8 @@
   let inputWrapperRef: any;
   let autoDropdownRef: any;
 
+  const isSmartPhone = (window as any).isSmartPhone;
+
   const columns = [
     {
       name: 'id',
@@ -35,20 +38,25 @@
     },
   ];
 
+
   const dispatch = createEventDispatcher();
 
   // @ts-ignore
-  $: if (list && list.length > 0) {
-    _list = SObject.clone(list);
-    _list.unshift({ id: '-1', name: 'ALL' });
-    if (!selectedItem.id) {
-      selectedItem.id = _list[0].id;
-      selectedItem.name = _list[0].name;
+  $: {
+    const distinctFilterColumns = list.filter( ( el: any ) => !excludeList.includes( el.id ) || el.id == selectedItem.id)
+    if (distinctFilterColumns && distinctFilterColumns.length > 0) {
+      // @ts-ignore
+      _list = SObject.clone(distinctFilterColumns);
+      _list.unshift({ id: '-1', name: 'ALL' });
+      if (!selectedItem.id) {
+        selectedItem.id = _list[0].id;
+        selectedItem.name = _list[0].name;
+      }
+    } else {
+      _list.unshift({ id: '-1', name: 'ALL' });
+      selectedItem.id = undefined;
+      selectedItem.name = '';
     }
-  } else {
-    _list.unshift({ id: '-1', name: 'ALL' });
-    selectedItem.id = undefined;
-    selectedItem.name = '';
   }
 
   export const focus = () => {
@@ -71,8 +79,8 @@
 
   const onClickItem = (item: any) => {
     hidePopup();
+    dispatch('itemChange', {before: selectedItem.id, current: item.id});
     selectedItem = item;
-    dispatch('itemChange', item.id);
   };
 
   const preSearch = (event) => {
@@ -89,9 +97,9 @@
       return false;
     }
 
-    if (event.code === 'Enter') {
+    if (!isSmartPhone && !dropdownFocused && event.code === 'Enter') {
       if (!dropdownFocused) {
-        dispatch('itemChange', selectedItem.id);
+        dispatch('search', inputRef.value);
       }
       hideAutoDropdown();
       return false;
@@ -101,6 +109,10 @@
   };
 
   const onSearchInput = () => {
+    if (!isSmartPhone) {
+      return;
+    }
+
     if (inputRef.value.trim().length > 0) {
       dispatch('search', inputRef.value.trim());
     } else {
@@ -131,13 +143,14 @@
 
   const selectItem = (data: any) => {
     if (data.length >= 0 && data[0]) {
-      dispatch('itemChange', data[0].id);
+      dispatch('search', data[0].id);
+
     }
   };
 
   const hideAutoDropdown = () => {
     dropdownFocused = false;
-    autoDropdownRef.classList.remove('show-auto-dropdown');
+    autoDropdownRef.classList.remove('simple-show-auto-dropdown');
   };
 
   const onTableClick = (event) => {
@@ -147,13 +160,15 @@
 
   const onTableKeyup = (event: any) => {
     if (dropdownFocused && event.detail.event.code === 'Enter') {
-      selectItem(event.detail.data);
+      // selectItem(event.detail.data);
     }
   };
 
   const showAutoDropdown = () => {
     tableRef.unSelectAll();
-    autoDropdownRef.classList.add('show-auto-dropdown');
+    const containerWidth = window['$'](inputWrapperRef).width();
+    autoDropdownRef.style.width = containerWidth + 'px';
+    autoDropdownRef.classList.add('simple-show-auto-dropdown');
   };
 
   const hideOnLostFocus = () => {
@@ -214,7 +229,7 @@
     </div>
   </div>
 
-  <div bind:this={autoDropdownRef} style="height: 200px;" class="auto-dropdown">
+  <div bind:this={autoDropdownRef} style="height: 200px;" class="simple-auto-dropdown">
     <SelectableTable
       on:click={onTableClick}
       on:keyup={onTableKeyup}

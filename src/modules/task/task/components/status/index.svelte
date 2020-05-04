@@ -16,13 +16,13 @@
 
 <div class="status-wrapper">
   <div>{SDate.convertMilisecondToDateTimeString(data.date)}</div>
-    {#if data.percent}
-  <div>{data.percent}</div>
-        {/if}
+  {#if data.percent}
+    <div>{data.percent}</div>
+  {/if}
 
-    {#if data.status}
-        <div>{data.status}</div>
-    {/if}
+  {#if data.status}
+    <div>{data.status}</div>
+  {/if}
 
   <div>{data.note}</div>
   {#if data.attach}

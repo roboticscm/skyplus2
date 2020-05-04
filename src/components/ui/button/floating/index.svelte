@@ -1,9 +1,6 @@
 <script lang="ts">
   export let icon = '<i class="fa fa-plus"></i>';
   export let title = '';
-
-
-
 </script>
 
 <style lang="scss">

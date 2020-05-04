@@ -23,7 +23,7 @@
   };
 </script>
 
-<div class="floating-wrapper">
+<div class="floating-wrapper" style="margin-top: 7px;">
   <input
     {title}
     {name}

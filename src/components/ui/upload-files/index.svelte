@@ -78,7 +78,12 @@
   on:dragover={onDragover}
   on:dragleave={onDragleave}
   on:drop={onDrop}>
-  <CloseableList directClose="{true}" bind:this={filenameRef} {menuPath} id={id + 'UploadFileId'} on:close={onDeleteFile} />
+  <CloseableList
+    directClose={true}
+    bind:this={filenameRef}
+    {menuPath}
+    id={id + 'UploadFileId'}
+    on:close={onDeleteFile} />
   <div class="upload-files__info">
     <i class="upload-files__info__icon fa fa-cloud-upload-alt" />
     <div class="upload-files__info__label">

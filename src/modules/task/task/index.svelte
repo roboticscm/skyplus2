@@ -39,7 +39,7 @@
 
 <TwoColumnView minLeftPane={!showWorkList} id={'mainLayout' + view.getViewName()} {menuPath}>
   <div style="height: 100%" slot="viewLeft">
-    <WorkList {view} {menuPath} {callFrom} on:callback />
+    <WorkList {view} {store} {menuPath} {callFrom} on:callback />
   </div>
 
   <div style="height: 100%" slot="default">

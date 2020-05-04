@@ -41,7 +41,6 @@
     ob$
       .pipe(switchMap(() => orgStore.sysGetOwnerOrgHumanTree(quickSearchRef.getTextSearch(), excludeHumanIds)))
       .subscribe((res) => {
-        console.log(res.data);
         data = res.data;
       });
   };

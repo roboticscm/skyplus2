@@ -13,13 +13,12 @@
   export let store: Store;
   export let forAssigner = false;
 
-  const {taskStatus$, qualitativeComment$} = store;
+  const { taskStatus$, qualitativeComment$ } = store;
 
   let modalRef: any;
   const defaultWidth = 800;
   const defaultHeight = 400;
   let data: any = {};
-
 
   export const show = (_data: any = undefined) => {
     if (_data) {
@@ -31,9 +30,7 @@
     });
   };
 
-  onMount(() => {
-
-  });
+  onMount(() => {});
 </script>
 
 <Modal
@@ -46,31 +43,23 @@
   {id}
   bind:this={modalRef}>
   <div>
-    <FloatDatePicker placeholder={T('COMMON.LABEL.DATE')}></FloatDatePicker>
+    <FloatDatePicker placeholder={T('COMMON.LABEL.DATE')} />
   </div>
 
   <div>
-  {#if forAssigner}
-    <FloatSelect
-            id={id + 'Status'}
-            placeholder={T('TASK.LABEL.STATUS')}
-            {menuPath}
-            data$={taskStatus$} />
-
+    {#if forAssigner}
+      <FloatSelect id={id + 'Status'} placeholder={T('TASK.LABEL.STATUS')} {menuPath} data$={taskStatus$} />
     {:else}
-    <FloatSelect
-            id={id + 'Percentage'}
-            placeholder={T('TASK.LABEL.PERCENTAGE')}
-            {menuPath}
-            data$={qualitativeComment$} />
+      <FloatSelect
+        id={id + 'Percentage'}
+        placeholder={T('TASK.LABEL.PERCENTAGE')}
+        {menuPath}
+        data$={qualitativeComment$} />
     {/if}
-</div>
+  </div>
 
   <div>
-    <FloatTextInput
-            placeholder={T('COMMON.LABEL.NOTE')}
-            name="note"
-            bind:value={data.name} />
+    <FloatTextInput placeholder={T('COMMON.LABEL.NOTE')} name="note" bind:value={data.name} />
   </div>
 
   <div style="margin-top: 6px;">

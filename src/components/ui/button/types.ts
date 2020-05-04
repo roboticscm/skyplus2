@@ -19,7 +19,7 @@ export enum ButtonType {
   UnSelectAll,
   ToggleSelection,
   Submit,
-  Approve
+  Approve,
 }
 
 export enum ButtonPressed {
@@ -41,5 +41,5 @@ export enum ButtonId {
   ViewLog = 'btnViewLog',
   Apply = 'btnApply',
   Submit = 'btnSubmit',
-  Approve = 'btnApprove'
+  Approve = 'btnApprove',
 }

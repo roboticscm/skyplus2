@@ -1,11 +1,13 @@
 import { ViewStore } from '@/store/view';
 import { BehaviorSubject } from 'rxjs';
-import {Project, File, QuantitativeComment, QualitativeComment, TaskStatus} from '@/modules/task/types';
+import { Project, File, QuantitativeComment, QualitativeComment, TaskStatus, Task } from '../types';
 import { User } from '@/model/user';
+import { OwnerOrg } from '@/modules/sys/owner-org/model';
 
 export default class Store {
   projects$ = new BehaviorSubject<Project[]>([]);
   uploadFiles$ = new BehaviorSubject<File[]>([]);
+  specificOrgList$ = new BehaviorSubject<OwnerOrg[]>([]);
   assigneeList$ = new BehaviorSubject<User[]>([]);
   assignerList$ = new BehaviorSubject<User[]>([]);
   accessorList$ = new BehaviorSubject<User[]>([]);
@@ -17,6 +19,9 @@ export default class Store {
   assignerStatusList$ = new BehaviorSubject<any[]>([]);
 
   taskStatus$ = new BehaviorSubject<TaskStatus[]>([]);
+
+  taskList$ = new BehaviorSubject<Task[]>([]);
+  projectList$ = new BehaviorSubject<Project[]>([]);
 
   constructor(view: ViewStore) {
     this.qualitativeComment$.next([
@@ -60,13 +65,49 @@ export default class Store {
 
     this.assignerStatusList$.next([
       { id: '1', date: new Date(), status: 'start doing...', note: 'Note1...', attach: 'xxxx' },
-      { id: '2', date: new Date(), status: 'stop....', note: 'Note2...' }
-      ]);
+      { id: '2', date: new Date(), status: 'stop....', note: 'Note2...' },
+    ]);
 
     this.taskStatus$.next([
-      {id: '1', name: 'Status 1'},
-      {id: '2', name: 'Status 2'},
-      {id: '3', name: 'Status 3'},
+      { id: '1', name: 'Status 1' },
+      { id: '2', name: 'Status 2' },
+      { id: '3', name: 'Status 3' },
+    ]);
+
+    this.taskList$.next([
+      {
+        id: '1',
+        name: 'Build KkyHub core',
+        projectId: '1',
+        projectName: 'SkyHub',
+        lastStatusName: 'Finish',
+      },
+      {
+        id: '2',
+        name: 'Build Task management module',
+        projectId: '1',
+        projectName: 'SkyHub',
+        lastStatusName: 'Open',
+      },
+      {
+        id: '3',
+        name: 'Build Quotation  module',
+        projectId: '1',
+        projectName: 'SkyHub',
+        lastStatusName: 'Open',
+      },
+      {
+        id: '4',
+        name: 'Build Dashboard',
+        projectId: '2',
+        projectName: 'SkyOne',
+        lastStatusName: 'Finish',
+      },
+    ]);
+
+    this.projectList$.next([
+      { id: '1', name: 'SkyHub', inProgressTask: 5, completedTask: 15, notStartedTask: 2 },
+      { id: '2', name: 'SkyOne', inProgressTask: 6, completedTask: 25, notStartedTask: 5 },
     ]);
   }
 

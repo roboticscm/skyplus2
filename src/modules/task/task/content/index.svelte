@@ -22,6 +22,7 @@
   import CloseableList from '@/components/ui/closeable-list';
   import UploadFiles from '@/components/ui/upload-files';
   import SelectHumanModal from '@/components/modal/select-human';
+  import SelectOrgModal from '@/components/modal/select-org';
   import { ButtonPressed } from '@/components/ui/button/types';
   import { SObject } from '@/lib/js/sobject';
   import StatusModal from '../components/status-modal/index.svelte';
@@ -44,7 +45,8 @@
     qualitativeComment$,
     quantitativeComment$,
     assigneeStatusList$,
-          assignerStatusList$
+    assignerStatusList$,
+    specificOrgList$,
   } = store;
 
   // Refs
@@ -52,8 +54,8 @@
   let taskNameRef: any;
   let taskDescRef: any;
   let uploadFilesRef: any;
-  let assigneeRef, assignerRef, accessorRef: any;
   let selectHumanModalRef: any;
+  let selectOrgModalRef: any;
   let accessCommentRef: any;
   let statusModalRef: any;
 
@@ -155,6 +157,35 @@
     });
   };
 
+  const onAddSpecificOrg = () => {
+    // @ts-ignore
+    const specificOrg: any[] = SObject.clone($specificOrgList$);
+    selectOrgModalRef.show(specificOrg).then((buttonPressed: ButtonPressed) => {
+      if (buttonPressed === ButtonPressed.OK) {
+        const checkedSpecificOrg = selectOrgModalRef.getCheckedLeafNodes();
+        specificOrgList$.next(
+          checkedSpecificOrg.map((it: any) => {
+            return {
+              id: it.id,
+              name: it.name,
+            };
+          }),
+        );
+      }
+    });
+  };
+
+  const onCloseSpecificOrg = (event: any) => {
+    // @ts-ignore
+    const specificOrgList = SObject.clone($specificOrgList$);
+
+    const index = specificOrgList.findIndex((it: any) => it.id === event.detail.id);
+    if (index >= 0) {
+      specificOrgList.splice(index, 1);
+      specificOrgList$.next(specificOrgList);
+    }
+  };
+
   const onCloseAssignee = (event: any) => {
     // @ts-ignore
     const assigneeList = SObject.clone($assigneeList$);
@@ -228,29 +259,19 @@
     forAssigner = true;
     statusModalRef.show().then((buttonPressed: ButtonPressed) => {
       if (buttonPressed === ButtonPressed.OK) {
-
-        assignerStatusList$.next(
-          [
-             { id: '1', date: new Date(), status: 'New status', note: 'Note xxx...'}
-          ]
-        );
+        assignerStatusList$.next([{ id: '1', date: new Date(), status: 'New status', note: 'Note xxx...' }]);
       }
     });
-  }
+  };
 
   const onAddAssigneeStatus = () => {
     forAssigner = false;
     statusModalRef.show().then((buttonPressed: ButtonPressed) => {
       if (buttonPressed === ButtonPressed.OK) {
-
-        assigneeStatusList$.next(
-                [
-                  { id: '1', date: new Date(), percent: 'New status', note: 'Note xxx...'}
-                ]
-        );
+        assigneeStatusList$.next([{ id: '1', date: new Date(), percent: 'New status', note: 'Note xxx...' }]);
       }
     });
-  }
+  };
 
   // ============================== // EVENT HANDLE ==========================
 
@@ -289,7 +310,6 @@
     },
   };
 
-
   /**
    * Use submit action directive. Register click event for Submit button
    * @param {none}
@@ -310,14 +330,15 @@
 <!--Invisible Element-->
 <SC bind:this={scRef} {view} {menuPath} />
 <SelectHumanModal id={view.getViewName() + 'SelectHumanModal'} {menuPath} bind:this={selectHumanModalRef} />
-<StatusModal forAssigner = {forAssigner} id={view.getViewName() + 'StatusModal'} {menuPath} bind:this={statusModalRef} {store} />
+<SelectOrgModal id={view.getViewName() + 'SelectOrgModal'} {menuPath} bind:this={selectOrgModalRef} />
+<StatusModal {forAssigner} id={view.getViewName() + 'StatusModal'} {menuPath} bind:this={statusModalRef} {store} />
 <!--//Invisible Element-->
 
 <!--Form controller-->
 <section class="view-content-controller">
-  {#if view.isRendered(ButtonId.AddNew)}
-    <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
-  {/if}
+<!--  {#if view.isRendered(ButtonId.AddNew)}-->
+<!--    <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />-->
+<!--  {/if}-->
 
   {#if view.isRendered(ButtonId.Save, !$isUpdateMode$)}
     <Button
@@ -341,10 +362,10 @@
 
   {#if view.isRendered(ButtonId.Submit, !$isUpdateMode$)}
     <Button
-            action={useSubmitAction}
-            btnType={ButtonType.Submit}
-            disabled={view.isDisabled(ButtonId.Submit, form.errors.any())}
-            running={$saveRunning$} />
+      action={useSubmitAction}
+      btnType={ButtonType.Submit}
+      disabled={view.isDisabled(ButtonId.Submit, form.errors.any())}
+      running={$saveRunning$} />
   {/if}
 
   {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
@@ -388,6 +409,8 @@
       <!-- Name -->
       <div class="col-xs-24 col-md-12 col-lg-6">
         <FloatTextInput
+          checked={form.private}
+          checkTitle={T('COMMON.LABEL.PRIVATE')}
           bind:this={taskNameRef}
           placeholder={T('COMMON.LABEL.NAME')}
           name="name"
@@ -398,17 +421,19 @@
       <!-- // Name -->
 
       <!-- Last status -->
-      <div class="danger col-xs-24 col-md-12 col-lg-6">
+      <div class="col-xs-24 col-md-12 col-lg-6">
         <FloatTextInput placeholder={T('COMMON.LABEL.STATUS')} disabled={true} bind:value={form.lastStatusName} />
-
       </div>
       <!-- // Last status -->
       <!-- Private task -->
       <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatCheckbox text={T('COMMON.LABEL.PRIVATE')} disabled={$isReadOnlyMode$} bind:checked={form.private} />
+        <FloatDatePicker
+          placeholder={T('COMMON.LABEL.CREATED_DATE')}
+          name="firstPrompt"
+          disabled={$isReadOnlyMode$}
+          bind:value={form.firstPrompt} />
       </div>
       <!-- // Private task -->
-
     </div>
 
     <!-- Task Description -->
@@ -434,12 +459,11 @@
     <div class="row">
       <div class="col-xs-24 col-md-12">
         <CloseableList
-          on:close={onCloseAssignee}
-          data$={assigneeList$}
-          bind:this={assigneeRef}
+          on:close={onCloseSpecificOrg}
+          data$={specificOrgList$}
           {menuPath}
-          id={view.getViewName() + 'AssigneeId'}>
-          <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_ASSIGNEE') + '...'} />
+          id={view.getViewName() + 'SpecificOrgId'}>
+          <Button on:click={onAddSpecificOrg} title={T('COMMON.LABEL.ADD_SPECIFIC_ORG') + '...'} />
         </CloseableList>
       </div>
 
@@ -447,10 +471,9 @@
         <CloseableList
           on:close={onCloseAssignee}
           data$={assigneeList$}
-          bind:this={assigneeRef}
           {menuPath}
           id={view.getViewName() + 'AssigneeId'}>
-          <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_ASSIGNEE') + '...'} />
+          <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_BENEFICIARY') + '...'} />
         </CloseableList>
       </div>
     </div>
@@ -458,12 +481,11 @@
     <div class="row">
       <div class="col-xs-24 col-md-12">
         <CloseableList
-                on:close={onCloseAssignee}
-                data$={assigneeList$}
-                bind:this={assigneeRef}
-                {menuPath}
-                id={view.getViewName() + 'AssigneeId'}>
-          <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_ASSIGNEE') + '...'} />
+          on:close={onCloseAssignee}
+          data$={assigneeList$}
+          {menuPath}
+          id={view.getViewName() + 'AssigneeId'}>
+          <Button on:click={onAddSpecificOrg} title={T('COMMON.LABEL.ADD_BENEFICIARY_ORG') + '...'} />
         </CloseableList>
       </div>
 
@@ -490,7 +512,6 @@
         <CloseableList
           on:close={onCloseAssignee}
           data$={assigneeList$}
-          bind:this={assigneeRef}
           {menuPath}
           id={view.getViewName() + 'AssigneeId'}>
           <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_ASSIGNEE') + '...'} />
@@ -503,7 +524,6 @@
         <CloseableList
           on:close={onCloseAssigner}
           data$={assignerList$}
-          bind:this={assignerRef}
           {menuPath}
           id={view.getViewName() + 'AssignerId'}>
           <Button on:click={onAddAssigner} title={T('COMMON.LABEL.ADD_ASSIGNER') + '...'} />
@@ -518,7 +538,6 @@
         <CloseableList
           on:close={onCloseEvaluator}
           data$={accessorList$}
-          bind:this={accessorRef}
           {menuPath}
           id={view.getViewName() + 'EvaluatorId'}>
           <Button on:click={onAddEvaluator} title={T('COMMON.LABEL.ADD_EVALUATOR') + '...'} />
@@ -541,7 +560,6 @@
           on:close={onCloseEvaluator}
           customData={$assignerStatusList$}
           customRender="modules/task/task/components/status/index.svelte"
-          bind:this={accessorRef}
           {menuPath}
           id={view.getViewName() + 'AssignerId'}>
           <FloatingButton on:click={onAddAssignerStatus} title={T('TASK.LABEL.ADD_STATUS')} />
@@ -573,43 +591,41 @@
     <!-- // Start date-->
 
     {#if form.startDateConfirm}
-    <div class="row" style="margin-top: 6px;">
-      <div class="col-24">{T('COMMON.LABEL.STATUS_DETAIL')}:</div>
-    </div>
-    <div class="row">
-      <div class=" col-24">
-        <CloseableList
-          on:close={onCloseEvaluator}
-          customData={$assigneeStatusList$}
-          customRender="modules/task/task/components/status/index.svelte"
-          bind:this={accessorRef}
-          {menuPath}
-          id={view.getViewName() + 'EvaluatorId'}>
-          <FloatingButton on:click={onAddAssigneeStatus} title={T('TASK.LABEL.ADD_STATUS')} />
-        </CloseableList>
+      <div class="row" style="margin-top: 6px;">
+        <div class="col-24">{T('COMMON.LABEL.STATUS_DETAIL')}:</div>
       </div>
-    </div>
-
-    <!-- End date-->
-    <div class="row">
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatDatePicker
-          placeholder={T('COMMON.LABEL.END_DATE')}
-          name="endDate"
-          disabled={$isReadOnlyMode$}
-          bind:value={form.endDate} />
+      <div class="row">
+        <div class=" col-24">
+          <CloseableList
+            on:close={onCloseEvaluator}
+            customData={$assigneeStatusList$}
+            customRender="modules/task/task/components/status/index.svelte"
+            {menuPath}
+            id={view.getViewName() + 'EvaluatorId'}>
+            <FloatingButton on:click={onAddAssigneeStatus} title={T('TASK.LABEL.ADD_STATUS')} />
+          </CloseableList>
+        </div>
       </div>
 
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatCheckbox
-          text={T('COMMON.LABEL.CONFIRM')}
-          disabled={$isReadOnlyMode$}
-          bind:checked={form.endDateConfirm} />
-      </div>
-    </div>
-    <!-- // End date-->
+      <!-- End date-->
+      <div class="row">
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatDatePicker
+            placeholder={T('COMMON.LABEL.END_DATE')}
+            name="endDate"
+            disabled={$isReadOnlyMode$}
+            bind:value={form.endDate} />
+        </div>
 
-      {/if}
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatCheckbox
+            text={T('COMMON.LABEL.CONFIRM')}
+            disabled={$isReadOnlyMode$}
+            bind:checked={form.endDateConfirm} />
+        </div>
+      </div>
+      <!-- // End date-->
+    {/if}
   </Section>
   <!-- // Assignee Info-->
 
@@ -620,9 +636,9 @@
       <div class="col-xs-24 col-md-12 col-lg-6">
         <FloatDatePicker
           placeholder={T('COMMON.LABEL.DATE')}
-          name="accessDate"
+          name="evaluateDate"
           disabled={$isReadOnlyMode$}
-          bind:value={form.accessDate} />
+          bind:value={form.evaluateDate} />
       </div>
     </div>
     <!-- // Date-->
@@ -636,6 +652,7 @@
     <!-- // Comment-->
 
     <div class="row">
+      <!-- Quantitative comment-->
       <div class="col-xs-24 col-md-12 col-lg-6">
         <FloatSelect
           id={view.getViewName() + 'QuantitativeCommentId'}
@@ -644,7 +661,9 @@
           disabled={$isReadOnlyMode$}
           data$={quantitativeComment$} />
       </div>
+      <!-- // Quantitative comment-->
 
+      <!-- Qualitative comment-->
       <div class="col-xs-24 col-md-12 col-lg-6">
         <FloatSelect
           id={view.getViewName() + 'QualitativeCommentId'}
@@ -653,10 +672,9 @@
           disabled={$isReadOnlyMode$}
           data$={qualitativeComment$} />
       </div>
-    </div>
+      <!-- // Qualitative comment-->
 
-    <!-- Status-->
-    <div class="row">
+      <!-- Status-->
       <div class="col-xs-24 col-md-12 col-lg-6">
         <FloatSelect placeholder={T('COMMON.LABEL.EVALUATE_STATUS')} disabled={$isReadOnlyMode$} />
       </div>
@@ -664,8 +682,9 @@
       <div class="col-xs-24 col-md-12 col-lg-6">
         <FloatCheckbox text={T('COMMON.LABEL.COMPLETE')} disabled={$isReadOnlyMode$} bind:checked={form.complete} />
       </div>
+      <!-- // Status-->
     </div>
-    <!-- // Status-->
+
   </Section>
   <!-- // Evaluator Info-->
 

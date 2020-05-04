@@ -38,11 +38,11 @@
   }
 
   .badge-chat {
-    left: calc(#{$notify-icon-width} - 5px);
+    left: calc(#{$notify-icon-width} - 7px);
   }
 
   .badge-functional {
-    left: calc(#{$badge-space} + (2 * #{$notify-icon-width}) - 5px);
+    left: calc(#{$badge-space} + (2 * #{$notify-icon-width}) - 10px);
   }
 </style>
 

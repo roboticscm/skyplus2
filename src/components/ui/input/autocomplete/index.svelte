@@ -291,7 +291,6 @@
   };
 
   const onTableClick = (event) => {
-    console.log('xxxx', event.detail.data);
     selectItem(event.detail.data);
     hideAutoDropdown();
   };
