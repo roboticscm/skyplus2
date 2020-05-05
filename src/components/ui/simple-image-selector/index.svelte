@@ -31,7 +31,14 @@
   // @ts-ignore
   $: dispatch('imageChange', data);
   // @ts-ignore
-  $: data = src;
+  $: {
+    data = src;
+    if (src && src.length > 0) {
+      imageViewerRef && imageViewerRef.classList.add('no-background');
+    } else {
+      imageViewerRef && imageViewerRef.classList.remove('no-background');
+    }
+  }
   // @ts-ignore
   $: {
     if (imageViewerRef) {
@@ -52,6 +59,7 @@
         reader.onloadend = function() {
           imageRef.src = reader.result;
           data = imageRef.src;
+          imageViewerRef.classList.add('no-background');
         };
         reader.readAsDataURL(file);
       }

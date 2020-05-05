@@ -15,10 +15,12 @@
   export let excludeList: any[] = [];
   export let fullWidth = true;
   export let menuPath: string;
+  export let selected: any = undefined;
+  export let showAllItem = false;
 
   let inputRef: any;
   let dropdownContentRef: any;
-  let selectedItem: any = {};
+  let selectedItem: any = selected;
   let _list: any[];
   let markData: any[] = [];
   let tableRef: any;
@@ -38,22 +40,27 @@
     },
   ];
 
-
   const dispatch = createEventDispatcher();
 
   // @ts-ignore
   $: {
-    const distinctFilterColumns = list.filter( ( el: any ) => !excludeList.includes( el.id ) || el.id == selectedItem.id)
+    const distinctFilterColumns = list.filter((el: any) => !excludeList.includes(el.id) || el.id == selectedItem.id);
     if (distinctFilterColumns && distinctFilterColumns.length > 0) {
       // @ts-ignore
       _list = SObject.clone(distinctFilterColumns);
-      _list.unshift({ id: '-1', name: 'ALL' });
+      if(showAllItem) {
+        _list.unshift({ id: '-1', name: 'ALL' });
+      }
+
       if (!selectedItem.id) {
         selectedItem.id = _list[0].id;
         selectedItem.name = _list[0].name;
       }
     } else {
-      _list.unshift({ id: '-1', name: 'ALL' });
+      if(showAllItem) {
+        _list.unshift({ id: '-1', name: 'ALL' });
+      }
+
       selectedItem.id = undefined;
       selectedItem.name = '';
     }
@@ -79,7 +86,7 @@
 
   const onClickItem = (item: any) => {
     hidePopup();
-    dispatch('itemChange', {before: selectedItem.id, current: item.id});
+    dispatch('itemChange', { before: selectedItem.id, current: item.id });
     selectedItem = item;
   };
 
@@ -144,7 +151,6 @@
   const selectItem = (data: any) => {
     if (data.length >= 0 && data[0]) {
       dispatch('search', data[0].id);
-
     }
   };
 
@@ -209,7 +215,10 @@
     bind:value
     {autocomplete}
     bind:this={inputRef}
-    placeholder={T('QTT.LABEL.' + selectedItem.name.toUpperCase().replace('#', '')) + ' ' + T('COMMON.LABEL.SEARCH')} />
+    placeholder={T('QTT.LABEL.' + selectedItem.name
+          .toUpperCase()
+          .replace('#', '')
+          .replace(' ', '_')) + ' ' + T('COMMON.LABEL.SEARCH')} />
 
   <label class="floating-filter__label" data-content={selectedItem.name} />
   <div class="floating-filter__select" on:mouseover|stopPropagation={showPopup} on:mouseout={hidePopup}>

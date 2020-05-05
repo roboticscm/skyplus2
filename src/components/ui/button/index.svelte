@@ -13,6 +13,7 @@
   export let disabled = false;
   export let running = false;
   export let action: any = undefined;
+  export let uppercase = true;
 
   let btnRef: any;
   export const getTarget = () => {
@@ -94,7 +95,15 @@
   };
 </script>
 
-<button use:useAction bind:this={btnRef} {id} {type} class={className} {disabled} on:click>
+<button
+  use:useAction
+  bind:this={btnRef}
+  {id}
+  {type}
+  class="{className}
+  {uppercase ? 'uppercase' : ''}"
+  {disabled}
+  on:click>
   {#if running}
     <i class="fa fa-spinner fa-spin" />
   {:else}

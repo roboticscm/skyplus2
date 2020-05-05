@@ -46,7 +46,8 @@
     quantitativeComment$,
     assigneeStatusList$,
     assignerStatusList$,
-    specificOrgList$,
+    characteristicTaskList$,
+    priority$,
   } = store;
 
   // Refs
@@ -75,6 +76,9 @@
   let form = resetForm();
   let beforeForm: Form;
 
+  export const getForm = () => {
+    return form;
+  };
   const saveUpdateUri = 'sys/language/save-or-update';
 
   // ============================== EVENT HANDLE ==========================
@@ -157,13 +161,13 @@
     });
   };
 
-  const onAddSpecificOrg = () => {
+  const onAddCharacteristicTask = () => {
     // @ts-ignore
-    const specificOrg: any[] = SObject.clone($specificOrgList$);
+    const specificOrg: any[] = SObject.clone($characteristicTaskList$);
     selectOrgModalRef.show(specificOrg).then((buttonPressed: ButtonPressed) => {
       if (buttonPressed === ButtonPressed.OK) {
         const checkedSpecificOrg = selectOrgModalRef.getCheckedLeafNodes();
-        specificOrgList$.next(
+        characteristicTaskList$.next(
           checkedSpecificOrg.map((it: any) => {
             return {
               id: it.id,
@@ -175,14 +179,14 @@
     });
   };
 
-  const onCloseSpecificOrg = (event: any) => {
+  const onCloseCharacteristicTask = (event: any) => {
     // @ts-ignore
-    const specificOrgList = SObject.clone($specificOrgList$);
+    const specificOrgList = SObject.clone($characteristicTaskList$);
 
     const index = specificOrgList.findIndex((it: any) => it.id === event.detail.id);
     if (index >= 0) {
       specificOrgList.splice(index, 1);
-      specificOrgList$.next(specificOrgList);
+      characteristicTaskList$.next(specificOrgList);
     }
   };
 
@@ -336,9 +340,9 @@
 
 <!--Form controller-->
 <section class="view-content-controller">
-<!--  {#if view.isRendered(ButtonId.AddNew)}-->
-<!--    <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />-->
-<!--  {/if}-->
+  <!--    {#if view.isRendered(ButtonId.AddNew)}-->
+  <!--      <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />-->
+  <!--    {/if}-->
 
   {#if view.isRendered(ButtonId.Save, !$isUpdateMode$)}
     <Button
@@ -394,7 +398,22 @@
   <!-- Task Info-->
   <Section title={T('TASK.LABEL.TASK')} {menuPath} id={view.getViewName() + 'TaskSectionId'}>
     <div class="row">
-      <div class="col-xs-24 col-md-12 col-lg-6">
+      <!-- Name -->
+      <div class="col-xs-24 col-md-12">
+        <FloatTextInput
+          checked={form.private}
+          rightCheck={true}
+          checkTitle={T('COMMON.LABEL.PRIVATE_TASK')}
+          bind:this={taskNameRef}
+          placeholder={T('COMMON.LABEL.NAME')}
+          name="name"
+          disabled={$isReadOnlyMode$}
+          bind:value={form.name} />
+        <Error {form} field="name" />
+      </div>
+      <!-- // Name -->
+
+      <div class="col-xs-24 col-md-12">
         <!-- Project -->
         <FloatSelect
           id={view.getViewName() + 'ProjectId'}
@@ -405,147 +424,161 @@
 
       </div>
       <!-- // Project -->
+    </div>
 
-      <!-- Name -->
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatTextInput
-          checked={form.private}
-          checkTitle={T('COMMON.LABEL.PRIVATE')}
-          bind:this={taskNameRef}
-          placeholder={T('COMMON.LABEL.NAME')}
-          name="name"
-          disabled={$isReadOnlyMode$}
-          bind:value={form.name} />
-        <Error {form} field="name" />
+    <div class="row">
+      <!-- Task Description -->
+      <div class="col-xs-24 col-md-12">
+        <RichEditor bind:this={taskDescRef}>{T('TASK.LABEL.TASK_DESCRIPTION')}:</RichEditor>
       </div>
-      <!-- // Name -->
+      <!-- // Task Description -->
+      <!-- Attach file -->
+      <div class="col-xs-24 col-md-12" style="margin-top: 25px; min-height: 100px;">
+        <UploadFiles {menuPath} id={view.getViewName() + 'UploadFiles'} />
+      </div>
+      <!-- // Attach file -->
+    </div>
 
+    <div class="row">
       <!-- Last status -->
-      <div class="col-xs-24 col-md-12 col-lg-6">
+      <div class="col-xs-24 col-md-12">
+        <FloatSelect
+          id={view.getViewName() + 'PriorityId'}
+          placeholder={T('TASK.LABEL.PRIORITY')}
+          {menuPath}
+          disabled={$isReadOnlyMode$}
+          data$={priority$} />
+        <!-- // Last status -->
+      </div>
+      <!-- Last status -->
+      <div class="col-xs-24 col-md-12">
         <FloatTextInput placeholder={T('COMMON.LABEL.STATUS')} disabled={true} bind:value={form.lastStatusName} />
       </div>
       <!-- // Last status -->
-      <!-- Private task -->
+    </div>
+
+    <div class="row">
+      <!-- Start time -->
       <div class="col-xs-24 col-md-12 col-lg-6">
         <FloatDatePicker
-          placeholder={T('COMMON.LABEL.CREATED_DATE')}
+          placeholder={T('COMMON.LABEL.START_TIME')}
           name="firstPrompt"
           disabled={$isReadOnlyMode$}
-          bind:value={form.firstPrompt} />
+          bind:value={form.startTime} />
       </div>
-      <!-- // Private task -->
-    </div>
+      <!-- // tart time -->
 
-    <!-- Task Description -->
-    <div class="row">
-      <div class="col-24">
-        <RichEditor bind:this={taskDescRef}>{T('TASK.LABEL.TASK_DESCRIPTION')}:</RichEditor>
-      </div>
-    </div>
-    <!-- // Task Description -->
-
-    <!-- Attach file -->
-    <div class="row">
-      <div class="col-24">
-        <UploadFiles {menuPath} id={view.getViewName() + 'UploadFiles'} />
-      </div>
-    </div>
-    <!-- // Attach file -->
-
-    <!--    //beneficiary-->
-    <!--    // beneficiary organization-->
-    <!--    //-->
-
-    <div class="row">
-      <div class="col-xs-24 col-md-12">
-        <CloseableList
-          on:close={onCloseSpecificOrg}
-          data$={specificOrgList$}
-          {menuPath}
-          id={view.getViewName() + 'SpecificOrgId'}>
-          <Button on:click={onAddSpecificOrg} title={T('COMMON.LABEL.ADD_SPECIFIC_ORG') + '...'} />
-        </CloseableList>
-      </div>
-
-      <div class="col-xs-24 col-md-12">
-        <CloseableList
-          on:close={onCloseAssignee}
-          data$={assigneeList$}
-          {menuPath}
-          id={view.getViewName() + 'AssigneeId'}>
-          <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_BENEFICIARY') + '...'} />
-        </CloseableList>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-xs-24 col-md-12">
-        <CloseableList
-          on:close={onCloseAssignee}
-          data$={assigneeList$}
-          {menuPath}
-          id={view.getViewName() + 'AssigneeId'}>
-          <Button on:click={onAddSpecificOrg} title={T('COMMON.LABEL.ADD_BENEFICIARY_ORG') + '...'} />
-        </CloseableList>
-      </div>
-
-      <div class="col-xs-24 col-md-6">
+      <!-- Deadline -->
+      <div class="col-xs-24 col-md-12 col-lg-6">
         <FloatDatePicker
-          placeholder={T('COMMON.LABEL.FIRST_PROMPT')}
-          name="firstPrompt"
+          placeholder={T('COMMON.LABEL.DEADLINE')}
+          name="deadline"
           disabled={$isReadOnlyMode$}
-          bind:value={form.firstPrompt} />
+          bind:value={form.deadline} />
+      </div>
+      <!-- // Deadline -->
+
+      <div class="col-xs-24 col-md-12 col-lg-6">
+        <FloatDatePicker
+          placeholder={T('COMMON.LABEL.FIRST_REMINDER')}
+          name="firstReminder"
+          disabled={$isReadOnlyMode$}
+          bind:value={form.firstReminder} />
       </div>
 
-      <div class="col-xs-24 col-md-6">
+      <div class="col-xs-24 col-md-12 col-lg-6">
         <FloatDatePicker
-          placeholder={T('COMMON.LABEL.SECOND_PROMPT')}
-          name="secondPrompt"
+          placeholder={T('COMMON.LABEL.SECOND_REMINDER')}
+          name="secondReminder"
           disabled={$isReadOnlyMode$}
-          bind:value={form.secondPrompt} />
+          bind:value={form.secondReminder} />
       </div>
+
     </div>
 
     <div class="row">
       <!-- Assignee -->
-      <div class="col-xs-24 col-md-12">
+      <div class="col-xs-24 col-md-12 col-lg-8">
         <CloseableList
           on:close={onCloseAssignee}
           data$={assigneeList$}
           {menuPath}
           id={view.getViewName() + 'AssigneeId'}>
-          <Button on:click={onAddAssignee} title={T('COMMON.LABEL.ADD_ASSIGNEE') + '...'} />
+          <Button uppercase={false} on:click={onAddAssignee} title={'+ ' + T('COMMON.LABEL.ASSIGNEE')} />
         </CloseableList>
       </div>
       <!-- // Assignee -->
 
       <!-- Assigner -->
-      <div class="col-xs-24 col-md-12">
+      <div class="col-xs-24 col-md-12 col-lg-8">
         <CloseableList
           on:close={onCloseAssigner}
           data$={assignerList$}
           {menuPath}
           id={view.getViewName() + 'AssignerId'}>
-          <Button on:click={onAddAssigner} title={T('COMMON.LABEL.ADD_ASSIGNER') + '...'} />
+          <Button uppercase={false} on:click={onAddAssigner} title={'+ ' + T('COMMON.LABEL.ASSIGNER')} />
         </CloseableList>
       </div>
       <!-- // Assigner -->
-    </div>
 
-    <!-- Evaluator -->
-    <div class="row">
-      <div class="col-24">
+      <!-- Evaluator -->
+      <div class="col-xs-24 col-md-12 col-lg-8">
         <CloseableList
           on:close={onCloseEvaluator}
           data$={accessorList$}
           {menuPath}
           id={view.getViewName() + 'EvaluatorId'}>
-          <Button on:click={onAddEvaluator} title={T('COMMON.LABEL.ADD_EVALUATOR') + '...'} />
+          <Button uppercase={false} on:click={onAddEvaluator} title={'+ ' + T('COMMON.LABEL.EVALUATOR')} />
         </CloseableList>
       </div>
+      <!-- // Evaluator -->
     </div>
-    <!-- // Evaluator -->
 
+    <!--    //beneficiary-->
+    <!--    // beneficiary organization-->
+    <!--    //-->
+    <Section
+      title={T('TASK.LABEL.CHARACTERISTIC_AND_BENEFICIARY')}
+      id={view.getViewName() + 'BeneficiarySectionId'}
+      {menuPath}>
+      <div class="row">
+        <div class="col-xs-24 col-md-12 col-lg-8">
+          <CloseableList
+            on:close={onCloseCharacteristicTask}
+            data$={characteristicTaskList$}
+            {menuPath}
+            id={view.getViewName() + 'CharacteristicTaskId'}>
+            <Button
+              uppercase={false}
+              on:click={onAddCharacteristicTask}
+              title={'+ ' + T('COMMON.LABEL.CHARACTERISTIC_TASK')} />
+          </CloseableList>
+        </div>
+
+        <div class="col-xs-24 col-md-12 col-lg-8">
+          <CloseableList
+            on:close={onCloseAssignee}
+            data$={assigneeList$}
+            {menuPath}
+            id={view.getViewName() + 'AssigneeId'}>
+            <Button uppercase={false} on:click={onAddAssignee} title={'+ ' + T('COMMON.LABEL.BENEFICIARY')} />
+          </CloseableList>
+        </div>
+
+        <div class="col-xs-24 col-md-12 col-lg-8">
+          <CloseableList
+            on:close={onCloseAssignee}
+            data$={assigneeList$}
+            {menuPath}
+            id={view.getViewName() + 'AssigneeId'}>
+            <Button
+              uppercase={false}
+              on:click={onAddAssignee}
+              title={'+ ' + T('COMMON.LABEL.BENEFICIARY_ORGANIZATION')} />
+          </CloseableList>
+        </div>
+      </div>
+    </Section>
   </Section>
   <!-- //Task Info-->
 

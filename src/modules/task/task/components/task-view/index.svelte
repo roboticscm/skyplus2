@@ -18,6 +18,7 @@
   @import '../sass/sass/helpers/variables.scss';
 
   .task-wrapper {
+    margin-top: $default-padding;
     padding: $default-padding;
     font-size: 0.9rem;
     font-family: $default-font-family;
@@ -52,6 +53,7 @@
   <div class="task-wrapper__task">
     <div>{task.name}</div>
     <div>{task.lastStatusName}</div>
+    <div>{SDate.convertMilisecondToDateTimeString(task.startTime)} ~ {SDate.convertMilisecondToDateTimeString(task.deadline)}</div>
   </div>
 
   <div class="task-wrapper__project">({task.projectName})</div>

@@ -1,13 +1,14 @@
 import { ViewStore } from '@/store/view';
 import { BehaviorSubject } from 'rxjs';
-import { Project, File, QuantitativeComment, QualitativeComment, TaskStatus, Task } from '../types';
+import { Project, File, QuantitativeComment, QualitativeComment, TaskStatus, Task, Priority } from '../types';
 import { User } from '@/model/user';
 import { OwnerOrg } from '@/modules/sys/owner-org/model';
 
 export default class Store {
   projects$ = new BehaviorSubject<Project[]>([]);
+  priority$ = new BehaviorSubject<Priority[]>([]);
   uploadFiles$ = new BehaviorSubject<File[]>([]);
-  specificOrgList$ = new BehaviorSubject<OwnerOrg[]>([]);
+  characteristicTaskList$ = new BehaviorSubject<OwnerOrg[]>([]);
   assigneeList$ = new BehaviorSubject<User[]>([]);
   assignerList$ = new BehaviorSubject<User[]>([]);
   accessorList$ = new BehaviorSubject<User[]>([]);
@@ -22,6 +23,8 @@ export default class Store {
 
   taskList$ = new BehaviorSubject<Task[]>([]);
   projectList$ = new BehaviorSubject<Project[]>([]);
+
+  showDashboard$ = new BehaviorSubject<boolean>(false);
 
   constructor(view: ViewStore) {
     this.qualitativeComment$.next([
@@ -80,6 +83,8 @@ export default class Store {
         name: 'Build KkyHub core',
         projectId: '1',
         projectName: 'SkyHub',
+        startTime: Date.now(),
+        deadline: Date.now(),
         lastStatusName: 'Finish',
       },
       {
@@ -87,6 +92,8 @@ export default class Store {
         name: 'Build Task management module',
         projectId: '1',
         projectName: 'SkyHub',
+        startTime: Date.now(),
+        deadline: Date.now(),
         lastStatusName: 'Open',
       },
       {
@@ -94,6 +101,8 @@ export default class Store {
         name: 'Build Quotation  module',
         projectId: '1',
         projectName: 'SkyHub',
+        startTime: Date.now(),
+        deadline: Date.now(),
         lastStatusName: 'Open',
       },
       {
@@ -101,6 +110,8 @@ export default class Store {
         name: 'Build Dashboard',
         projectId: '2',
         projectName: 'SkyOne',
+        startTime: Date.now(),
+        deadline: Date.now(),
         lastStatusName: 'Finish',
       },
     ]);
@@ -108,6 +119,12 @@ export default class Store {
     this.projectList$.next([
       { id: '1', name: 'SkyHub', inProgressTask: 5, completedTask: 15, notStartedTask: 2 },
       { id: '2', name: 'SkyOne', inProgressTask: 6, completedTask: 25, notStartedTask: 5 },
+    ]);
+
+    this.priority$.next([
+      { id: '1', name: 'Low' },
+      { id: '2', name: 'Medium' },
+      { id: '3', name: 'High' },
     ]);
   }
 

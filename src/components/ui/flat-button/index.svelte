@@ -18,6 +18,7 @@
   export let action: any = undefined;
   export let showIcon = false;
   export let dropdownList: ButtonDropdown[] = [];
+  export let uppercase = true;
   // export let dropdownList: ButtonDropdown[] = [
   //   { id: 'ITEM1', name: 'Demo Item1', useFontIcon: true, fontIcon: '<i class="fab fa-skyatlas"></i>' },
   //   { id: 'ITEM2', name: 'Demo Item2', useFontIcon: true, fontIcon: '<i class="fa fa-adjust"></i>' },
@@ -125,7 +126,15 @@
   };
 </script>
 
-<button use:useAction bind:this={btnRef} {id} {type} class={className} {disabled} on:click>
+<button
+  use:useAction
+  bind:this={btnRef}
+  {id}
+  {type}
+  class="{className}
+  {uppercase ? 'uppercase' : ''}"
+  {disabled}
+  on:click|stopPropagation>
   {#if running}
     <i class="fa fa-spinner fa-spin" />
   {:else if showIcon}

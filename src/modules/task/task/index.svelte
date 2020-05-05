@@ -2,7 +2,9 @@
   import { onMount } from 'svelte';
   import TwoColumnView from '@/components/layout/two-column-view';
   import WorkList from './work-list/index.svelte';
+  import DashboardWorkList from './work-list/dashboard.svelte';
   import MainContent from './content/index.svelte';
+  import DashboardContent from './content/dashboard.svelte';
   import ProgressBar from '@/components/ui/progress-bar';
   import { ViewStore } from '@/store/view';
   import Store from './store';
@@ -24,6 +26,12 @@
 
   const store = new Store(view);
 
+  // @ts-ignore
+  const { selectedData$, hasAnyDeletedRecord$, deleteRunning$, saveRunning$, isReadOnlyMode$, isUpdateMode$ } = view;
+  // @ts-ignore
+  const { showDashboard$ } = store;
+
+  let mainContentRef: any;
   const onceLoad = () => {
     store.findProjects();
     // test
@@ -39,10 +47,18 @@
 
 <TwoColumnView minLeftPane={!showWorkList} id={'mainLayout' + view.getViewName()} {menuPath}>
   <div style="height: 100%" slot="viewLeft">
-    <WorkList {view} {store} {menuPath} {callFrom} on:callback />
+    {#if $showDashboard$}
+      <DashboardWorkList {view} {store} />
+    {:else}
+      <WorkList {view} {store} {menuPath} {callFrom} on:callback />
+    {/if}
   </div>
 
   <div style="height: 100%" slot="default">
-    <MainContent {view} {menuPath} {store} />
+    {#if $showDashboard$}
+      <DashboardContent />
+    {:else}
+      <MainContent {view} {menuPath} {store} bind:this={mainContentRef} />
+    {/if}
   </div>
 </TwoColumnView>

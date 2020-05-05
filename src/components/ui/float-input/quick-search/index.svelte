@@ -42,7 +42,11 @@
   <label class="floating__label" data-content={placeholder} />
   <i class="search-icon fa fa-search" />
   {#if showAdvancedSearch}
-    <i on:click={onClickAdvanced} on:mouseover={onMouseoverAdvanced} on:mouseout={onMouseoutAdvanced} class="advanced-icon fa fa-cog">
+    <i
+      on:click={onClickAdvanced}
+      on:mouseover={onMouseoverAdvanced}
+      on:mouseout={onMouseoutAdvanced}
+      class="advanced-icon fa fa-cog">
       <slot />
     </i>
   {/if}

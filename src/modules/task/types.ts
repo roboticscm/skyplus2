@@ -5,17 +5,23 @@ export class Task {
   projectName? = '';
   private? = false;
   lastStatusName = 'Open';
-  startDate? = Date.now();
+  startTime? = Date.now();
+  deadline? = Date.now();
   startDateConfirm? = false;
   endDate? = Date.now();
   endDateConfirm? = false;
   evaluateDate? = Date.now();
   complete? = false;
-  firstPrompt? = Date.now();
-  secondPrompt? = Date.now();
+  firstReminder? = Date.now();
+  secondReminder? = Date.now();
 }
 
 export class TaskStatus {
+  id = '';
+  name = '';
+}
+
+export class Priority {
   id = '';
   name = '';
 }

@@ -14,7 +14,10 @@
   import Button from '@/components/ui/flat-button';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import ContentFilter from '@/components/ui/float-input/content-filter';
-  import {filterColumns} from './helper';
+  import { filterColumns } from './helper';
+  import CloseableList from '@/components/ui/closeable-list';
+  import {StringUtil} from "../../../../lib/js/string-util";
+  import {SObject} from "../../../../lib/js/sobject";
 
   export let menuPath: string;
   export let callFrom = 'Self';
@@ -25,15 +28,14 @@
   callFrom;
   view;
 
-  const { taskList$, projectList$ } = store;
+  const { taskList$, projectList$, showDashboard$ } = store;
   let quickSearchRef: any;
   let searchWrapperRef: any;
   let viewBy = 'task';
   let selectedTask: Task;
 
-  let filterList: any[] = [
-    {id: 'taskName', name: ''},
-  ];
+  let filterList: any[] = [{ id: '', name: '' }];
+  let mappedFilterList: any[] = [];
 
   let usedFilterColumns: any[] = [];
 
@@ -45,8 +47,6 @@
         // data = res.data;
       });
   };
-
-
 
   const useSearchAction = {
     register(component: HTMLElement, param: any) {
@@ -72,7 +72,7 @@
     Dropdown.show('searchTaskWorkListId');
   };
 
-  const onMouseoutAdvanced = () => {
+  const onCloseSearch = () => {
     Dropdown.hide('searchTaskWorkListId');
   };
 
@@ -83,38 +83,77 @@
   const onItemChangeFilter = (event: any, item: any) => {
     item.id = event.detail.current;
 
-    if(event.detail.before == '-1') {
+    if (event.detail.before == '-1') {
       usedFilterColumns.push(event.detail.current);
     } else {
       const index = usedFilterColumns.indexOf(event.detail.before);
-      if(index>=0) {
+      if (index >= 0) {
         usedFilterColumns[index] = event.detail.current;
       }
     }
     usedFilterColumns = [...usedFilterColumns];
-  }
+  };
 
   const onSearch = (event: any, item: any) => {
-    if(filterList.length >= filterColumns.length-1 || event.detail.length === 0) {
+    if (filterList.length >= filterColumns.length - 1 || event.detail.length === 0) {
       return;
     }
 
     // item.name = event.detail;
 
-    filterList = [...filterList, {
-      id: '', name: ''
-    }];
-
-  }
+    filterList = [
+      ...filterList,
+      {
+        id: '',
+        name: '',
+      },
+    ];
+  };
 
   const onRemoveFilter = (event: any) => {
-    console.log(event);
+    // do not allow remove last item
+    if(filterList.length === 1) {
+      return;
+    }
     const index = filterList.findIndex((it: any) => it.id === event.id);
     if (index >= 0) {
       filterList.splice(index, 1);
       filterList = [...filterList];
     }
+  };
+
+  const onToggleDashboard = () => {
+    // @ts-ignore
+    showDashboard$.next(!$showDashboard$);
+  };
+
+  const onSelectSearchField = () => {
+    mappedFilterList = filterList.filter((it: any) => !StringUtil.isEmpty(it.name))
+      .map((it: any) => {
+        return {
+          id: it.id,
+          name: T('TASK.LABEL.' + StringUtil.toUpperCaseWithUnderscore(it.id)) + ': ' + it.name
+        }
+      });
+    onCloseSearch();
   }
+
+  const onCloseFilter = (event: any) => {
+    const _filterList = SObject.clone(filterList);
+
+    const index = _filterList.findIndex((it: any) => it.id === event.detail.id);
+
+    if (index >= 0) {
+      _filterList.splice(index, 1);
+      filterList = [..._filterList];
+    }
+
+    if (filterList.length === 0) {
+      filterList = [{id: '', name: ''}]
+    }
+    onSelectSearchField();
+  }
+
 </script>
 
 <style lang="scss">
@@ -166,12 +205,17 @@
 
 <section class="view-left-main">
   <!-- Add new -->
-  {#if view.isRendered(ButtonId.AddNew)}
-    <Button btnType={ButtonType.AddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
-  {/if}
-  <Button btnType={ButtonType.Custom} title={T('COMMON.BUTTON.DASHBOARD')} />
-  <!-- Add new -->
-  <div class="horizontal-separator"> </div>
+  <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+    {#if view.isRendered(ButtonId.AddNew)}
+      <Button btnType={ButtonType.AddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
+    {/if}
+    <Button
+      on:click={onToggleDashboard}
+      btnType={ButtonType.Custom}
+      title={$showDashboard$ ? T('COMMON.BUTTON.HIDE_DASHBOARD') : T('COMMON.BUTTON.SHOW_DASHBOARD')} />
+  </div>
+  <!--   // Add new-->
+  <div class="horizontal-separator" />
   <!-- Search-->
   <div bind:this={searchWrapperRef}>
     <QuickSearch
@@ -180,38 +224,51 @@
       action={useSearchAction}
       bind:this={quickSearchRef}
       placeholder={T('TASK.LABEL.SEARCH_TASK_OR_PROJECT') + '...'}>
-      <div id="searchTaskWorkListId" class="left-dropdown-content" style="color: black; font-weight: 100; overflow: auto; padding: 6px;">
-        <div>
-          <button>Search</button>
-          <button>Close</button>
+      <div
+        id="searchTaskWorkListId"
+        class="left-dropdown-content"
+        style="color: black; font-weight: 300; overflow: auto; padding: 6px;">
+        <div style="display: flex; justify-content: space-between;">
+          <Button on:click={onSelectSearchField} btnType={ButtonType.Custom} title="SEARCH" />
+
+          <i style="font-size: 1rem;" on:click|stopPropagation={onCloseSearch} class="fa fa-times" />
+
         </div>
 
-
-
-
-          {#each filterList as item}
-<div style="display: flex;">
+        {#each filterList as item}
+          <div style="display: flex;">
             <ContentFilter
-                    on:search={(e)=>onSearch(e, item)}
-                    on:itemChange={(e) => onItemChangeFilter (e, item)}
-                    list={filterColumns}
-                    excludeList={usedFilterColumns}
-                            bind:value={item.name}
-                    />
-  <i on:click={() => onRemoveFilter(item)} class="fa fa-times" style="display: flex; flex-direction: column; justify-content: flex-end; padding-left: 5px;"></i>
-</div>
-            {/each}
-
-
-
-
-
-
+              on:search={(e) => onSearch(e, item)}
+              on:itemChange={(e) => onItemChangeFilter(e, item)}
+              list={filterColumns}
+              excludeList={usedFilterColumns}
+              selected={item}
+              bind:value={item.name} />
+            <i
+              on:click={() => onRemoveFilter(item)}
+              class="fa fa-times"
+              style="font-size: 0.7rem; display: flex; flex-direction: column; justify-content: flex-end; padding-left:
+              5px;" />
+          </div>
+        {/each}
 
       </div>
     </QuickSearch>
   </div>
   <!-- // Search -->
+
+  <!-- Filter -->
+  {#if mappedFilterList.length>0}
+  <div>
+    <CloseableList
+            on:close={onCloseFilter}
+            data={mappedFilterList}
+            {menuPath}
+            id={view.getViewName() + 'FilterId'}>
+    </CloseableList>
+  </div>
+  {/if}
+  <!-- // Filter -->
 
   <!-- Option task or project view -->
   <div style="display: flex; justify-content: space-evenly; margin-bottom: 6px;">
