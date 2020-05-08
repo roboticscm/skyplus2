@@ -4,7 +4,7 @@
   export let disabled = false;
   export let className = '';
   export let autocomplete = App.AUTO_COMPLETE;
-  export let value;
+  export let value = undefined;
   export let placeholder: string;
   export let checked: boolean = undefined;
   export let rightCheck = false;
@@ -27,7 +27,7 @@
   <input
     {title}
     {name}
-    type="search"
+    type="number"
     {disabled}
     class="{checked !== undefined ? 'check' : ''}
     {rightCheck ? 'right' : ''}

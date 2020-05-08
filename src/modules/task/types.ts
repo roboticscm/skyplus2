@@ -1,9 +1,11 @@
 export class Task {
   id = '';
   name = '';
-  projectId? = '';
+  description? = '';
+  projectId? = '-1';
   projectName? = '';
-  private? = false;
+  isPrivate? = false;
+  priorityId? = '-1';
   lastStatusName = 'Open';
   startTime? = Date.now();
   deadline? = Date.now();
@@ -14,6 +16,11 @@ export class Task {
   complete? = false;
   firstReminder? = Date.now();
   secondReminder? = Date.now();
+
+  // one to many relation
+  taskAttachFile?: any[] = [];
+  removeTaskAttachFile?: any[] = [];
+  insertTaskAttachFile?: any[] = [];
 }
 
 export class TaskStatus {
@@ -23,13 +30,16 @@ export class TaskStatus {
 
 export class Priority {
   id = '';
+  code? = '';
   name = '';
+  sort? = 0;
 }
 
 export class Project {
   id = '';
   name = '';
-  desc? = '';
+  description? = '';
+  sort? = 0;
   completedTask? = 0;
   inProgressTask? = 0;
   notStartedTask? = 0;
@@ -41,12 +51,12 @@ export class File {
   fullPath = '';
 }
 
-export class QuantitativeComment {
+export class TaskQualification {
   id = '';
   name = '';
 }
 
-export class QualitativeComment {
+export class TaskVerification {
   id = '';
   name = '';
 }

@@ -4,6 +4,7 @@
   import { Observable } from 'rxjs';
   import { take } from 'rxjs/operators';
   import { settingsStore } from '@/store/settings';
+  import { App } from '@/lib/js/constants';
 
   export let id: string;
   export let menuPath: string;
@@ -14,7 +15,7 @@
   export let placeholder: string;
   export let checked: boolean = undefined;
   export let rightCheck: boolean = false;
-  export let data: any[] = [];
+  export let data: any[] = undefined;
   export let data$: Observable<any> = undefined;
   export let saveState = false;
   export let showAllItem = false;
@@ -105,6 +106,13 @@
     }
   });
 
+  const onClickLabel = () => {
+    if (disabled) {
+      return;
+    }
+
+    dispatch('clickLabel');
+  };
   // @ts-ignore
   $: {
     // @ts-ignore
@@ -117,6 +125,15 @@
   }
 </script>
 
+<style lang="scss">
+  @import '../sass/sass/helpers/variables.scss';
+
+  .floating__hover:hover {
+    color: var(--my-active-color);
+    cursor: pointer;
+  }
+</style>
+
 <div class="floating-wrapper">
   <select
     on:change={onChange}
@@ -127,6 +144,7 @@
     {rightCheck ? 'right' : ''}
     {className}"
     bind:this={inputRef}>
+
     <option disabled selected={!saveState && _selectedId === undefined} value={-1}>
       {T('COMMON.MSG.PLEASE_SELECT_ONE')}
     </option>
@@ -135,11 +153,20 @@
       <option value={undefined}>{'--- ' + T('COMMON.LABEL.ALL') + ' ---'}</option>
     {/if}
 
-    {#each _data as item}
-      <option value={item.id} selected={item.id == _selectedId}>{item.name}</option>
-    {/each}
+    {#if $data$ || data}
+      {#each _data as item}
+        <option value={item.id} selected={item.id == _selectedId}>{item.name}</option>
+      {/each}
+    {:else}
+      <option>{T('COMMON.LABEL.LOADING')}...</option>
+    {/if}
+
   </select>
-  <label class="floating__label" data-content={placeholder} />
+
+  <label
+    on:click={onClickLabel}
+    class="floating__label {disabled ? '' : 'floating__hover'}"
+    data-content={placeholder} />
   {#if checked !== undefined}
     <input class={rightCheck ? 'right' : ''} tabindex="-1" bind:checked type="checkbox" on:change={onCheck} />
   {/if}

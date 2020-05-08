@@ -20,7 +20,7 @@
   .task-wrapper {
     margin-top: $default-padding;
     padding: $default-padding;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-family: $default-font-family;
     border: $default-border;
     border-radius: $default-border-radius;
@@ -28,7 +28,7 @@
     justify-content: space-between;
     &__task {
       &:hover {
-        font-weight: 400;
+        font-weight: 500;
         color: var(--my-active-color);
         cursor: pointer;
       }
@@ -42,7 +42,7 @@
     }
 
     &.selected {
-      font-weight: 400;
+      font-weight: 500;
     }
   }
 </style>
@@ -53,7 +53,9 @@
   <div class="task-wrapper__task">
     <div>{task.name}</div>
     <div>{task.lastStatusName}</div>
-    <div>{SDate.convertMilisecondToDateTimeString(task.startTime)} ~ {SDate.convertMilisecondToDateTimeString(task.deadline)}</div>
+    <div>
+      {SDate.convertMilisecondToDateString(task.startTime)} ~ {SDate.convertMilisecondToDateString(task.deadline)}
+    </div>
   </div>
 
   <div class="task-wrapper__project">({task.projectName})</div>

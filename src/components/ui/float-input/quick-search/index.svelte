@@ -46,7 +46,7 @@
       on:click={onClickAdvanced}
       on:mouseover={onMouseoverAdvanced}
       on:mouseout={onMouseoutAdvanced}
-      class="advanced-icon fa fa-cog">
+      class="advanced-icon fa fa-chevron-down">
       <slot />
     </i>
   {/if}

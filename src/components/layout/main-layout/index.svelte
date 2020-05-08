@@ -9,7 +9,7 @@
 
   const { isLogged$ } = AppStore;
 
-  const defaultHeaderHeight = '88px';
+  const defaultHeaderHeight = '96px';
   const gutterHeight = '7px';
 
   onMount(async () => {

@@ -74,6 +74,10 @@ export class ViewStore {
     });
   };
 
+  static loadTableMetaData$ = (tableName: string) => {
+    return TableUtilStore.getAllColumnsOfTable(tableName);
+  };
+
   getMenuNameFromPath = () => {
     return this.menuPath.includes('/') ? this.menuPath.split('/')[this.menuPath.split('/').length - 1] : this.menuPath;
   };
@@ -129,13 +133,29 @@ export class ViewStore {
     });
   };
 
+  // createQuerySubscription = (withVar: boolean = false) => {
+  //   const query = `
+  //     subscription ${this.tableName}Subscription ${withVar ? '($id: bigint!, $updatedBy: bigint!)' : ''} {
+  //       ${this.tableName} ${
+  //     withVar ? '(where: {_and: [ {id: { _eq: $id }}, {updated_by: { _neq: $updatedBy }}]})' : ''
+  //   } {
+  //         ${this.allColumns.map((it) => it.columnName).join('\n')}
+  //       }
+  //     }
+  //   `;
+  //
+  //   return gql(query);
+  // };
+
   createQuerySubscription = (withVar: boolean = false) => {
+    return ViewStore.createCustomQuerySubscription(this.tableName, this.allColumns, withVar);
+  };
+
+  static createCustomQuerySubscription = (table: string, columns: any[], withVar: boolean = false) => {
     const query = `
-      subscription ${this.tableName}Subscription ${withVar ? '($id: bigint!, $updatedBy: bigint!)' : ''} {
-        ${this.tableName} ${
-      withVar ? '(where: {_and: [ {id: { _eq: $id }}, {updated_by: { _neq: $updatedBy }}]})' : ''
-    } {
-          ${this.allColumns.map((it) => it.columnName).join('\n')}
+      subscription ${table}Subscription ${withVar ? '($id: bigint!, $updatedBy: bigint!)' : ''} {
+        ${table} ${withVar ? '(where: {_and: [ {id: { _eq: $id }}, {updated_by: { _neq: $updatedBy }}]})' : ''} {
+          ${columns.map((it) => it.columnName).join('\n')}
         }
       }
     `;
@@ -377,6 +397,7 @@ export class ViewStore {
                 dataChanged = dataChanged.filter(
                   (item: any) => item.code !== 'btnConfig' || (item.code === 'btnConfig' && item.checked),
                 );
+
                 if (dataChanged.length > 0) {
                   menuControlStore
                     .saveOrUpdateOrDelete({
@@ -384,7 +405,7 @@ export class ViewStore {
                       menuControls: dataChanged,
                     })
                     .then((_: any) => {
-                      location.reload();
+                      // location.reload();
                     });
                 }
               }

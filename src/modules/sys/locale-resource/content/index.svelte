@@ -6,7 +6,6 @@
   import { ViewStore } from '@/store/view';
   import { roleControlStore } from '@/store/role-control';
   import { appStore } from '@/store/app';
-  import { string } from 'prop-types';
   import { distinctUntilChanged, skip, switchMap, take, tap, map, debounce } from 'rxjs/operators';
   import { forkJoin, fromEvent, Observable } from 'rxjs';
   import FloatSelect from '@/components/ui/float-input/select';

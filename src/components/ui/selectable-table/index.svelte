@@ -19,7 +19,7 @@
   export let data: any[];
   export let showRowNumber = true;
   export let startRowCount = 1;
-  export let menuPath: string;
+  export let menuPath: string = undefined;
   export let saveState = true;
 
   let startRow: any = null;
@@ -27,7 +27,7 @@
   let tableRef: any;
 
   onMount(() => {
-    if (saveState) {
+    if (saveState && menuPath) {
       loadSettings();
     }
   });
@@ -243,7 +243,7 @@
   };
 
   const onMouseUpHeader = (event) => {
-    if (saveState) {
+    if (saveState && menuPath) {
       saveSettings();
     }
   };

@@ -15,7 +15,7 @@
 
 <style lang="scss">
   .floating-checkbox {
-    margin-top: 25px;
+    margin-top: 35px;
   }
 </style>
 

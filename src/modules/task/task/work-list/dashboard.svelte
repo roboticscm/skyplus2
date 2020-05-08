@@ -8,6 +8,8 @@
   export let view: ViewStore;
   export let store: Store;
 
+  view;
+
   const { showDashboard$ } = store;
 
   const onToggleDashboard = () => {

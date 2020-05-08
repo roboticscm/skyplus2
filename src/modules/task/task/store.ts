@@ -1,33 +1,37 @@
 import { ViewStore } from '@/store/view';
 import { BehaviorSubject } from 'rxjs';
-import { Project, File, QuantitativeComment, QualitativeComment, TaskStatus, Task, Priority } from '../types';
+import { Project, File, TaskVerification, TaskQualification, TaskStatus, Task, Priority } from '../types';
 import { User } from '@/model/user';
 import { OwnerOrg } from '@/modules/sys/owner-org/model';
+import { TableUtilStore } from '@/store/table-util';
+import { RxHttp } from '@/lib/js/rx-http';
+import { toSnackCase } from '@/lib/js/util';
 
+const BASE_URL = 'task/task/';
 export default class Store {
-  projects$ = new BehaviorSubject<Project[]>([]);
-  priority$ = new BehaviorSubject<Priority[]>([]);
+  projects$ = new BehaviorSubject<Project[]>(undefined);
+  priority$ = new BehaviorSubject<Priority[]>(undefined);
   uploadFiles$ = new BehaviorSubject<File[]>([]);
   characteristicTaskList$ = new BehaviorSubject<OwnerOrg[]>([]);
   assigneeList$ = new BehaviorSubject<User[]>([]);
   assignerList$ = new BehaviorSubject<User[]>([]);
   accessorList$ = new BehaviorSubject<User[]>([]);
 
-  quantitativeComment$ = new BehaviorSubject<QuantitativeComment[]>([]);
-  qualitativeComment$ = new BehaviorSubject<QualitativeComment[]>([]);
+  taskVerification$ = new BehaviorSubject<TaskVerification[]>([]);
+  taskQualification$ = new BehaviorSubject<TaskQualification[]>([]);
 
   assigneeStatusList$ = new BehaviorSubject<any[]>([]);
   assignerStatusList$ = new BehaviorSubject<any[]>([]);
 
   taskStatus$ = new BehaviorSubject<TaskStatus[]>([]);
 
-  taskList$ = new BehaviorSubject<Task[]>([]);
+  taskList$ = new BehaviorSubject<Task[]>(undefined);
   projectList$ = new BehaviorSubject<Project[]>([]);
 
   showDashboard$ = new BehaviorSubject<boolean>(false);
 
-  constructor(view: ViewStore) {
-    this.qualitativeComment$.next([
+  constructor(private view: ViewStore) {
+    this.taskVerification$.next([
       { id: '0', name: '0%' },
       { id: '1', name: '10%' },
       { id: '2', name: '20%' },
@@ -41,7 +45,7 @@ export default class Store {
       { id: '10', name: '100%' },
     ]);
 
-    this.quantitativeComment$.next([
+    this.taskQualification$.next([
       { id: '0', name: 'Bad' },
       { id: '0', name: 'So so' },
       { id: '0', name: 'Good' },
@@ -77,63 +81,55 @@ export default class Store {
       { id: '3', name: 'Status 3' },
     ]);
 
-    this.taskList$.next([
-      {
-        id: '1',
-        name: 'Build KkyHub core',
-        projectId: '1',
-        projectName: 'SkyHub',
-        startTime: Date.now(),
-        deadline: Date.now(),
-        lastStatusName: 'Finish',
-      },
-      {
-        id: '2',
-        name: 'Build Task management module',
-        projectId: '1',
-        projectName: 'SkyHub',
-        startTime: Date.now(),
-        deadline: Date.now(),
-        lastStatusName: 'Open',
-      },
-      {
-        id: '3',
-        name: 'Build Quotation  module',
-        projectId: '1',
-        projectName: 'SkyHub',
-        startTime: Date.now(),
-        deadline: Date.now(),
-        lastStatusName: 'Open',
-      },
-      {
-        id: '4',
-        name: 'Build Dashboard',
-        projectId: '2',
-        projectName: 'SkyOne',
-        startTime: Date.now(),
-        deadline: Date.now(),
-        lastStatusName: 'Finish',
-      },
-    ]);
-
     this.projectList$.next([
       { id: '1', name: 'SkyHub', inProgressTask: 5, completedTask: 15, notStartedTask: 2 },
       { id: '2', name: 'SkyOne', inProgressTask: 6, completedTask: 25, notStartedTask: 5 },
     ]);
-
-    this.priority$.next([
-      { id: '1', name: 'Low' },
-      { id: '2', name: 'Medium' },
-      { id: '3', name: 'High' },
-    ]);
   }
 
   findProjects = () => {
-    this.projects$.next([
-      { id: '1', name: 'Project 1', desc: 'Desc 1' },
-      { id: '2', name: 'Project 2', desc: 'Desc 2' },
-      { id: '3', name: 'Project 3', desc: 'Desc 3' },
-    ]);
+    TableUtilStore.getSimpleList({
+      tableName: 'tsk_project',
+      columns: 'id,name',
+      orderBy: 'sort',
+      textSearch: '',
+      page: 1,
+      pageSize: -1,
+      onlyMe: false,
+      includeDisabled: false,
+    }).subscribe((res: any) => {
+      this.projects$.next(res.data.payload);
+    });
+  };
+
+  findPriorities = () => {
+    TableUtilStore.getSimpleList({
+      tableName: 'tsk_priority',
+      columns: 'id,name',
+      orderBy: 'sort',
+      textSearch: '',
+      page: 1,
+      pageSize: -1,
+      onlyMe: false,
+      includeDisabled: false,
+    }).subscribe((res: any) => {
+      this.priority$.next(res.data.payload);
+    });
+  };
+
+  findTasks = () => {
+    TableUtilStore.getSimpleList({
+      tableName: 'tsk_task',
+      columns: 'id,name',
+      orderBy: 'updated_or_created_date desc nulls last',
+      textSearch: '',
+      page: 1,
+      pageSize: -1,
+      onlyMe: false,
+      includeDisabled: false,
+    }).subscribe((res: any) => {
+      this.taskList$.next(res.data.payload);
+    });
   };
 
   findUploadFiles = (taskId: string) => {
@@ -142,4 +138,10 @@ export default class Store {
       { id: '2', name: 'file2.png', fullPath: '/abc' },
     ]);
   };
+
+  tskGetTaskById(id: string) {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('tskGetTaskById')}`, {
+      id,
+    });
+  }
 }

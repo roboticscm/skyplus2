@@ -74,6 +74,7 @@
     "json-bigint": "^0.3.0",
     "jsuites": "^2.7.1",
     "mobile-detect": "^1.4.4",
+    "moment": "^2.25.3",
     "page": "^1.11.5",
     "prettier-plugin-svelte": "^0.7.0",
     "rxjs": "^6.5.4",

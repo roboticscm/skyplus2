@@ -277,7 +277,7 @@
     return jExcelObj;
   };
 
-  export const createCheckboxHeader = (col: number, onlyOneCheckbox = false) => {
+  export const createCheckboxHeader = (col: number, onlyOneCheckbox = true) => {
     const checkboxTag = document.createElement('input');
     checkboxTag.type = 'checkbox';
     checkboxTag.onchange = (event: any) => {

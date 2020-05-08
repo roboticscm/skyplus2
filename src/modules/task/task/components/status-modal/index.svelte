@@ -13,7 +13,7 @@
   export let store: Store;
   export let forAssigner = false;
 
-  const { taskStatus$, qualitativeComment$ } = store;
+  const { taskStatus$, taskQualification$ } = store;
 
   let modalRef: any;
   const defaultWidth = 800;
@@ -54,7 +54,7 @@
         id={id + 'Percentage'}
         placeholder={T('TASK.LABEL.PERCENTAGE')}
         {menuPath}
-        data$={qualitativeComment$} />
+        data$={taskQualification$} />
     {/if}
   </div>
 

@@ -31,7 +31,7 @@
   @import '../sass/sass/helpers/variables.scss';
 
   .project-wrapper {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-family: $default-font-family;
     border: $default-border;
     border-radius: $default-border-radius;

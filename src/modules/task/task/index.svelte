@@ -16,9 +16,6 @@
   export let callFrom = 'Self';
   export let showWorkList = true;
 
-  fullControl;
-  roleControls;
-
   // Init view
   const view = new ViewStore(menuPath);
   view.fullControl = fullControl;
@@ -27,20 +24,21 @@
   const store = new Store(view);
 
   // @ts-ignore
-  const { selectedData$, hasAnyDeletedRecord$, deleteRunning$, saveRunning$, isReadOnlyMode$, isUpdateMode$ } = view;
-  // @ts-ignore
   const { showDashboard$ } = store;
 
   let mainContentRef: any;
   const onceLoad = () => {
-    store.findProjects();
     // test
-    store.findUploadFiles(undefined);
+    // store.findUploadFiles(undefined);
   };
 
   onMount(() => {
     onceLoad();
   });
+
+  const onAddNew = () => {
+    mainContentRef.doAddNew();
+  };
 </script>
 
 <ProgressBar loading$={view.loading$} />
@@ -50,7 +48,7 @@
     {#if $showDashboard$}
       <DashboardWorkList {view} {store} />
     {:else}
-      <WorkList {view} {store} {menuPath} {callFrom} on:callback />
+      <WorkList {view} {store} {menuPath} {callFrom} on:callback on:addNew={onAddNew} />
     {/if}
   </div>
 

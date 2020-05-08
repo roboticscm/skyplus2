@@ -71,11 +71,11 @@
     list={list.filter((it) => [filter1Id, filter3Id].indexOf(it.id.toString()) < 0)}
     name="filter2"
     bind:value={filter2Text} />
-  <ContentFilter
-    on:itemChange={onItemChangeFilter3}
-    list={list.filter((it) => [filter1Id, filter2Id].indexOf(it.id.toString()) < 0)}
-    name="filter3"
-    bind:value={filter3Text} />
+  <!--  <ContentFilter-->
+  <!--    on:itemChange={onItemChangeFilter3}-->
+  <!--    list={list.filter((it) => [filter1Id, filter2Id].indexOf(it.id.toString()) < 0)}-->
+  <!--    name="filter3"-->
+  <!--    bind:value={filter3Text} />-->
   <button on:click={onSearch}>Test</button>
 </section>
 <div class="view-left-bottom" />

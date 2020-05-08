@@ -4,7 +4,7 @@
   export let disabled = false;
   export let className = '';
   export let autocomplete = App.AUTO_COMPLETE;
-  export let value;
+  export let value: string = undefined;
   export let placeholder: string;
   export let checked: boolean = undefined;
   export let rightCheck = false;

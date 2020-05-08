@@ -6,7 +6,6 @@
   import SelectableTable from '@/components/ui/selectable-table';
   import { StringUtil } from '../../../../lib/js/string-util';
 
-  export let name: string;
   export let disabled = false;
   export let className = '';
   export let autocomplete = App.AUTO_COMPLETE;
@@ -14,7 +13,6 @@
   export let list: any[] = [];
   export let excludeList: any[] = [];
   export let fullWidth = true;
-  export let menuPath: string;
   export let selected: any = undefined;
   export let showAllItem = false;
 
@@ -48,7 +46,7 @@
     if (distinctFilterColumns && distinctFilterColumns.length > 0) {
       // @ts-ignore
       _list = SObject.clone(distinctFilterColumns);
-      if(showAllItem) {
+      if (showAllItem) {
         _list.unshift({ id: '-1', name: 'ALL' });
       }
 
@@ -57,7 +55,7 @@
         selectedItem.name = _list[0].name;
       }
     } else {
-      if(showAllItem) {
+      if (showAllItem) {
         _list.unshift({ id: '-1', name: 'ALL' });
       }
 
@@ -208,7 +206,6 @@
     on:click={onClickInput}
     on:search={onSearchInput}
     required
-    {name}
     type="search"
     {disabled}
     class="floating-filter__input {className}"
@@ -222,7 +219,9 @@
 
   <label class="floating-filter__label" data-content={selectedItem.name} />
   <div class="floating-filter__select" on:mouseover|stopPropagation={showPopup} on:mouseout={hidePopup}>
-    <span class="w-100">{selectedItem.name}</span>
+    <span class="w-100" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+      {selectedItem.name}
+    </span>
     <i
       class="fa fa-angle-down"
       style="border-right: 1px solid rgba(0, 0, 0, 0.2); min-width: 15px; display: flex; flex-direction: column;
@@ -246,7 +245,6 @@
       data={markData}
       showRowNumber={false}
       {columns}
-      {menuPath}
       showHeader={false} />
   </div>
 </div>

@@ -14,10 +14,10 @@ export class Proxy {
 }
 
 export class API {
-  // static API_DOMAIN = 'localhost';
+  static API_DOMAIN = 'localhost';
   // static API_DOMAIN = '192.168.10.3';
   // static API_DOMAIN = '172.16.30.19';
-  static API_DOMAIN = 'frontend.com.vn';
+  // static API_DOMAIN = 'frontend.com.vn';
   static API_SERVER = `${Protocol.HTTP}://${API.API_DOMAIN}:7581`;
 
   static BASE_URL = `${API.API_SERVER}/api/`;
@@ -42,6 +42,7 @@ export class App {
   static MIN_PASSWORD_LENGTH = 6;
   static MAX_HEADER_HEIGHT = 100;
   static MIN_HEADER_HEIGHT = 30;
+  static UUID_LEN = 36;
 }
 
 export class Image {

@@ -53,7 +53,7 @@
       import('@/components/ui/excel-grid/index.svelte').then((res) => {
         ExcelGridComponent = res.default;
         tick().then(() => {
-          excelGridRef && excelGridRef.createCheckboxHeader(1);
+          excelGridRef && excelGridRef.createCheckboxHeader(1, true);
         });
         resolve(modalRef.show());
       });
