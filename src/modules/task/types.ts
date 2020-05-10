@@ -1,3 +1,6 @@
+import {StringUtil} from "@/lib/js/string-util";
+import {genNumberUUID} from "@/lib/js/util";
+
 export class Task {
   id = '';
   name = '';
@@ -18,14 +21,66 @@ export class Task {
   secondReminder? = Date.now();
 
   // one to many relation
-  taskAttachFile?: any[] = [];
-  removeTaskAttachFile?: any[] = [];
-  insertTaskAttachFile?: any[] = [];
+  taskAttachFiles?: any[] = [];
+  removeTaskAttachFiles?: any[] = [];
+  insertTaskAttachFiles?: any[] = [];
+
+  // Assigner
+  assigners?: any[] = [];
+  removeAssigners?: any[] = [];
+  insertAssigners?: any[] = [];
+
+  // Assignee
+  assignees?: any[] = [];
+  removeAssignees?: any[] = [];
+  insertAssignees?: any[] = [];
+
+  // Evaluator
+  evaluators?: any[] = [];
+  removeEvaluators?: any[] = [];
+  insertEvaluators?: any[] = [];
+
+  // Characteristic
+  chars?: any[] = [];
+  removeChars?: any[] = [];
+  insertChars?: any[] = [];
+
+  // Target Person
+  targetPersons?: any[] = [];
+  removeTargetPersons?: any[] = [];
+  insertTargetPersons?: any[] = [];
+
+  // Target Team
+  targetTeams?: any[] = [];
+  removeTargetTeams?: any[] = [];
+  insertTargetTeams?: any[] = [];
+
+  // assigner status detail
+  assignerStatusDetails?: any[] = [];
+  removeAssignerStatusDetails?: any[] = [];
+  insertAssignerStatusDetails?: any[] = [];
+  editAssignerStatusDetails?: any[] = [];
 }
 
-export class TaskStatus {
+export class Status {
   id = '';
+  code? = '';
   name = '';
+  sort? = 0;
+}
+
+export class StatusDetail {
+  id? = genNumberUUID();
+  taskId? = '';
+  statusId? ='';
+  verificationId? ='';
+  startTime? = Date.now();
+  endTime? = Date.now();
+  note? = '';
+  assignPosition? = '';
+  attachFiles: File[] = [];
+  status? = '';
+  percent? = '';
 }
 
 export class Priority {
@@ -48,7 +103,8 @@ export class Project {
 export class File {
   id = '';
   name = '';
-  fullPath = '';
+  removeFiles: any[] = [];
+  insertFiles: any[] = [];
 }
 
 export class TaskQualification {
@@ -58,5 +114,8 @@ export class TaskQualification {
 
 export class TaskVerification {
   id = '';
+  code? = '';
   name = '';
+  percent? = 0;
+  sort? = 0;
 }

@@ -362,7 +362,7 @@ export class ViewStore {
         snackbar.showNoDataChange();
       }
 
-      return true;
+      return null;
     }
     return changedObject;
   };
@@ -393,7 +393,7 @@ export class ViewStore {
             if (buttonPressed === ButtonPressed.OK) {
               const newData = scRef.configModalRef().getData();
               let dataChanged = this.checkObjectArrayChange(data, newData, scRef.snackbarRef());
-              if (typeof dataChanged !== 'boolean') {
+              if (dataChanged) {
                 dataChanged = dataChanged.filter(
                   (item: any) => item.code !== 'btnConfig' || (item.code === 'btnConfig' && item.checked),
                 );
@@ -433,7 +433,7 @@ export class ViewStore {
         ? res.map((item: any, index: any) => {
             item.restore = false;
             item.foreverDelete = false;
-            item.deletedDate = SDate.convertMilisecondToDateTimeString(item.deletedDate);
+            item.deletedDate = SDate.convertMillisecondToDateTimeString(item.deletedDate);
             return item;
           })
         : [];
@@ -514,10 +514,10 @@ export class ViewStore {
       result.push({
         field: T('COMMON.LABEL.' + StringUtil.toUpperCaseWithUnderscore(field)),
         oldValue: field.toLowerCase().includes('date')
-          ? SDate.convertMilisecondToDateTimeString(changedData[field].oldValue)
+          ? SDate.convertMillisecondToDateTimeString(changedData[field].oldValue)
           : changedData[field].oldValue,
         newValue: field.toLowerCase().includes('date')
-          ? SDate.convertMilisecondToDateTimeString(changedData[field].newValue)
+          ? SDate.convertMillisecondToDateTimeString(changedData[field].newValue)
           : changedData[field].newValue,
       });
     }

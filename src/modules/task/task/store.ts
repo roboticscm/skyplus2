@@ -1,6 +1,6 @@
 import { ViewStore } from '@/store/view';
 import { BehaviorSubject } from 'rxjs';
-import { Project, File, TaskVerification, TaskQualification, TaskStatus, Task, Priority } from '../types';
+import { Project, File, TaskVerification, TaskQualification, Status, Task, Priority } from '../types';
 import { User } from '@/model/user';
 import { OwnerOrg } from '@/modules/sys/owner-org/model';
 import { TableUtilStore } from '@/store/table-util';
@@ -12,10 +12,6 @@ export default class Store {
   projects$ = new BehaviorSubject<Project[]>(undefined);
   priority$ = new BehaviorSubject<Priority[]>(undefined);
   uploadFiles$ = new BehaviorSubject<File[]>([]);
-  characteristicTaskList$ = new BehaviorSubject<OwnerOrg[]>([]);
-  assigneeList$ = new BehaviorSubject<User[]>([]);
-  assignerList$ = new BehaviorSubject<User[]>([]);
-  accessorList$ = new BehaviorSubject<User[]>([]);
 
   taskVerification$ = new BehaviorSubject<TaskVerification[]>([]);
   taskQualification$ = new BehaviorSubject<TaskQualification[]>([]);
@@ -23,7 +19,7 @@ export default class Store {
   assigneeStatusList$ = new BehaviorSubject<any[]>([]);
   assignerStatusList$ = new BehaviorSubject<any[]>([]);
 
-  taskStatus$ = new BehaviorSubject<TaskStatus[]>([]);
+  taskStatus$ = new BehaviorSubject<Status[]>([]);
 
   taskList$ = new BehaviorSubject<Task[]>(undefined);
   projectList$ = new BehaviorSubject<Project[]>([]);
@@ -75,12 +71,6 @@ export default class Store {
       { id: '2', date: new Date(), status: 'stop....', note: 'Note2...' },
     ]);
 
-    this.taskStatus$.next([
-      { id: '1', name: 'Status 1' },
-      { id: '2', name: 'Status 2' },
-      { id: '3', name: 'Status 3' },
-    ]);
-
     this.projectList$.next([
       { id: '1', name: 'SkyHub', inProgressTask: 5, completedTask: 15, notStartedTask: 2 },
       { id: '2', name: 'SkyOne', inProgressTask: 6, completedTask: 25, notStartedTask: 5 },
@@ -117,26 +107,30 @@ export default class Store {
     });
   };
 
-  findTasks = () => {
+  findStatus = () => {
     TableUtilStore.getSimpleList({
-      tableName: 'tsk_task',
+      tableName: 'tsk_status',
       columns: 'id,name',
-      orderBy: 'updated_or_created_date desc nulls last',
+      orderBy: 'sort',
       textSearch: '',
       page: 1,
       pageSize: -1,
       onlyMe: false,
       includeDisabled: false,
     }).subscribe((res: any) => {
-      this.taskList$.next(res.data.payload);
+      this.taskStatus$.next(res.data.payload);
     });
   };
 
-  findUploadFiles = (taskId: string) => {
-    this.uploadFiles$.next([
-      { id: '1', name: 'file1.png', fullPath: '/abc' },
-      { id: '2', name: 'file2.png', fullPath: '/abc' },
-    ]);
+  tskFindTasks = (menuPath: string, departmentId: string) => {
+    RxHttp.get(`${BASE_URL}${toSnackCase('tskFindTasks')}`, {
+      menuPath,
+      departmentId,
+      page: this.view.page,
+      pageSize: this.view.pageSize,
+    }).subscribe((res: any) => {
+      this.taskList$.next(res.data.payload);
+    });
   };
 
   tskGetTaskById(id: string) {

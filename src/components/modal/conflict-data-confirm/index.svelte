@@ -88,7 +88,7 @@
     fullWidth={true}>
     <div slot="label">
       <div>
-        {@html T('SYS.MSG.THIS_FORM_WAS_EDITED_BY') + ': ' + editedUser + '. ' + T('COMMON.LABEL.AT') + ': ' + SDate.convertMilisecondToDateTimeString(atTime)}
+        {@html T('SYS.MSG.THIS_FORM_WAS_EDITED_BY') + ': ' + editedUser + '. ' + T('COMMON.LABEL.AT') + ': ' + SDate.convertMillisecondToDateTimeString(atTime)}
       </div>
       <div style="text-align: left;">{T('COMMON.LABEL.DETAIL')}:</div>
     </div>

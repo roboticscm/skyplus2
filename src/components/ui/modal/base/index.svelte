@@ -39,6 +39,7 @@
   let modalRef: any;
   let passwordRef: any;
   let displayPasswordChar = passwordChar();
+  let disabled = false;
 
   const useModal = createModal(menuPath, defaultWidth, defaultHeight);
 
@@ -70,7 +71,8 @@
     dispatch('mouseUp', undefined);
   };
 
-  export const show = (content: string = '') => {
+  export const show = (content: string = '', _disabled = false) => {
+    disabled = _disabled;
     return new Promise((resolve, reject) => {
       useModal.state.content = content;
       useModal.state.resolve = resolve;
@@ -209,7 +211,6 @@
       <div id={id + 'header'} class="modal-header">
         <div class="modal-title">
           <div>
-
             {#if iconData}
               <img src={iconData} alt="No Image" />
             {:else if fontIcon}
@@ -258,9 +259,9 @@
         <div class="modal-controller" style={'text-align: ' + (showCancelButton ? 'right' : 'center')}>
           {#if showOkButton}
             {#if modalType === ModalType.ConfirmPassword}
-              <Button type="submit" btnType={ButtonType.OkModal} title={okButtonTitle} />
+              <Button type="submit" btnType={ButtonType.OkModal} title={okButtonTitle} {disabled} />
             {:else}
-              <Button on:click={onOK} btnType={ButtonType.OkModal} title={okButtonTitle} />
+              <Button on:click={onOK} btnType={ButtonType.OkModal} title={okButtonTitle} {disabled}/>
             {/if}
           {/if}
           {#if showCancelButton}

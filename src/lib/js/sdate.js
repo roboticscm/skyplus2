@@ -1,11 +1,19 @@
 export class SDate {
-  static convertMilisecondToDateString(milisecond) {
-    const date = new Date(milisecond);
+  static convertMillisecondToDateString(millisecond) {
+    if (!millisecond) {
+      return '';
+    }
+
+    const date = new Date(millisecond);
     return date.toLocaleDateString('vi-VN');
   }
 
-  static convertMilisecondToDateTimeString(milisecond) {
-    const date = new Date(milisecond);
+  static convertMillisecondToDateTimeString(millisecond) {
+    if (!millisecond) {
+      return '';
+    }
+
+    const date = new Date(millisecond);
     return (
       date.toLocaleString('vi-VN', {
         dateStyle: 'short',

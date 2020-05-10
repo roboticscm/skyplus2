@@ -10,7 +10,7 @@
   export let dropPlaceholder = T('COMMON.LABEL.DROP_TO_UPLOAD');
   export let menuPath: string;
   export let id: string;
-  export let savePath = '';
+  export let savePath = 'upload_files';
   export let list: any[] = [];
   export let disabled = false;
 

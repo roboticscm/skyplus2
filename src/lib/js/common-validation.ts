@@ -23,10 +23,6 @@ export class CommonValidation {
 
   public static LENGTH_BETWEEN = 'COMMON.MSG.VALUE_MUST_BE_BETWEEN_%min_AND_%max_CHARS';
   public static isLengthBetween(source: string, min: number, max: number) {
-    if (!source) {
-      return false;
-    }
-
     return source.trim().length >= min && source.trim().length <= max;
   }
 

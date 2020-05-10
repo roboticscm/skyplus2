@@ -70,7 +70,7 @@
       {/if}
     </div>
     <div class="news-body">
-      <div class="news-date">{SDate.convertMilisecondToDateTimeString(news.startDate)}</div>
+      <div class="news-date">{SDate.convertMillisecondToDateTimeString(news.startDate)}</div>
       <div class="news-title" title={news.title}>{news.title}</div>
       <div class="news-intro" title={news.intro}>{news.intro}</div>
     </div>

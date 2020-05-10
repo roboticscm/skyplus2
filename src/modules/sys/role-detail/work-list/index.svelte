@@ -48,15 +48,16 @@
   const doSelectRole = (ob$: Observable<any>) => {
     return ob$
       .pipe(
+        delay(10),
         filter((_) => selectedOrgId !== undefined),
         tap((_) => view.loading$.next(true)),
-        switchMap((_) =>
-          forkJoin([
+        switchMap((_) => {
+          return forkJoin([
             // @ts-ignore
             Store.loadRoleDetail$(selectedOrgId, $selectedData$.id.replace('role', '')),
             Store.loadFilterOrgTree$(selectedOrgId),
-          ]),
-        ),
+          ]);
+        }),
       )
       .subscribe((res: any[]) => {
         roleDetails$.next(res[0].data);
@@ -123,7 +124,7 @@
   };
 
   const onClickRoleTree = (event: any) => {
-    filterMenu$.next(undefined);
+    // filterMenu$.next(undefined);
     prevHideColumn = 'com';
     const treeNode: any = event.detail.treeNode;
 
@@ -135,7 +136,6 @@
     const orgId = extractOrgId(treeNode);
     selectedOrgId = orgId;
     const roleId = extractRoleId(treeNode);
-    view.loading$.next(true);
     store.selectedData$.next({
       pId: orgId,
       id: roleId,
@@ -165,7 +165,6 @@
       prevHideColumn = 'bra';
     } else if (treeNode.type === OrgType.Department) {
       if (prevHideColumn !== 'dep') {
-        console.log('hide hideDepartmentColumn$');
         hideDepartmentColumn$.next(Date.now());
       }
       prevHideColumn = 'dep';
@@ -180,6 +179,15 @@
     roleTreeRef.selectNodeById($needSelectRole$, true);
   }
 
+  const getPreviousCheckedMenu = (menuId: string) => {
+    if (filterMenu) {
+      const index = filterMenu.findIndex((it: any) => it.id == menuId && it.checked);
+      return index >= 0;
+    } else {
+      return true;
+    }
+  };
+
   // @ts-ignore
   $: {
     // @ts-ignore
@@ -188,7 +196,7 @@
         index: it.menuId.toString(),
         id: it.menuId.toString(),
         name: it.menuName,
-        checked: true,
+        checked: getPreviousCheckedMenu(it.menuId.toString()),
       };
     });
     filterMenu = SObject.distinctArrayObject(menus);

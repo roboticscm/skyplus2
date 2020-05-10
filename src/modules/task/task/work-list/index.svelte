@@ -2,7 +2,7 @@
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { ViewStore } from '@/store/view';
   import QuickSearch from '@/components/ui/float-input/quick-search';
-  import { switchMap, map, tap, filter } from 'rxjs/operators';
+  import { switchMap, map, tap, filter, delay } from 'rxjs/operators';
   import { fromEvents } from '@/lib/js/rx';
   import { T } from '@/lib/js/locale/locale';
   import { forkJoin, fromEvent, Observable, Subscription } from 'rxjs';
@@ -21,6 +21,7 @@
   import { SObject } from '@/lib/js/sobject';
   import { apolloClient } from '@/lib/js/hasura-client';
   import { App } from '@/lib/js/constants';
+  import { appStore } from '@/store/app';
 
   export let menuPath: string;
   export let callFrom = 'Self';
@@ -166,7 +167,8 @@
         query,
       });
       taskApolloClient$.subscribe((res: any) => {
-        store.findTasks();
+        console.log(menuPath, appStore.org.departmentId);
+        store.tskFindTasks(menuPath, appStore.org.departmentId);
       });
     });
   };
@@ -178,6 +180,7 @@
   const doSelect = (ob$: Observable<any>) => {
     return ob$
       .pipe(
+        delay(10),
         filter((_) => selectedTask !== undefined),
         tap((_) => view.loading$.next(true)),
         switchMap((_) => forkJoin([store.tskGetTaskById(selectedTask.id)])),
@@ -207,6 +210,7 @@
 
   const onAddNew = () => {
     dispatch('addNew');
+    selectedTask = undefined;
   };
 </script>
 

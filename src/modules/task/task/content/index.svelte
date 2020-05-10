@@ -7,7 +7,7 @@
   import FloatingButton from '@/components/ui/button/floating';
   import Store from '../store';
   import Form from '@/lib/js/form/form';
-  import { Task } from '../../types';
+  import {StatusDetail, Task} from '../../types';
   import FloatSelect from '@/components/ui/float-input/select';
   import FloatCheckbox from '@/components/ui/float-input/checkbox';
   import FloatLabel from '@/components/ui/float-input/label';
@@ -33,6 +33,12 @@
   import { catchError, concatMap, switchMap, filter, take } from 'rxjs/operators';
   import { fromEvent, of, Observable, EMPTY, Subscription } from 'rxjs';
   import { fromPromise } from 'rxjs/internal-compatibility';
+  import {
+    findEditStatusDetail,
+    findRemoveAndInsertFile,
+    findRemoveAndInsertItem,
+    findRemoveAndInsertStatusDetail
+  } from "./helper";
 
   // Props
   export let view: ViewStore;
@@ -45,23 +51,16 @@
   // @ts-ignore
   const {
     projects$,
-    uploadFiles$,
-    assigneeList$,
-    assignerList$,
-    accessorList$,
     taskQualification$,
     taskVerification$,
     assigneeStatusList$,
     assignerStatusList$,
-    characteristicTaskList$,
     priority$,
   } = store;
 
   // Refs
   let scRef: any;
   let taskNameRef: any;
-  let taskDescRef: any;
-  let uploadFilesRef: any;
   let selectHumanModalRef: any;
   let selectOrgModalRef: any;
   let accessCommentRef: any;
@@ -75,12 +74,11 @@
   let modalRoleControls: any[] = [];
   let modalMenuPath: string;
 
-  let projectSub: Subscription;
-  let projectApolloClient$: any;
+  let projectSub, prioritySub, statusSub: Subscription;
 
-  let prioritySub: Subscription;
-  let priorityApolloClient$: any;
   let saveOrUpdateSub: any;
+
+  let assignerModalTitle = '';
 
   /**
    * Reset form (reset input and errors)
@@ -162,139 +160,67 @@
     view.showTrashRestoreModal(event.currentTarget.id, false, scRef);
   };
 
-  const onAddAssignee = () => {
-    // @ts-ignore
-    if ($isReadOnlyMode$) {
-      return;
-    }
-
-    // @ts-ignore
-    const assignee: any[] = SObject.clone($assigneeList$);
-    selectHumanModalRef.show(assignee).then((buttonPressed: ButtonPressed) => {
-      if (buttonPressed === ButtonPressed.OK) {
-        const checkedAssignee = selectHumanModalRef.getCheckedLeafNodes();
-        assigneeList$.next(
-          checkedAssignee.map((it: any) => {
-            return {
-              id: it.id,
-              name: it.name,
-            };
-          }),
-        );
-      }
-    });
-  };
-
-  const onAddCharacteristicTask = () => {
-    // @ts-ignore
-    if ($isReadOnlyMode$) {
-      return;
-    }
-
-    // @ts-ignore
-    const specificOrg: any[] = SObject.clone($characteristicTaskList$);
-    selectOrgModalRef.show(specificOrg).then((buttonPressed: ButtonPressed) => {
-      if (buttonPressed === ButtonPressed.OK) {
-        const checkedSpecificOrg = selectOrgModalRef.getCheckedLeafNodes();
-        characteristicTaskList$.next(
-          checkedSpecificOrg.map((it: any) => {
-            return {
-              id: it.id,
-              name: it.name,
-            };
-          }),
-        );
-      }
-    });
-  };
-
-  const onCloseCharacteristicTask = (event: any) => {
-    // @ts-ignore
-    const specificOrgList = SObject.clone($characteristicTaskList$);
-
-    const index = specificOrgList.findIndex((it: any) => it.id === event.detail.id);
-    if (index >= 0) {
-      specificOrgList.splice(index, 1);
-      characteristicTaskList$.next(specificOrgList);
-    }
-  };
-
-  const onCloseAssignee = (event: any) => {
-    // @ts-ignore
-    const assigneeList = SObject.clone($assigneeList$);
-
-    const index = assigneeList.findIndex((it: any) => it.id === event.detail.id);
-    if (index >= 0) {
-      assigneeList.splice(index, 1);
-      assigneeList$.next(assigneeList);
-    }
-  };
-
   const onAddAssigner = () => {
-    // @ts-ignore
-    if ($isReadOnlyMode$) {
-      return;
-    }
-    // @ts-ignore
-    const assigner: any[] = SObject.clone($assignerList$);
-    selectHumanModalRef.show(assigner).then((buttonPressed: ButtonPressed) => {
-      if (buttonPressed === ButtonPressed.OK) {
-        const checkedAssigner = selectHumanModalRef.getCheckedLeafNodes();
-        assignerList$.next(
-          checkedAssigner.map((it: any) => {
-            return {
-              id: it.id,
-              name: it.name,
-            };
-          }),
-        );
-      }
+    addAssignHumanOrOrg(form.assigners).then((res: any) => {
+      form.assigners = res;
     });
   };
 
-  const onCloseAssigner = (event: any) => {
-    // @ts-ignore
-    const assignerList = SObject.clone($assignerList$);
-
-    const index = assignerList.findIndex((it: any) => it.id === event.detail.id);
-    if (index >= 0) {
-      assignerList.splice(index, 1);
-      assignerList$.next(assignerList);
-    }
+  const onAddAssignee = () => {
+    addAssignHumanOrOrg(form.assignees).then((res: any) => {
+      form.assignees = res;
+    });
   };
 
   const onAddEvaluator = () => {
+    addAssignHumanOrOrg(form.evaluators).then((res: any) => {
+      form.evaluators = res;
+    });
+  };
+
+  const onAddCharacteristic = () => {
+    addAssignOwnerOrg(form.chars).then((res: any) => {
+      form.chars = res;
+    });
+  };
+
+  const onAddTargetPerson = () => {
+    addAssignHumanOrOrg(form.targetPersons).then((res: any) => {
+      form.targetPersons = res;
+    });
+  };
+
+  const onAddTargetTeam = () => {
+    addAssignOwnerOrg(form.targetTeams).then((res: any) => {
+      form.targetTeams = res;
+    });
+  };
+
+  const onEditAssignerStatus = (event: any) => {
     // @ts-ignore
     if ($isReadOnlyMode$) {
       return;
     }
 
-    // @ts-ignore
-    const evaluator: any[] = SObject.clone($accessorList$);
-    selectHumanModalRef.show(evaluator).then((buttonPressed: ButtonPressed) => {
+    assignerModalTitle = T('COMMON.LABEL.EDIT_STATUS');
+    forAssigner = true;
+    statusModalRef.show(event.detail).then((buttonPressed: ButtonPressed) => {
       if (buttonPressed === ButtonPressed.OK) {
-        const checkedEvaluator = selectHumanModalRef.getCheckedLeafNodes();
-        accessorList$.next(
-          checkedEvaluator.map((it: any) => {
-            return {
-              id: it.id,
-              name: it.name,
-            };
-          }),
-        );
+        const editedData = statusModalRef.getData();
+        const index  = form.assignerStatusDetails.findIndex((it: StatusDetail) => it.id === editedData.id)
+        if(index >=0) {
+          form.assignerStatusDetails[index] = editedData;
+          form.assignerStatusDetails = [...form.assignerStatusDetails];
+        }
       }
     });
   };
 
-  const onCloseEvaluator = (event: any) => {
-    // @ts-ignore
-    const accessorList = SObject.clone($accessorList$);
 
-    const index = accessorList.findIndex((it: any) => it.id === event.detail.id);
-    if (index >= 0) {
-      accessorList.splice(index, 1);
-      accessorList$.next(accessorList);
-    }
+  const onViewAssignerStatus = (event: any) => {
+    assignerModalTitle = T('COMMON.LABEL.STATUS_DETAIL');
+    forAssigner = true;
+    statusModalRef.show(event.detail, true);
   };
 
   const onAddAssignerStatus = () => {
@@ -303,10 +229,20 @@
       return;
     }
 
+    assignerModalTitle = T('COMMON.LABEL.ADD_STATUS');
     forAssigner = true;
     statusModalRef.show().then((buttonPressed: ButtonPressed) => {
       if (buttonPressed === ButtonPressed.OK) {
-        assignerStatusList$.next([{ id: '1', date: new Date(), status: 'New status', note: 'Note xxx...' }]);
+        if(form.assignerStatusDetails && form.assignerStatusDetails.length > 0 && form.assignerStatusDetails[0].id) {
+          form.assignerStatusDetails = [
+            ...form.assignerStatusDetails,
+            {...statusModalRef.getData()},
+          ];
+        } else {
+          form.assignerStatusDetails = [
+            {...statusModalRef.getData()},
+          ];
+        }
       }
     });
   };
@@ -337,31 +273,130 @@
   // ============================== // EVENT HANDLE ==========================
 
   // ============================== HELPER ==========================
-  const preprocessData = () => {
-    // form.description = taskDescRef.getHtmlContent();
-    // form.startTime = startTimeRef.getTimestampValue();
-    // form.deadline = deadlineRef.getTimestampValue();
-    // form.firstReminder = firstReminderRef.getTimestampValue();
-    // form.secondReminder = secondReminderRef.getTimestampValue();
-    // form.taskAttachFile = uploadFilesRef.getUploadFileNames();
+  const addAssignHumanOrOrg = (source: any[]) => {
+    return new Promise((resolve, reject) => {
+      // @ts-ignore
+      if ($isReadOnlyMode$) {
+        return;
+      }
+
+      // @ts-ignore
+      const _source: any[] = SObject.clone(source);
+      selectHumanModalRef.show(_source).then((buttonPressed: ButtonPressed) => {
+        if (buttonPressed === ButtonPressed.OK) {
+          const checked = selectHumanModalRef.getCheckedLeafNodes();
+          const result = checked.map((it: any) => {
+            return {
+              id: it.id.replace('human', ''),
+              name: it.name,
+            };
+          });
+
+          resolve(result);
+        }
+      });
+    });
   };
 
+  const addAssignOwnerOrg = (source: any[]) => {
+    return new Promise((resolve, reject) => {
+      // @ts-ignore
+      if ($isReadOnlyMode$) {
+        return;
+      }
+
+      // @ts-ignore
+      const _source: any[] = SObject.clone(source);
+      selectOrgModalRef.show(_source).then((buttonPressed: ButtonPressed) => {
+        if (buttonPressed === ButtonPressed.OK) {
+          const checked = selectOrgModalRef.getCheckedLeafNodes();
+          const result = checked.map((it: any) => {
+            return {
+              id: it.id,
+              name: it.name,
+            };
+          });
+
+          resolve(result);
+        }
+      });
+    });
+  };
+
+  const preprocessData = () => {};
+
   const postprocessData = () => {
-    // @ts-ignore
-    if ($isUpdateMode$) {
-      form.removeTaskAttachFile =
-        beforeForm.taskAttachFile && form.taskAttachFile
-          ? beforeForm.taskAttachFile.filter((it: string) => form.taskAttachFile.indexOf(it) < 0)
-          : [];
-      form.insertTaskAttachFile =
-        beforeForm.taskAttachFile && form.taskAttachFile
-          ? form.taskAttachFile.filter((it: string) => beforeForm.taskAttachFile.indexOf(it) < 0)
-          : form.taskAttachFile;
-    } else {
-      form.removeTaskAttachFile = [];
-      form.insertTaskAttachFile = form.taskAttachFile;
+    // task attach file
+    [form.removeTaskAttachFiles, form.insertTaskAttachFiles] = findRemoveAndInsertFile(isUpdateMode$.value,
+      beforeForm && beforeForm.taskAttachFiles,
+      form.taskAttachFiles,
+    );
+
+    // assigner
+    [form.removeAssigners, form.insertAssigners] = findRemoveAndInsertItem(isUpdateMode$.value,
+      beforeForm && beforeForm.assigners,
+      form.assigners,
+    );
+
+    // assignee
+    [form.removeAssignees, form.insertAssignees] = findRemoveAndInsertItem(isUpdateMode$.value,
+      beforeForm && beforeForm.assignees,
+      form.assignees,
+    );
+
+    // evaluator
+    [form.removeEvaluators, form.insertEvaluators] = findRemoveAndInsertItem(isUpdateMode$.value,
+      beforeForm && beforeForm.evaluators,
+      form.evaluators,
+    );
+
+    // characteristics
+    [form.removeChars, form.insertChars] = findRemoveAndInsertItem(isUpdateMode$.value, beforeForm && beforeForm.chars, form.chars);
+
+    // Target Person
+    [form.removeTargetPersons, form.insertTargetPersons] = findRemoveAndInsertItem(isUpdateMode$.value,
+      beforeForm && beforeForm.targetPersons,
+      form.targetPersons,
+    );
+
+    // Target Team
+    [form.removeTargetTeams, form.insertTargetTeams] = findRemoveAndInsertItem(isUpdateMode$.value,
+      beforeForm && beforeForm.targetTeams,
+      form.targetTeams,
+    );
+
+
+    // Add or remove Assigner status detail
+    [form.removeAssignerStatusDetails, form.insertAssignerStatusDetails] = findRemoveAndInsertStatusDetail(isUpdateMode$.value,
+            beforeForm && beforeForm.assignerStatusDetails,
+            form.assignerStatusDetails,
+    );
+
+
+    // Edit Assigner status detail
+    if (isUpdateMode$.value) {
+      const [a, b] = findEditStatusDetail(beforeForm.assignerStatusDetails, SObject.clone(form.assignerStatusDetails));
+      const dataChange = view.checkObjectArrayChange(a, b);
+      if(dataChange) {
+        form.editAssignerStatusDetails = dataChange;
+
+        for(let statusDetail of form.editAssignerStatusDetails) {
+          const index = beforeForm.assignerStatusDetails.findIndex((it: StatusDetail) => {
+            return it.id === statusDetail.id;
+          });
+
+          if(index >= 0) {
+            [statusDetail.removeAttachFiles, statusDetail.insertAttachFiles] = findRemoveAndInsertFile(isUpdateMode$.value,
+                  beforeForm && beforeForm.assignerStatusDetails[index].attachFiles,
+                  statusDetail.attachFiles,
+            );
+          }
+        }
+      }
     }
   };
+
+
   // ============================== // HELPER ==========================
 
   // ============================== CLIENT VALIDATION ==========================
@@ -380,10 +415,8 @@
     }
 
     // check for data change
-    // @ts-ignore
-    if ($isUpdateMode$) {
+    if (isUpdateMode$.value) {
       const dataChanged = view.checkObjectChange(beforeForm, SObject.clone(form), scRef.snackbarRef());
-      console.log(dataChanged);
       if (!dataChanged) {
         return false;
       }
@@ -442,7 +475,7 @@
           /* submit data to API server*/
           saveRunning$.next(true);
           postprocessData();
-          console.log(form.data());
+          console.log('save data: ', form.data());
           return form.post(saveUpdateUri).pipe(
             catchError((error) => {
               return of(error);
@@ -489,19 +522,35 @@
       isUpdateMode$.next(true);
       form = new Form({
         ...selectedData,
-        removeTaskAttachFile: [],
-        insertTaskAttachFile: [],
+        removeTaskAttachFiles: [],
+        insertTaskAttachFiles: [],
+
+        removeAssigners: [],
+        insertAssigners: [],
+
+        removeAssignees: [],
+        insertAssignees: [],
+
+        removeEvaluators: [],
+        insertEvaluators: [],
+
+        removeChars: [],
+        insertChars: [],
+
+        removeTargetPersons: [],
+        insertTargetPersons: [],
+
+        removeTargetTeams: [],
+        insertTargetTeams: [],
+
+        removeAssignerStatusDetails: [],
+        insertAssignerStatusDetails: [],
+        editAssignerStatusDetails: [],
       });
 
-      // taskDescRef.setHtmlContent(form.description);
-      // startTimeRef.setTimestampValue(form.startTime);
-      // deadlineRef.setTimestampValue(form.deadline);
-      // firstReminderRef.setTimestampValue(form.firstReminder);
-      // secondReminderRef.setTimestampValue(form.secondReminder);
-
+      form.assignerStatusDetails = SObject.distinctArrayObject(form.assignerStatusDetails);
       // save init value for checking data change
       beforeForm = SObject.clone(form);
-      console.log(beforeForm);
     }
   };
   // ============================== // FUNCTIONAL ==========================
@@ -561,27 +610,38 @@
   const registerSubscription = () => {
     projectSub = ViewStore.loadTableMetaData$('tsk_project').subscribe((res) => {
       const query = ViewStore.createCustomQuerySubscription('tsk_project', res.data);
-      projectApolloClient$ = apolloClient.subscribe({
+      const apolloClient$ = apolloClient.subscribe({
         query,
       });
-      projectApolloClient$.subscribe((res: any) => {
+      apolloClient$.subscribe((res: any) => {
         store.findProjects();
       });
     });
 
     prioritySub = ViewStore.loadTableMetaData$('tsk_priority').subscribe((res) => {
       const query = ViewStore.createCustomQuerySubscription('tsk_priority', res.data);
-      priorityApolloClient$ = apolloClient.subscribe({
+      const apolloClient$ = apolloClient.subscribe({
         query,
       });
-      priorityApolloClient$.subscribe((res: any) => {
+      apolloClient$.subscribe((res: any) => {
         store.findPriorities();
+      });
+    });
+
+    statusSub = ViewStore.loadTableMetaData$('tsk_status').subscribe((res) => {
+      const query = ViewStore.createCustomQuerySubscription('tsk_status', res.data);
+      const apolloClient$ = apolloClient.subscribe({
+        query,
+      });
+      apolloClient$.subscribe((res: any) => {
+        store.findStatus();
       });
     });
   };
 
   onMount(() => {
     registerSubscription();
+    doAddNew();
   });
 
   onDestroy(() => {
@@ -591,6 +651,10 @@
 
     if (prioritySub) {
       prioritySub.unsubscribe();
+    }
+
+    if (statusSub) {
+      statusSub.unsubscribe();
     }
 
     if (saveOrUpdateSub) {
@@ -640,7 +704,13 @@
 <SC bind:this={scRef} {view} {menuPath} />
 <SelectHumanModal id={view.getViewName() + 'SelectHumanModal'} {menuPath} bind:this={selectHumanModalRef} />
 <SelectOrgModal id={view.getViewName() + 'SelectOrgModal'} {menuPath} bind:this={selectOrgModalRef} />
-<StatusModal {forAssigner} id={view.getViewName() + 'StatusModal'} {menuPath} bind:this={statusModalRef} {store} />
+<StatusModal
+  title={assignerModalTitle}
+  {forAssigner}
+  id={view.getViewName() + 'StatusModal'}
+  {menuPath}
+  bind:this={statusModalRef}
+  {store} />
 
 <ViewWrapperModal
   menuInfo={modalContentViewRef && modalContentViewRef.getMenuInfo$()}
@@ -720,6 +790,7 @@
 
 <!--Main content-->
 <section class="view-content-main">
+  <form class="form" on:keydown={(event) => form.errors.clear(event.target.name)}>
   <!-- Task Info-->
   <Section title={T('TASK.LABEL.TASK')} {menuPath} id={view.getViewName() + 'TaskSectionId'}>
     <div class="row">
@@ -757,7 +828,7 @@
     <div class="row">
       <!-- Task Description -->
       <div class="col-xs-24 col-md-12">
-        <RichEditor bind:value={form.description} bind:this={taskDescRef} disabled={$isReadOnlyMode$}>
+        <RichEditor bind:value={form.description} disabled={$isReadOnlyMode$}>
           {T('TASK.LABEL.TASK_DESCRIPTION')}:
         </RichEditor>
       </div>
@@ -765,8 +836,8 @@
       <!-- Attach file -->
       <div class="col-xs-24 col-md-12" style="margin-top: 25px; min-height: 100px;">
         <UploadFiles
-          bind:this={uploadFilesRef}
-          bind:list={form.taskAttachFile}
+                savePath="upload_files/task"
+          bind:list={form.taskAttachFiles}
           {menuPath}
           id={view.getViewName() + 'UploadFiles'}
           disabled={$isReadOnlyMode$} />
@@ -834,12 +905,11 @@
       <!-- Assigner -->
       <div class="col-xs-24 col-md-12">
         <CloseableList
+          directClose={true}
           disabled={$isReadOnlyMode$}
-          on:close={onCloseAssigner}
-          data$={assignerList$}
+          bind:list={form.assigners}
           {menuPath}
           id={view.getViewName() + 'AssignerId'}>
-          <!--          <Button uppercase={false} on:click={onAddAssigner} title={'+ ' + T('COMMON.LABEL.ASSIGNER')} />-->
           <div on:click={onAddAssigner}>
             {T('COMMON.LABEL.ASSIGNER')}
             <i class="fa fa-angle-down" />
@@ -861,12 +931,11 @@
       <!-- Assignee -->
       <div class="col-xs-24 col-md-12">
         <CloseableList
+          directClose={true}
           disabled={$isReadOnlyMode$}
-          on:close={onCloseAssignee}
-          data$={assigneeList$}
+          bind:list={form.assignees}
           {menuPath}
           id={view.getViewName() + 'AssigneeId'}>
-          <!--          <Button uppercase={false} on:click={onAddAssignee} title={'+ ' + T('COMMON.LABEL.ASSIGNEE')} />-->
           <div on:click={onAddAssignee}>
             {T('COMMON.LABEL.ASSIGNEE')}
             <i class="fa fa-angle-down" />
@@ -879,8 +948,9 @@
       <!-- Evaluator -->
       <div class="col-xs-24 col-md-12">
         <CloseableList
-          on:close={onCloseEvaluator}
-          data$={accessorList$}
+          directClose={true}
+          disabled={$isReadOnlyMode$}
+          bind:list={form.evaluators}
           {menuPath}
           id={view.getViewName() + 'EvaluatorId'}>
           <!--          <Button uppercase={false} on:click={onAddEvaluator} title={'+ ' + T('COMMON.LABEL.EVALUATOR')} />-->
@@ -897,24 +967,20 @@
     <div style="height: 10px;" />
 
     <Section
-      title={T('TASK.LABEL.CHARACTERISTIC_AND_BENEFICIARY')}
-      id={view.getViewName() + 'BeneficiarySectionId'}
+      title={T('TASK.LABEL.CHARACTERISTIC_AND_TARGET')}
+      id={view.getViewName() + 'CharAndTargetSectionId'}
       {menuPath}>
       <div class="row">
         <div class="col-xs-24 col-md-12 col-lg-8">
           <CloseableList
+            directClose={true}
             disabled={$isReadOnlyMode$}
-            on:close={onCloseCharacteristicTask}
-            data$={characteristicTaskList$}
+            bind:list={form.chars}
             {menuPath}
-            id={view.getViewName() + 'CharacteristicTaskId'}>
-            <!--            <Button-->
-            <!--              uppercase={false}-->
-            <!--              on:click={onAddCharacteristicTask}-->
-            <!--              title={'+ ' + T('COMMON.LABEL.CHARACTERISTIC_TASK')} />-->
+            id={view.getViewName() + 'TaskCharacteristicId'}>
 
-            <div on:click={onAddCharacteristicTask}>
-              {T('COMMON.LABEL.CHARACTERISTIC_TASK')}
+            <div on:click={onAddCharacteristic}>
+              {T('COMMON.LABEL.TASK_CHARACTERISTIC')}
               <i class="fa fa-angle-down" />
               <div />
             </div>
@@ -923,14 +989,13 @@
 
         <div class="col-xs-24 col-md-12 col-lg-8">
           <CloseableList
+            directClose={true}
             disabled={$isReadOnlyMode$}
-            on:close={onCloseAssignee}
-            data$={assigneeList$}
+            bind:list={form.targetPersons}
             {menuPath}
-            id={view.getViewName() + 'AssigneeId'}>
-            <!--            <Button uppercase={false} on:click={onAddAssignee} title={'+ ' + T('COMMON.LABEL.BENEFICIARY')} />-->
-            <div on:click={onAddAssignee}>
-              {T('COMMON.LABEL.BENEFICIARY')}
+            id={view.getViewName() + 'TargetPersonId'}>
+            <div on:click={onAddTargetPerson}>
+              {T('COMMON.LABEL.TARGET_PERSON')}
               <i class="fa fa-angle-down" />
               <div />
             </div>
@@ -939,17 +1004,13 @@
 
         <div class="col-xs-24 col-md-12 col-lg-8">
           <CloseableList
+            directClose={true}
             disabled={$isReadOnlyMode$}
-            on:close={onCloseAssignee}
-            data$={assigneeList$}
+            bind:list={form.targetTeams}
             {menuPath}
-            id={view.getViewName() + 'AssigneeId'}>
-            <!--            <Button-->
-            <!--              uppercase={false}-->
-            <!--              on:click={onAddAssignee}-->
-            <!--              title={'+ ' + T('COMMON.LABEL.BENEFICIARY_ORGANIZATION')} />-->
-            <div on:click={onAddAssignee}>
-              {T('COMMON.LABEL.BENEFICIARY_ORGANIZATION')}
+            id={view.getViewName() + 'TargetTeamId'}>
+            <div on:click={onAddTargetTeam}>
+              {T('COMMON.LABEL.TARGET_TEAM')}
               <i class="fa fa-angle-down" />
               <div />
             </div>
@@ -965,21 +1026,28 @@
   <!-- Assigner Info-->
   <Section title={T('TASK.LABEL.ASSIGNER')} id={view.getViewName() + 'AssignerSectionId'} {menuPath}>
     <div class="row" style="margin-top: 6px;">
-      <div class="col-24">{T('COMMON.LABEL.STATUS_DETAIL')}:</div>
+      <div class="label-link col-24 {$isReadOnlyMode$ ? '' : 'label-button-hover'}" on:click={onAddAssignerStatus}>
+        {T('COMMON.LABEL.ADD_NEW_DETAIL')}
+      </div>
     </div>
     <div class="row">
       <div class=" col-24">
-        <CloseableList
-          className="closeable-list__floating-controller"
-          on:close={onCloseEvaluator}
-          customData={$assignerStatusList$}
-          customRender="modules/task/task/components/status/index.svelte"
-          {menuPath}
-          id={view.getViewName() + 'AssignerId'}>
-          <div slot="floatingController">
-            <FloatingButton on:click={onAddAssignerStatus} title={T('TASK.LABEL.ADD_STATUS')} />
-          </div>
-        </CloseableList>
+        {#if form.assignerStatusDetails.length > 0 && form.assignerStatusDetails[0].startTime}
+          <CloseableList
+            on:edit={onEditAssignerStatus}
+            on:view={onViewAssignerStatus}
+            directClose={true}
+            disabled={$isReadOnlyMode$}
+            bind:list={form.assignerStatusDetails}
+            className="closeable-list__floating-controller"
+            customRender="modules/task/task/components/status/index.svelte"
+            {menuPath}
+            id={view.getViewName() + 'AssignerStatusDetailId'}>
+            <!--          <div slot="floatingController">-->
+            <!--            <FloatingButton on:click={onAddAssignerStatus} title={T('TASK.LABEL.ADD_STATUS')} />-->
+            <!--          </div>-->
+          </CloseableList>
+        {/if}
       </div>
     </div>
   </Section>
@@ -1012,7 +1080,6 @@
         <div class=" col-24">
           <CloseableList
             className="closeable-list__floating-controller"
-            on:close={onCloseEvaluator}
             customData={$assigneeStatusList$}
             customRender="modules/task/task/components/status/index.svelte"
             {menuPath}
@@ -1102,6 +1169,6 @@
 
   </Section>
   <!-- // Evaluator Info-->
-
+  </form>
 </section>
 <!--//Main content-->

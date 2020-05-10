@@ -87,10 +87,33 @@
     });
   }
 
+  const createCheckboxesHeader = (delay = 2000) => {
+    setTimeout(() => {
+      if (excelGridRef) {
+        // checked
+        excelGridRef.createCheckboxHeader(4, true);
+        // private
+        excelGridRef.createCheckboxHeader(7, true);
+        // approve
+        excelGridRef.createCheckboxHeader(9, true);
+
+        // Render
+        excelGridRef.createCheckboxHeader(12, true);
+        // Disabled
+        excelGridRef.createCheckboxHeader(13, true);
+        // Confirm
+        excelGridRef.createCheckboxHeader(14, true);
+        // Require password
+        excelGridRef.createCheckboxHeader(15, true);
+      }
+    }, delay);
+  };
+
   // @ts-ignore
   $: if (useMergeCell) {
     // @ts-ignore
     mergeCells = makeMergeCells(roleDetails);
+    createCheckboxesHeader(500);
   } else {
     mergeCells = {};
   }
@@ -114,7 +137,7 @@
 
     dataChanged = view.checkObjectArrayChange(beforeData, SObject.clone(editedData));
 
-    if (dataChanged !== true) {
+    if (dataChanged) {
       scRef
         .confirmModalRef()
         .show(T('SYS.MSG.THE_DATA_HAS_BEEN_CHANGED') + '. ' + T('SYS.MSG.ARE_YOU_SURE_TO_RESET' + '?'))
@@ -181,7 +204,7 @@
 
     dataChanged = view.checkObjectArrayChange(beforeData, SObject.clone(editedData), scRef.snackbarRef());
 
-    if (dataChanged === true) {
+    if (!dataChanged) {
       return false;
     }
 
@@ -271,28 +294,6 @@
 
     createCheckboxesHeader();
   });
-
-  const createCheckboxesHeader = (delay = 1000) => {
-    setTimeout(() => {
-      if (excelGridRef) {
-        // checked
-        excelGridRef.createCheckboxHeader(4, true);
-        // private
-        excelGridRef.createCheckboxHeader(7, true);
-        // approve
-        excelGridRef.createCheckboxHeader(9, true);
-
-        // Render
-        excelGridRef.createCheckboxHeader(12, true);
-        // Disabled
-        excelGridRef.createCheckboxHeader(13, true);
-        // Confirm
-        excelGridRef.createCheckboxHeader(14, true);
-        // Require password
-        excelGridRef.createCheckboxHeader(15, true);
-      }
-    }, delay);
-  };
 
   onDestroy(() => {
     if (saveOrUpdateSub) {

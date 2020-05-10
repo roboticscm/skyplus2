@@ -73,6 +73,10 @@ export const genUUID = () => {
   return 'id' + uuidv4();
 };
 
+export const genNumberUUID = () => {
+  return getRandomInt(0, 999999999999) + Date.now();
+};
+
 export const getRandomInt = (min: number, max: number) => {
   const _min = Math.ceil(min);
   const _max = Math.floor(max);

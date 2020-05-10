@@ -106,7 +106,7 @@
 
     dataChanged = view.checkObjectArrayChange(beforeRoleData, SObject.clone(editedRoleData));
 
-    if (dataChanged !== true) {
+    if (dataChanged) {
       scRef
         .confirmModalRef()
         .show(T('SYS.MSG.THE_DATA_HAS_BEEN_CHANGED') + '. ' + T('SYS.MSG.ARE_YOU_SURE_TO_RESET' + '?'))
@@ -212,7 +212,7 @@
 
     dataChanged = view.checkObjectArrayChange(beforeRoleData, SObject.clone(editedRoleData), scRef.snackbarRef());
 
-    if (dataChanged === true) {
+    if (!dataChanged) {
       return false;
     }
 

@@ -237,7 +237,15 @@ export const getDiffFieldsObject = (obj1, obj2) => {
     // Check if all items exist and are in the same order
     for (var i = 0; i < arr1.length; i++) {
       // if (arr1[i] !== arr2[i] && ((arr1[i] !== null && arr2[i] !== '') || (arr1[i] !== '' && arr2[i] !== null)))
-      if (arr1[i] != arr2[i]) return false;
+      if (typeof arr1[i] === 'object' || typeof arr2[i] === 'object') {
+        var objDiff = getDiffFieldsObject(arr1[i], arr2[i]);
+        if (objDiff && Object.keys(objDiff).length > 1) {
+          diffs[key] = objDiff;
+        }
+      } else {
+        if (arr1[i] != arr2[i]) return false;
+      }
+
     }
 
     // Otherwise, return true

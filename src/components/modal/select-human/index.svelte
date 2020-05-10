@@ -23,7 +23,7 @@
   export const show = (human: any[]) => {
     setTimeout(() => {
       quickSearchRef && quickSearchRef.focus();
-      treeRef.checkNodeByIds(human.map((it: any) => it.id));
+      treeRef.checkNodeByIds(human.map((it: any) => 'human' + it.id));
     }, 100);
 
     return new Promise((resolve, reject) => {

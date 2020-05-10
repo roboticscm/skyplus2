@@ -6,8 +6,6 @@
   import { ModalType } from '@/components/ui/modal/types';
   import { ButtonPressed } from '../button/types';
 
-  export let data: CloseableListItem[] = undefined;
-  export let data$: Observable<CloseableListItem[]> = undefined;
   export let confirmDelete = false;
   export let menuPath: string;
   export let id: string;
@@ -16,7 +14,7 @@
   export let disabled = false;
 
   export let customRender: string = undefined;
-  export let customData: any[] = [];
+  export let list: any[] = [];
 
   const dispatch = createEventDispatcher();
 
@@ -25,14 +23,10 @@
   let CustomRender: any;
 
   // @ts-ignore
-  $: {
-    if (data) {
-      _data = data;
-      // @ts-ignore
-    } else if ($data$) {
-      // @ts-ignore
-      _data = $data$;
-    }
+  $: if (list && list.length > 0 && list[0].id) {
+    _data = list;
+  } else {
+    _data = [];
   }
 
   // @ts-ignore
@@ -76,14 +70,17 @@
       }
       dispatch('close', row);
     }
+    list = _data;
   };
 
   export const push = (item: CloseableListItem) => {
     _data = [..._data, item];
+    list = _data;
   };
 
   export const clearAll = () => {
     _data = [];
+    list = _data;
   };
 
   export const getData = () => {
@@ -96,9 +93,9 @@
   <div class="closeable-list__content ">
     <ul>
       {#if customRender}
-        {#each customData as row}
+        {#each _data as row}
           <li on:click={() => onClickItem(row)}>
-            <svelte:component this={CustomRender} data={row} />
+            <svelte:component this={CustomRender} data={row} {disabled} on:view on:edit />
             <span class="close" on:click={(e) => onClose(e, row)}>&times;</span>
           </li>
         {/each}
@@ -113,11 +110,11 @@
     </ul>
   </div>
 
-  <div class="closeable-list__controller">
+  <div class="closeable-list__controller label-link">
     <slot />
   </div>
 
-  <div class="closeable-list__floating-controller">
+  <div class="closeable-list__floating-controller label-link">
     <slot name="floatingController" />
   </div>
 
