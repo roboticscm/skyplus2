@@ -1,5 +1,5 @@
-import {StringUtil} from "@/lib/js/string-util";
-import {genNumberUUID} from "@/lib/js/util";
+import { StringUtil } from '@/lib/js/string-util';
+import { genNumberUUID } from '@/lib/js/util';
 
 export class Task {
   id = '';
@@ -19,6 +19,7 @@ export class Task {
   complete? = false;
   firstReminder? = Date.now();
   secondReminder? = Date.now();
+  submitStatus? = 0;
 
   // one to many relation
   taskAttachFiles?: any[] = [];
@@ -72,8 +73,8 @@ export class Status {
 export class StatusDetail {
   id? = genNumberUUID();
   taskId? = '';
-  statusId? ='';
-  verificationId? ='';
+  statusId? = '';
+  verificationId? = '';
   startTime? = Date.now();
   endTime? = Date.now();
   note? = '';

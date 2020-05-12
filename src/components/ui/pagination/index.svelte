@@ -3,6 +3,7 @@
   import { settingsStore } from '@/store/settings';
   import { createEventDispatcher } from 'svelte';
   import { App } from '@/lib/js/constants';
+  import { SNumber } from '@/lib/js/snumber';
 
   const dispatch = createEventDispatcher();
 
@@ -13,7 +14,7 @@
   export let showFirstLastButton = true;
   export let menuPath: string;
 
-  const sizes = [3, 10, 20, 50, 100, 500, 1000, -1];
+  const sizes = [3, 10, 20, 50, 100];
   let pageSize = sizes[0];
   let curPage = 1;
 
@@ -132,6 +133,7 @@
         <!--      first button-->
         {#if showFirstLastButton && (firstStatus || showDisabledButton)}
           <button
+            type="button"
             title={T('COMMON.LABEL.FIRST')}
             disabled={!firstStatus}
             on:click={() => jumpToPage(1)}
@@ -142,6 +144,7 @@
         <!--      prev button-->
         {#if prevStatus || showDisabledButton}
           <button
+            type="button"
             title={T('COMMON.LABEL.PREVIOUS')}
             disabled={!prevStatus}
             on:click={() => jumpToPage(curPage - 1)}
@@ -149,19 +152,22 @@
             ←
           </button>
         {/if}
-        <!--      page-->
-        <select
-          title={T('SYS.LABEL.RECORDS')}
-          on:change={onPageChange}
-          class={smallSize ? 'small-control-dropdown' : 'control-dropdown'}>
-          {#each getPages() as page}
-            <option selected={page.id === curPage} value={page.id}>{page.value}</option>
-          {/each}
-        </select>
-
+        <!-- page-->
+        <!-- TODO-->
+        {#if totalPages > 0 && totalPages < 100}
+          <select
+            title={T('SYS.LABEL.RECORDS')}
+            on:change={onPageChange}
+            class={smallSize ? 'small-control-dropdown' : 'control-dropdown'}>
+            {#each getPages() as page}
+              <option selected={page.id === curPage} value={page.id}>{page.value}</option>
+            {/each}
+          </select>
+        {:else if totalPages >= 100}{T('COMMON.LABEL.PAGE')} : {SNumber.toLocaleString(curPage)}{/if}
         <!--      next button-->
         {#if nextStatus || showDisabledButton}
           <button
+            type="button"
             title={T('COMMON.LABEL.NEXT')}
             disabled={!nextStatus}
             on:click={() => jumpToPage(curPage + 1)}
@@ -172,6 +178,7 @@
         <!--     last button-->
         {#if showFirstLastButton && (lastStatus || showDisabledButton)}
           <button
+            type="button"
             title={T('COMMON.LABEL.LAST')}
             disabled={!lastStatus}
             on:click={() => jumpToPage(totalPages)}
@@ -190,7 +197,7 @@
         <option value={size}>{size !== -1 ? size : T('SYS.LABEL.ALL')}</option>
       {/each}
     </select>
-    <span title={T('COMMON.LABEL.TOTAL_RECORD')}>{'#' + totalRecords}</span>
+    <span title={T('COMMON.LABEL.TOTAL_RECORD')}>{'#' + SNumber.toLocaleString(totalRecords)}</span>
     <!--     Default slot-->
     <slot />
   </span>

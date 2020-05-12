@@ -18,6 +18,8 @@ import { fromPromise } from 'rxjs/internal-compatibility';
 import Form from '@/lib/js/form/form';
 import { Menu } from '@/modules/sys/menu/model';
 import HumanOrOrgStore from '@/modules/sys/user/store';
+import { roleControlStore } from '@/store/role-control';
+import { appStore } from '@/store/app';
 
 export class ViewStore {
   tableName: string;
@@ -49,6 +51,10 @@ export class ViewStore {
 
   allColumns$ = new BehaviorSubject<any[]>([]);
   allColumns: any[] = [];
+
+  ModalContentView$ = new BehaviorSubject<any>(undefined);
+  modalFullControl$ = new BehaviorSubject<boolean>(undefined);
+  modalRoleControls$ = new BehaviorSubject<any[]>([]);
 
   completeLoading$ = forkJoin([
     this.dataList$.pipe(
@@ -154,7 +160,9 @@ export class ViewStore {
   static createCustomQuerySubscription = (table: string, columns: any[], withVar: boolean = false) => {
     const query = `
       subscription ${table}Subscription ${withVar ? '($id: bigint!, $updatedBy: bigint!)' : ''} {
-        ${table} ${withVar ? '(where: {_and: [ {id: { _eq: $id }}, {updated_by: { _neq: $updatedBy }}]})' : ''} {
+        ${table} ${
+      withVar ? '(limit: 1, where: {_and: [ {id: { _eq: $id }}, {updated_by: { _neq: $updatedBy }}]})' : '(limit: 1)'
+    } {
           ${columns.map((it) => it.columnName).join('\n')}
         }
       }
@@ -350,6 +358,26 @@ export class ViewStore {
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'DELETE',
+      extraMessage,
+    );
+  };
+
+  verifySubmitAction = (buttonId: string, scRef: any, extraMessage: string = '') => {
+    return this.verifySimpleAction(
+      buttonId,
+      scRef.confirmModalRef(),
+      scRef.confirmPasswordModalRef(),
+      'SUBMIT',
+      extraMessage,
+    );
+  };
+
+  verifyCancelSubmitAction = (buttonId: string, scRef: any, extraMessage: string = '') => {
+    return this.verifySimpleAction(
+      buttonId,
+      scRef.confirmModalRef(),
+      scRef.confirmPasswordModalRef(),
+      'CANCEL_SUBMIT',
       extraMessage,
     );
   };
@@ -567,5 +595,46 @@ export class ViewStore {
         this.needSelectId$.next(selectedId);
       }
     }
+  };
+
+  loadModalComponent = (menuPath: string) => {
+    return new Promise((resolve, reject) => {
+      roleControlStore
+        .sysGetControlListByDepIdAndUserIdAndMenuPath(appStore.org.departmentId, menuPath)
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (res.data.fullControl) {
+            this.modalFullControl$.next(true);
+          } else {
+            this.modalRoleControls$.next(res.data);
+          }
+          import('@/modules/' + menuPath + '/index.svelte')
+            .then((res) => {
+              this.ModalContentView$.next(res.default);
+              resolve('ok');
+            })
+            .catch((error) => reject(error));
+        });
+    });
+  };
+
+  registerHotKey$ = (container: any, isReadOnlyMode$: Observable<boolean>) => {
+    const controlS$ = fromEvent(container, 'keydown').pipe(
+      filter((e: any) => {
+        if (e.keyCode == 83 && (navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)) {
+          e.preventDefault();
+          // @ts-ignore
+          if (!isReadOnlyMode$.value) {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          return false;
+        }
+      }),
+    );
+
+    return controlS$;
   };
 }

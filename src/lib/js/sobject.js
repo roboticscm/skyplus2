@@ -245,7 +245,6 @@ export const getDiffFieldsObject = (obj1, obj2) => {
       } else {
         if (arr1[i] != arr2[i]) return false;
       }
-
     }
 
     // Otherwise, return true

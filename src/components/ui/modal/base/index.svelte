@@ -34,6 +34,7 @@
   export let defaultHeight: number = undefined; // in pixel
   export let defaultWidth: number = undefined; // in pixel
   export let transparent = true;
+  export let wrapperClass = '';
 
   let modalWrapperRef: any;
   let modalRef: any;
@@ -205,7 +206,7 @@
 
 </style>
 
-<div bind:this={modalWrapperRef} class="modal-wrapper {transparent ? '' : 'modal-wrapper-background'}">
+<div bind:this={modalWrapperRef} class="modal-wrapper {wrapperClass} {transparent ? '' : 'modal-wrapper-background'}">
   <form on:submit|preventDefault={loginWithoutGenToken} on:keydown={(e) => form.errors.clear(e.currentTarget.name)}>
     <div bind:this={modalRef} {id} class="modal" on:mouseup={onMouseUp}>
       <div id={id + 'header'} class="modal-header">
@@ -261,7 +262,7 @@
             {#if modalType === ModalType.ConfirmPassword}
               <Button type="submit" btnType={ButtonType.OkModal} title={okButtonTitle} {disabled} />
             {:else}
-              <Button on:click={onOK} btnType={ButtonType.OkModal} title={okButtonTitle} {disabled}/>
+              <Button on:click={onOK} btnType={ButtonType.OkModal} title={okButtonTitle} {disabled} />
             {/if}
           {/if}
           {#if showCancelButton}

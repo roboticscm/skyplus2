@@ -6,6 +6,7 @@ import { OwnerOrg } from '@/modules/sys/owner-org/model';
 import { TableUtilStore } from '@/store/table-util';
 import { RxHttp } from '@/lib/js/rx-http';
 import { toSnackCase } from '@/lib/js/util';
+import { Http } from '@/lib/js/http';
 
 const BASE_URL = 'task/task/';
 export default class Store {
@@ -123,6 +124,7 @@ export default class Store {
   };
 
   tskFindTasks = (menuPath: string, departmentId: string) => {
+    const start = Date.now();
     RxHttp.get(`${BASE_URL}${toSnackCase('tskFindTasks')}`, {
       menuPath,
       departmentId,
@@ -130,6 +132,9 @@ export default class Store {
       pageSize: this.view.pageSize,
     }).subscribe((res: any) => {
       this.taskList$.next(res.data.payload);
+      this.view.fullCount$.next(res.data.fullCount);
+      const end = Date.now();
+      console.log('Took ', end - start);
     });
   };
 

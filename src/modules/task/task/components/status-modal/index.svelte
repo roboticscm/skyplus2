@@ -9,12 +9,18 @@
   import UploadFiles from '@/components/ui/upload-files';
   import Form from '@/lib/js/form/form';
   import { StatusDetail } from '../../../types';
+  import { ViewStore } from '@/store/view';
+  import ViewWrapperModal from '@/components/modal/view-wrapper';
+  import { take } from 'rxjs/operators';
+  import { roleControlStore } from '@/store/role-control';
+  import { appStore } from '@/store/app';
 
   export let menuPath: string;
   export let id: string;
   export let store: Store;
   export let forAssigner = false;
   export let title: string;
+  export let view: ViewStore;
 
   const { taskStatus$, taskQualification$ } = store;
 
@@ -22,12 +28,19 @@
   const defaultWidth = 800;
   const defaultHeight = 400;
 
-  let form = new Form({
+  let form: any = new Form({
     ...new StatusDetail(),
   });
   let disabled = false;
+  let modalMenuPath: string;
+  let modalContentViewRef: any;
+  let viewWrapperModalRef: any;
 
-  export const show = (_data: any = undefined, _disabled=false) => {
+  let ModalContentView: any;
+  let modalFullControl: boolean = undefined;
+  let modalRoleControls: any[] = [];
+
+  export const show = (_data: any = undefined, _disabled = false) => {
     disabled = _disabled;
     if (_data) {
       form = new Form({
@@ -56,9 +69,43 @@
     };
   };
 
-  const onShowStatusModal = () => {
-    console.log('xxx');
-  }
+  const loadModalComponent = (menuPath: string) => {
+    return new Promise((resolve, reject) => {
+      roleControlStore
+        .sysGetControlListByDepIdAndUserIdAndMenuPath(appStore.org.departmentId, menuPath)
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (res.data.fullControl) {
+            modalFullControl = true;
+          } else {
+            modalRoleControls = res.data;
+          }
+          import('@/modules/' + menuPath + '/index.svelte')
+            .then((res) => {
+              ModalContentView = res.default;
+              resolve('ok');
+            })
+            .catch((error) => reject(error));
+        });
+    });
+  };
+
+  const onShowStatusModal = (menuPath: string) => {
+    modalMenuPath = menuPath;
+    loadModalComponent(menuPath).then((res) => {
+      viewWrapperModalRef.show().then((res) => {
+        console.log(res);
+      });
+    });
+  };
+
+  const addCallback = (event) => {
+    if (modalMenuPath === 'task/status') {
+      form.statusId = event.detail;
+    } else if (modalMenuPath === 'task/task-verification') {
+      form.verificationId = event.detail;
+    }
+  };
 </script>
 
 <Modal
@@ -84,9 +131,9 @@
     <div class="col-24">
       {#if forAssigner}
         <FloatSelect
-          on:clickLabel={onShowStatusModal}
+          on:clickLabel={() => onShowStatusModal('task/status')}
           {disabled}
-          bind:this = {statusRef}
+          bind:this={statusRef}
           bind:value={form.statusId}
           id={id + 'Status'}
           placeholder={T('TASK.LABEL.STATUS')}
@@ -94,9 +141,9 @@
           data$={taskStatus$} />
       {:else}
         <FloatSelect
-                {disabled}
-          bind:this = {taskVerificationRef}
-          bind:value={form.verficationId}
+          {disabled}
+          bind:this={taskVerificationRef}
+          bind:value={form.verificationId}
           id={id + 'Percentage'}
           placeholder={T('TASK.LABEL.PERCENTAGE')}
           {menuPath}
@@ -112,7 +159,32 @@
   </div>
   <div class="row">
     <div class="col-24" style="margin-top: 6px;">
-      <UploadFiles savePath="upload_files/task" {disabled} {menuPath} id={id + 'UploadFiles'} bind:list={form.attachFiles} />
+      <UploadFiles
+        savePath="upload_files/task"
+        {disabled}
+        {menuPath}
+        id={id + 'UploadFiles'}
+        bind:list={form.attachFiles} />
     </div>
   </div>
 </Modal>
+
+<ViewWrapperModal
+  menuInfo={modalContentViewRef && modalContentViewRef.getMenuInfo$()}
+  title={modalContentViewRef && modalContentViewRef.getViewTitle()}
+  defaultWidth={600}
+  defaultHeight={400}
+  bind:this={viewWrapperModalRef}
+  {menuPath}
+  id={'modalWrapper' + view.getViewName() + 'StatusModalId'}>
+  <svelte:component
+    this={ModalContentView}
+    showWorkList={false}
+    bind:this={modalContentViewRef}
+    showTitle={false}
+    on:callback={addCallback}
+    callFrom={menuPath}
+    menuPath={modalMenuPath}
+    fullControl={modalFullControl}
+    roleControls={modalRoleControls} />
+</ViewWrapperModal>

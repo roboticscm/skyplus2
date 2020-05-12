@@ -7,7 +7,7 @@
   import FloatingButton from '@/components/ui/button/floating';
   import Store from '../store';
   import Form from '@/lib/js/form/form';
-  import {StatusDetail, Task} from '../../types';
+  import { StatusDetail, Task } from '../../types';
   import FloatSelect from '@/components/ui/float-input/select';
   import FloatCheckbox from '@/components/ui/float-input/checkbox';
   import FloatLabel from '@/components/ui/float-input/label';
@@ -37,8 +37,8 @@
     findEditStatusDetail,
     findRemoveAndInsertFile,
     findRemoveAndInsertItem,
-    findRemoveAndInsertStatusDetail
-  } from "./helper";
+    findRemoveAndInsertStatusDetail,
+  } from './helper';
 
   // Props
   export let view: ViewStore;
@@ -46,7 +46,17 @@
   export let store: Store;
 
   // @ts-ignore
-  const { selectedData$, hasAnyDeletedRecord$, deleteRunning$, saveRunning$, isReadOnlyMode$, isUpdateMode$ } = view;
+  const {
+    selectedData$,
+    hasAnyDeletedRecord$,
+    deleteRunning$,
+    saveRunning$,
+    isReadOnlyMode$,
+    isUpdateMode$,
+    ModalContentView$,
+    modalFullControl$,
+    modalRoleControls$,
+  } = view;
 
   // @ts-ignore
   const {
@@ -67,11 +77,8 @@
   let statusModalRef: any;
   let modalContentViewRef: any;
   let viewWrapperModalRef: any;
-  let ModalContentView: any;
   let selectedData: Task;
   let forAssigner = undefined;
-  let modalFullControl: boolean = undefined;
-  let modalRoleControls: any[] = [];
   let modalMenuPath: string;
 
   let projectSub, prioritySub, statusSub: Subscription;
@@ -90,6 +97,7 @@
       ...new Task(),
     });
   };
+
   let form: any = resetForm();
   let beforeForm: any;
 
@@ -207,15 +215,14 @@
     statusModalRef.show(event.detail).then((buttonPressed: ButtonPressed) => {
       if (buttonPressed === ButtonPressed.OK) {
         const editedData = statusModalRef.getData();
-        const index  = form.assignerStatusDetails.findIndex((it: StatusDetail) => it.id === editedData.id)
-        if(index >=0) {
+        const index = form.assignerStatusDetails.findIndex((it: StatusDetail) => it.id === editedData.id);
+        if (index >= 0) {
           form.assignerStatusDetails[index] = editedData;
           form.assignerStatusDetails = [...form.assignerStatusDetails];
         }
       }
     });
   };
-
 
   const onViewAssignerStatus = (event: any) => {
     assignerModalTitle = T('COMMON.LABEL.STATUS_DETAIL');
@@ -233,15 +240,10 @@
     forAssigner = true;
     statusModalRef.show().then((buttonPressed: ButtonPressed) => {
       if (buttonPressed === ButtonPressed.OK) {
-        if(form.assignerStatusDetails && form.assignerStatusDetails.length > 0 && form.assignerStatusDetails[0].id) {
-          form.assignerStatusDetails = [
-            ...form.assignerStatusDetails,
-            {...statusModalRef.getData()},
-          ];
+        if (form.assignerStatusDetails && form.assignerStatusDetails.length > 0 && form.assignerStatusDetails[0].id) {
+          form.assignerStatusDetails = [...form.assignerStatusDetails, { ...statusModalRef.getData() }];
         } else {
-          form.assignerStatusDetails = [
-            {...statusModalRef.getData()},
-          ];
+          form.assignerStatusDetails = [{ ...statusModalRef.getData() }];
         }
       }
     });
@@ -263,7 +265,7 @@
 
   const onOpenModal = (menuPath: string) => {
     modalMenuPath = menuPath;
-    loadModalComponent(menuPath).then((res) => {
+    view.loadModalComponent(menuPath).then((res) => {
       viewWrapperModalRef.show().then((res) => {
         console.log(res);
       });
@@ -327,68 +329,78 @@
 
   const postprocessData = () => {
     // task attach file
-    [form.removeTaskAttachFiles, form.insertTaskAttachFiles] = findRemoveAndInsertFile(isUpdateMode$.value,
+    [form.removeTaskAttachFiles, form.insertTaskAttachFiles] = findRemoveAndInsertFile(
+      isUpdateMode$.value,
       beforeForm && beforeForm.taskAttachFiles,
       form.taskAttachFiles,
     );
 
     // assigner
-    [form.removeAssigners, form.insertAssigners] = findRemoveAndInsertItem(isUpdateMode$.value,
+    [form.removeAssigners, form.insertAssigners] = findRemoveAndInsertItem(
+      isUpdateMode$.value,
       beforeForm && beforeForm.assigners,
       form.assigners,
     );
 
     // assignee
-    [form.removeAssignees, form.insertAssignees] = findRemoveAndInsertItem(isUpdateMode$.value,
+    [form.removeAssignees, form.insertAssignees] = findRemoveAndInsertItem(
+      isUpdateMode$.value,
       beforeForm && beforeForm.assignees,
       form.assignees,
     );
 
     // evaluator
-    [form.removeEvaluators, form.insertEvaluators] = findRemoveAndInsertItem(isUpdateMode$.value,
+    [form.removeEvaluators, form.insertEvaluators] = findRemoveAndInsertItem(
+      isUpdateMode$.value,
       beforeForm && beforeForm.evaluators,
       form.evaluators,
     );
 
     // characteristics
-    [form.removeChars, form.insertChars] = findRemoveAndInsertItem(isUpdateMode$.value, beforeForm && beforeForm.chars, form.chars);
+    [form.removeChars, form.insertChars] = findRemoveAndInsertItem(
+      isUpdateMode$.value,
+      beforeForm && beforeForm.chars,
+      form.chars,
+    );
 
     // Target Person
-    [form.removeTargetPersons, form.insertTargetPersons] = findRemoveAndInsertItem(isUpdateMode$.value,
+    [form.removeTargetPersons, form.insertTargetPersons] = findRemoveAndInsertItem(
+      isUpdateMode$.value,
       beforeForm && beforeForm.targetPersons,
       form.targetPersons,
     );
 
     // Target Team
-    [form.removeTargetTeams, form.insertTargetTeams] = findRemoveAndInsertItem(isUpdateMode$.value,
+    [form.removeTargetTeams, form.insertTargetTeams] = findRemoveAndInsertItem(
+      isUpdateMode$.value,
       beforeForm && beforeForm.targetTeams,
       form.targetTeams,
     );
 
-
     // Add or remove Assigner status detail
-    [form.removeAssignerStatusDetails, form.insertAssignerStatusDetails] = findRemoveAndInsertStatusDetail(isUpdateMode$.value,
-            beforeForm && beforeForm.assignerStatusDetails,
-            form.assignerStatusDetails,
+    [form.removeAssignerStatusDetails, form.insertAssignerStatusDetails] = findRemoveAndInsertStatusDetail(
+      isUpdateMode$.value,
+      beforeForm && beforeForm.assignerStatusDetails,
+      form.assignerStatusDetails,
     );
-
 
     // Edit Assigner status detail
     if (isUpdateMode$.value) {
       const [a, b] = findEditStatusDetail(beforeForm.assignerStatusDetails, SObject.clone(form.assignerStatusDetails));
       const dataChange = view.checkObjectArrayChange(a, b);
-      if(dataChange) {
+      if (dataChange) {
         form.editAssignerStatusDetails = dataChange;
 
-        for(let statusDetail of form.editAssignerStatusDetails) {
+        for (let statusDetail of form.editAssignerStatusDetails) {
           const index = beforeForm.assignerStatusDetails.findIndex((it: StatusDetail) => {
             return it.id === statusDetail.id;
           });
 
-          if(index >= 0) {
-            [statusDetail.removeAttachFiles, statusDetail.insertAttachFiles] = findRemoveAndInsertFile(isUpdateMode$.value,
-                  beforeForm && beforeForm.assignerStatusDetails[index].attachFiles,
-                  statusDetail.attachFiles,
+          if (index >= 0) {
+            [statusDetail.removeAttachFiles, statusDetail.insertAttachFiles] = findRemoveAndInsertFile(
+              isUpdateMode$.value,
+              beforeForm && beforeForm.assignerStatusDetails[index].attachFiles,
+              statusDetail.attachFiles,
             );
           }
         }
@@ -396,10 +408,48 @@
     }
   };
 
-
   // ============================== // HELPER ==========================
 
   // ============================== CLIENT VALIDATION ==========================
+  const verifySaveOrUpdate = () => {
+    return fromPromise(
+      /* verify permission*/
+      view.verifySaveAction(
+        // @ts-ignore
+        $isUpdateMode$ ? ButtonId.Update : ButtonId.Save,
+        scRef,
+      ),
+    ).pipe(
+      catchError((error) => {
+        return of(error);
+      }),
+    );
+  };
+
+  const verifySubmit = () => {
+    form.submitStatus = 1;
+    return fromPromise(
+      /* verify permission*/
+      view.verifySubmitAction(ButtonId.Submit, scRef),
+    ).pipe(
+      catchError((error) => {
+        return of(error);
+      }),
+    );
+  };
+
+  const verifyCancelSubmit = () => {
+    form.submitStatus = 0;
+    return fromPromise(
+      /* verify permission*/
+      view.verifyCancelSubmitAction(ButtonId.CancelSubmit, scRef),
+    ).pipe(
+      catchError((error) => {
+        return of(error);
+      }),
+    );
+  };
+
   /**
    * Client validation and check for no data change.
    * @param {none}
@@ -424,6 +474,19 @@
 
     return true;
   };
+
+  const validateForSubmitOrCancelSubmit = () => {
+    preprocessData();
+
+    // client validation
+    form.errors.errors = form.recordErrors(validation(form));
+    if (form.errors.any()) {
+      return false;
+    }
+
+    return true;
+  };
+
   // ============================== //CLIENT VALIDATION ==========================
 
   // ============================== FUNCTIONAL ==========================
@@ -452,24 +515,11 @@
    * @param {ob$} Observable event of the button click or shortcut key(fromEvent)
    * @return {void}.
    */
-  const doSaveOrUpdate = (ob$: Observable<any>) => {
+  const doSaveOrUpdate = (ob$: Observable<any>, verifyFunction, validateFunction = validate) => {
     saveOrUpdateSub = ob$
       .pipe(
-        filter((_) => validate()) /* filter if form pass client validation */,
-        concatMap((_) =>
-          fromPromise(
-            /* verify permission*/
-            view.verifySaveAction(
-              // @ts-ignore
-              $isUpdateMode$ ? ButtonId.Update : ButtonId.Save,
-              scRef,
-            ),
-          ).pipe(
-            catchError((error) => {
-              return of(error);
-            }),
-          ),
-        ),
+        filter((_) => validateFunction()) /* filter if form pass client validation */,
+        concatMap((_) => verifyFunction()),
         filter((value) => value !== 'fail') /* filter if pass verify permission*/,
         switchMap((_) => {
           /* submit data to API server*/
@@ -563,27 +613,6 @@
     }
   };
 
-  const loadModalComponent = (menuPath: string) => {
-    return new Promise((resolve, reject) => {
-      roleControlStore
-        .sysGetControlListByDepIdAndUserIdAndMenuPath(appStore.org.departmentId, menuPath)
-        .pipe(take(1))
-        .subscribe((res) => {
-          if (res.data.fullControl) {
-            modalFullControl = true;
-          } else {
-            modalRoleControls = res.data;
-          }
-          import('@/modules/' + menuPath + '/index.svelte')
-            .then((res) => {
-              ModalContentView = res.default;
-              resolve('ok');
-            })
-            .catch((error) => reject(error));
-        });
-    });
-  };
-
   /**
    * Use save or update action directive. Register click event for Save / Update button
    * @param {none}
@@ -591,7 +620,8 @@
    */
   const useSaveOrUpdateAction = {
     register(component: HTMLElement, param: any) {
-      doSaveOrUpdate(fromEvent(component, 'click'));
+      const ob$ = fromEvent(component, 'click');
+      doSaveOrUpdate(ob$, verifySaveOrUpdate);
     },
   };
 
@@ -602,8 +632,20 @@
    */
   const useSubmitAction = {
     register(component: HTMLElement, param: any) {
-      // TODO
-      // doSaveOrUpdate(fromEvent(component, 'click'));
+      const ob$ = fromEvent(component, 'click');
+      doSaveOrUpdate(ob$, verifySubmit, validateForSubmitOrCancelSubmit);
+    },
+  };
+
+  /**
+   * Use cancel submit action directive. Register click event for Cancel Submit button
+   * @param {none}
+   * @return {void}.
+   */
+  const useCancelSubmitAction = {
+    register(component: HTMLElement, param: any) {
+      const ob$ = fromEvent(component, 'click');
+      doSaveOrUpdate(ob$, verifyCancelSubmit, validateForSubmitOrCancelSubmit);
     },
   };
 
@@ -642,6 +684,9 @@
   onMount(() => {
     registerSubscription();
     doAddNew();
+    // Capture hot key (Ctrl - S) for save or update
+
+    doSaveOrUpdate(view.registerHotKey$(document, isReadOnlyMode$), verifySaveOrUpdate);
   });
 
   onDestroy(() => {
@@ -705,6 +750,7 @@
 <SelectHumanModal id={view.getViewName() + 'SelectHumanModal'} {menuPath} bind:this={selectHumanModalRef} />
 <SelectOrgModal id={view.getViewName() + 'SelectOrgModal'} {menuPath} bind:this={selectOrgModalRef} />
 <StatusModal
+  {view}
   title={assignerModalTitle}
   {forAssigner}
   id={view.getViewName() + 'StatusModal'}
@@ -721,18 +767,17 @@
   {menuPath}
   id={'modalWrapper' + view.getViewName() + 'ModalId'}>
   <svelte:component
-    this={ModalContentView}
+    this={$ModalContentView$}
     showWorkList={false}
     bind:this={modalContentViewRef}
     showTitle={false}
     on:callback={addCallback}
     callFrom={menuPath}
     menuPath={modalMenuPath}
-    fullControl={modalFullControl}
-    roleControls={modalRoleControls} />
+    fullControl={$modalFullControl$}
+    roleControls={$modalRoleControls$} />
 </ViewWrapperModal>
 <!--//Invisible Element-->
-
 <!--Form controller-->
 <section class="view-content-controller">
   <!--    {#if view.isRendered(ButtonId.AddNew)}-->
@@ -759,12 +804,18 @@
       running={$saveRunning$} />
   {/if}
 
-  {#if view.isRendered(ButtonId.Submit, !$isUpdateMode$)}
+  {#if view.isRendered(ButtonId.Submit, form.submitStatus === 0)}
     <Button
       action={useSubmitAction}
       btnType={ButtonType.Submit}
-      disabled={view.isDisabled(ButtonId.Submit, form.errors.any())}
-      running={$saveRunning$} />
+      disabled={view.isDisabled(ButtonId.Submit, form.errors.any())} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.CancelSubmit, form.submitStatus === 1)}
+    <Button
+      action={useCancelSubmitAction}
+      btnType={ButtonType.CancelSubmit}
+      disabled={view.isDisabled(ButtonId.CancelSubmit)} />
   {/if}
 
   {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
@@ -791,384 +842,388 @@
 <!--Main content-->
 <section class="view-content-main">
   <form class="form" on:keydown={(event) => form.errors.clear(event.target.name)}>
-  <!-- Task Info-->
-  <Section title={T('TASK.LABEL.TASK')} {menuPath} id={view.getViewName() + 'TaskSectionId'}>
-    <div class="row">
-      <!-- Name -->
-      <div class="col-xs-24 col-md-12">
-        <FloatTextInput
-          checked={form.private}
-          rightCheck={true}
-          checkTitle={T('COMMON.LABEL.PRIVATE_TASK')}
-          bind:this={taskNameRef}
-          placeholder={T('COMMON.LABEL.NAME')}
-          name="name"
-          disabled={$isReadOnlyMode$}
-          bind:value={form.name} />
-        <Error {form} field="name" />
-      </div>
-      <!-- // Name -->
+    <!-- Task Info-->
+    <Section title={T('TASK.LABEL.TASK')} {menuPath} id={view.getViewName() + 'TaskSectionId'}>
+      <div class="row">
+        <!-- Name -->
+        <div class="col-xs-24 col-md-12">
+          <FloatTextInput
+            checked={form.private}
+            rightCheck={true}
+            checkTitle={T('COMMON.LABEL.PRIVATE_TASK')}
+            bind:this={taskNameRef}
+            placeholder={T('COMMON.LABEL.NAME')}
+            name="name"
+            disabled={$isReadOnlyMode$}
+            bind:value={form.name} />
+          <Error {form} field="name" />
+        </div>
+        <!-- // Name -->
 
-      <div class="col-xs-24 col-md-12">
-        <!-- Project -->
-        <FloatSelect
-          saveState={true}
-          autoLoad={true}
-          bind:value={form.projectId}
-          on:clickLabel={() => onOpenModal('task/project')}
-          id={view.getViewName() + 'ProjectId'}
-          placeholder={T('TASK.LABEL.PROJECT') + '(+)'}
-          {menuPath}
-          disabled={$isReadOnlyMode$}
-          data$={projects$} />
+        <div class="col-xs-24 col-md-12">
+          <!-- Project -->
+          <FloatSelect
+            saveState={true}
+            autoLoad={true}
+            bind:value={form.projectId}
+            on:clickLabel={() => onOpenModal('task/project')}
+            id={view.getViewName() + 'ProjectId'}
+            placeholder={T('TASK.LABEL.PROJECT') + '(+)'}
+            {menuPath}
+            disabled={$isReadOnlyMode$}
+            data$={projects$} />
+        </div>
+        <!-- // Project -->
       </div>
-      <!-- // Project -->
-    </div>
 
-    <div class="row">
-      <!-- Task Description -->
-      <div class="col-xs-24 col-md-12">
-        <RichEditor bind:value={form.description} disabled={$isReadOnlyMode$}>
-          {T('TASK.LABEL.TASK_DESCRIPTION')}:
-        </RichEditor>
+      <div class="row">
+        <!-- Task Description -->
+        <div class="col-xs-24 col-md-12">
+          <RichEditor bind:value={form.description} disabled={$isReadOnlyMode$}>
+            {T('TASK.LABEL.TASK_DESCRIPTION')}:
+          </RichEditor>
+        </div>
+        <!-- // Task Description -->
+        <!-- Attach file -->
+        <div class="col-xs-24 col-md-12" style="margin-top: 25px; min-height: 100px;">
+          <UploadFiles
+            savePath="upload_files/task"
+            bind:list={form.taskAttachFiles}
+            {menuPath}
+            id={view.getViewName() + 'UploadFiles'}
+            disabled={$isReadOnlyMode$} />
+        </div>
+        <!-- // Attach file -->
       </div>
-      <!-- // Task Description -->
-      <!-- Attach file -->
-      <div class="col-xs-24 col-md-12" style="margin-top: 25px; min-height: 100px;">
-        <UploadFiles
-                savePath="upload_files/task"
-          bind:list={form.taskAttachFiles}
-          {menuPath}
-          id={view.getViewName() + 'UploadFiles'}
-          disabled={$isReadOnlyMode$} />
-      </div>
-      <!-- // Attach file -->
-    </div>
 
-    <div class="row">
-      <!-- Last status -->
-      <div class="col-xs-24 col-md-12">
-        <FloatSelect
-          saveState={true}
-          autoLoad={true}
-          bind:value={form.priorityId}
-          on:clickLabel={() => onOpenModal('task/priority')}
-          id={view.getViewName() + 'PriorityId'}
-          placeholder={T('TASK.LABEL.PRIORITY') + '(+)'}
-          {menuPath}
-          disabled={$isReadOnlyMode$}
-          data$={priority$} />
+      <div class="row">
+        <!-- Last status -->
+        <div class="col-xs-24 col-md-12">
+          <FloatSelect
+            saveState={true}
+            autoLoad={true}
+            bind:value={form.priorityId}
+            on:clickLabel={() => onOpenModal('task/priority')}
+            id={view.getViewName() + 'PriorityId'}
+            placeholder={T('TASK.LABEL.PRIORITY') + '(+)'}
+            {menuPath}
+            disabled={$isReadOnlyMode$}
+            data$={priority$} />
+          <!-- // Last status -->
+        </div>
+        <!-- Last status -->
+        <div class="col-xs-24 col-md-12">
+          <FloatTextInput placeholder={T('COMMON.LABEL.STATUS')} disabled={true} bind:value={form.lastStatusName} />
+        </div>
         <!-- // Last status -->
       </div>
-      <!-- Last status -->
-      <div class="col-xs-24 col-md-12">
-        <FloatTextInput placeholder={T('COMMON.LABEL.STATUS')} disabled={true} bind:value={form.lastStatusName} />
-      </div>
-      <!-- // Last status -->
-    </div>
 
-    <div class="row">
-      <!-- Start time -->
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatDatePicker
-          bind:value={form.startTime}
-          placeholder={T('COMMON.LABEL.START_TIME')}
-          disabled={$isReadOnlyMode$} />
-      </div>
-      <!-- // tart time -->
-
-      <!-- Deadline -->
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatDatePicker
-          placeholder={T('COMMON.LABEL.DEADLINE')}
-          bind:value={form.deadline}
-          disabled={$isReadOnlyMode$} />
-      </div>
-      <!-- // Deadline -->
-
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatDatePicker
-          placeholder={T('COMMON.LABEL.FIRST_REMINDER')}
-          bind:value={form.firstReminder}
-          disabled={$isReadOnlyMode$} />
-      </div>
-
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatDatePicker
-          placeholder={T('COMMON.LABEL.SECOND_REMINDER')}
-          bind:value={form.secondReminder}
-          disabled={$isReadOnlyMode$} />
-      </div>
-    </div>
-
-    <div class="row" style="margin-top: 15px;">
-      <!-- Assigner -->
-      <div class="col-xs-24 col-md-12">
-        <CloseableList
-          directClose={true}
-          disabled={$isReadOnlyMode$}
-          bind:list={form.assigners}
-          {menuPath}
-          id={view.getViewName() + 'AssignerId'}>
-          <div on:click={onAddAssigner}>
-            {T('COMMON.LABEL.ASSIGNER')}
-            <i class="fa fa-angle-down" />
-            <div />
-          </div>
-        </CloseableList>
-      </div>
-      <!-- // Assigner -->
-
-      <div class="col-xs-24 col-md-12">
-        <div class="default-rounded-border">
-          <div class="my-placeholder" style="padding: 6px;">{T('COMMON.LABEL.CREATOR')}:</div>
-          <div style="margin-top: 5px; padding: 6px;">{'Tony Lua'}</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row" style="margin-top: 15px;">
-      <!-- Assignee -->
-      <div class="col-xs-24 col-md-12">
-        <CloseableList
-          directClose={true}
-          disabled={$isReadOnlyMode$}
-          bind:list={form.assignees}
-          {menuPath}
-          id={view.getViewName() + 'AssigneeId'}>
-          <div on:click={onAddAssignee}>
-            {T('COMMON.LABEL.ASSIGNEE')}
-            <i class="fa fa-angle-down" />
-            <div />
-          </div>
-        </CloseableList>
-      </div>
-      <!-- // Assignee -->
-
-      <!-- Evaluator -->
-      <div class="col-xs-24 col-md-12">
-        <CloseableList
-          directClose={true}
-          disabled={$isReadOnlyMode$}
-          bind:list={form.evaluators}
-          {menuPath}
-          id={view.getViewName() + 'EvaluatorId'}>
-          <!--          <Button uppercase={false} on:click={onAddEvaluator} title={'+ ' + T('COMMON.LABEL.EVALUATOR')} />-->
-          <div on:click={onAddEvaluator}>
-            {T('COMMON.LABEL.EVALUATOR')}
-            <i class="fa fa-angle-down" />
-            <div />
-          </div>
-        </CloseableList>
-      </div>
-      <!-- // Evaluator -->
-    </div>
-
-    <div style="height: 10px;" />
-
-    <Section
-      title={T('TASK.LABEL.CHARACTERISTIC_AND_TARGET')}
-      id={view.getViewName() + 'CharAndTargetSectionId'}
-      {menuPath}>
       <div class="row">
-        <div class="col-xs-24 col-md-12 col-lg-8">
-          <CloseableList
-            directClose={true}
-            disabled={$isReadOnlyMode$}
-            bind:list={form.chars}
-            {menuPath}
-            id={view.getViewName() + 'TaskCharacteristicId'}>
+        <!-- Start time -->
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatDatePicker
+            bind:value={form.startTime}
+            placeholder={T('COMMON.LABEL.START_TIME')}
+            disabled={$isReadOnlyMode$} />
+        </div>
+        <!-- // tart time -->
 
-            <div on:click={onAddCharacteristic}>
-              {T('COMMON.LABEL.TASK_CHARACTERISTIC')}
-              <i class="fa fa-angle-down" />
-              <div />
-            </div>
-          </CloseableList>
+        <!-- Deadline -->
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatDatePicker
+            placeholder={T('COMMON.LABEL.DEADLINE')}
+            bind:value={form.deadline}
+            disabled={$isReadOnlyMode$} />
+        </div>
+        <!-- // Deadline -->
+
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatDatePicker
+            placeholder={T('COMMON.LABEL.FIRST_REMINDER')}
+            bind:value={form.firstReminder}
+            disabled={$isReadOnlyMode$} />
         </div>
 
-        <div class="col-xs-24 col-md-12 col-lg-8">
-          <CloseableList
-            directClose={true}
-            disabled={$isReadOnlyMode$}
-            bind:list={form.targetPersons}
-            {menuPath}
-            id={view.getViewName() + 'TargetPersonId'}>
-            <div on:click={onAddTargetPerson}>
-              {T('COMMON.LABEL.TARGET_PERSON')}
-              <i class="fa fa-angle-down" />
-              <div />
-            </div>
-          </CloseableList>
-        </div>
-
-        <div class="col-xs-24 col-md-12 col-lg-8">
-          <CloseableList
-            directClose={true}
-            disabled={$isReadOnlyMode$}
-            bind:list={form.targetTeams}
-            {menuPath}
-            id={view.getViewName() + 'TargetTeamId'}>
-            <div on:click={onAddTargetTeam}>
-              {T('COMMON.LABEL.TARGET_TEAM')}
-              <i class="fa fa-angle-down" />
-              <div />
-            </div>
-          </CloseableList>
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatDatePicker
+            placeholder={T('COMMON.LABEL.SECOND_REMINDER')}
+            bind:value={form.secondReminder}
+            disabled={$isReadOnlyMode$} />
         </div>
       </div>
+
+      <div class="row" style="margin-top: 15px;">
+        <!-- Assigner -->
+        <div class="col-xs-24 col-md-12">
+          <CloseableList
+            directClose={true}
+            disabled={$isReadOnlyMode$}
+            bind:list={form.assigners}
+            {menuPath}
+            id={view.getViewName() + 'AssignerId'}>
+            <div on:click={onAddAssigner}>
+              {T('COMMON.LABEL.ASSIGNER')}
+              <i class="fa fa-angle-down" />
+              <div />
+            </div>
+          </CloseableList>
+        </div>
+        <!-- // Assigner -->
+
+        <div class="col-xs-24 col-md-12">
+          <div class="default-rounded-border">
+            <div class="my-placeholder" style="padding: 6px;">{T('COMMON.LABEL.CREATOR')}:</div>
+            <div style="margin-top: 5px; padding: 6px;">{'Tony Lua'}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top: 15px;">
+        <!-- Assignee -->
+        <div class="col-xs-24 col-md-12">
+          <CloseableList
+            directClose={true}
+            disabled={$isReadOnlyMode$}
+            bind:list={form.assignees}
+            {menuPath}
+            id={view.getViewName() + 'AssigneeId'}>
+            <div on:click={onAddAssignee}>
+              {T('COMMON.LABEL.ASSIGNEE')}
+              <i class="fa fa-angle-down" />
+              <div />
+            </div>
+          </CloseableList>
+        </div>
+        <!-- // Assignee -->
+
+        <!-- Evaluator -->
+        <div class="col-xs-24 col-md-12">
+          <CloseableList
+            directClose={true}
+            disabled={$isReadOnlyMode$}
+            bind:list={form.evaluators}
+            {menuPath}
+            id={view.getViewName() + 'EvaluatorId'}>
+            <!--          <Button uppercase={false} on:click={onAddEvaluator} title={'+ ' + T('COMMON.LABEL.EVALUATOR')} />-->
+            <div on:click={onAddEvaluator}>
+              {T('COMMON.LABEL.EVALUATOR')}
+              <i class="fa fa-angle-down" />
+              <div />
+            </div>
+          </CloseableList>
+        </div>
+        <!-- // Evaluator -->
+      </div>
+
+      <div style="height: 10px;" />
+
+      <div class="row">
+        <div class="col-24">
+          <Section
+            title={T('TASK.LABEL.CHARACTERISTIC_AND_TARGET')}
+            id={view.getViewName() + 'CharAndTargetSectionId'}
+            {menuPath}>
+            <div class="row">
+              <div class="col-xs-24 col-md-12 col-lg-8">
+                <CloseableList
+                  directClose={true}
+                  disabled={$isReadOnlyMode$}
+                  bind:list={form.chars}
+                  {menuPath}
+                  id={view.getViewName() + 'TaskCharacteristicId'}>
+
+                  <div on:click={onAddCharacteristic}>
+                    {T('COMMON.LABEL.TASK_CHARACTERISTIC')}
+                    <i class="fa fa-angle-down" />
+                    <div />
+                  </div>
+                </CloseableList>
+              </div>
+
+              <div class="col-xs-24 col-md-12 col-lg-8">
+                <CloseableList
+                  directClose={true}
+                  disabled={$isReadOnlyMode$}
+                  bind:list={form.targetPersons}
+                  {menuPath}
+                  id={view.getViewName() + 'TargetPersonId'}>
+                  <div on:click={onAddTargetPerson}>
+                    {T('COMMON.LABEL.TARGET_PERSON')}
+                    <i class="fa fa-angle-down" />
+                    <div />
+                  </div>
+                </CloseableList>
+              </div>
+
+              <div class="col-xs-24 col-md-12 col-lg-8">
+                <CloseableList
+                  directClose={true}
+                  disabled={$isReadOnlyMode$}
+                  bind:list={form.targetTeams}
+                  {menuPath}
+                  id={view.getViewName() + 'TargetTeamId'}>
+                  <div on:click={onAddTargetTeam}>
+                    {T('COMMON.LABEL.TARGET_TEAM')}
+                    <i class="fa fa-angle-down" />
+                    <div />
+                  </div>
+                </CloseableList>
+              </div>
+            </div>
+          </Section>
+        </div>
+      </div>
+
     </Section>
-  </Section>
-  <!-- //Task Info-->
+    <!-- //Task Info-->
+    <div style="height: 20px;" />
 
-  <div style="height: 20px;" />
-
-  <!-- Assigner Info-->
-  <Section title={T('TASK.LABEL.ASSIGNER')} id={view.getViewName() + 'AssignerSectionId'} {menuPath}>
-    <div class="row" style="margin-top: 6px;">
-      <div class="label-link col-24 {$isReadOnlyMode$ ? '' : 'label-button-hover'}" on:click={onAddAssignerStatus}>
-        {T('COMMON.LABEL.ADD_NEW_DETAIL')}
-      </div>
-    </div>
-    <div class="row">
-      <div class=" col-24">
-        {#if form.assignerStatusDetails.length > 0 && form.assignerStatusDetails[0].startTime}
-          <CloseableList
-            on:edit={onEditAssignerStatus}
-            on:view={onViewAssignerStatus}
-            directClose={true}
-            disabled={$isReadOnlyMode$}
-            bind:list={form.assignerStatusDetails}
-            className="closeable-list__floating-controller"
-            customRender="modules/task/task/components/status/index.svelte"
-            {menuPath}
-            id={view.getViewName() + 'AssignerStatusDetailId'}>
-            <!--          <div slot="floatingController">-->
-            <!--            <FloatingButton on:click={onAddAssignerStatus} title={T('TASK.LABEL.ADD_STATUS')} />-->
-            <!--          </div>-->
-          </CloseableList>
-        {/if}
-      </div>
-    </div>
-  </Section>
-  <!-- // Assigner Info-->
-
-  <div style="height: 20px;" />
-
-  <!-- Assignee Info-->
-  <Section title={T('TASK.LABEL.ASSIGNEE')} id={view.getViewName() + 'AssigneeSectionId'} {menuPath}>
-    <!-- Start date-->
-    <div class="row">
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatDatePicker placeholder={T('COMMON.LABEL.START_DATE')} name="startDate" disabled={$isReadOnlyMode$} />
-      </div>
-
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatCheckbox
-          text={T('COMMON.LABEL.CONFIRM')}
-          disabled={$isReadOnlyMode$}
-          bind:checked={form.startDateConfirm} />
-      </div>
-    </div>
-    <!-- // Start date-->
-
-    {#if form.startDateConfirm}
+    <!-- Assigner Info-->
+    <Section title={T('TASK.LABEL.ASSIGNER')} id={view.getViewName() + 'AssignerSectionId'} {menuPath}>
       <div class="row" style="margin-top: 6px;">
-        <div class="col-24">{T('COMMON.LABEL.STATUS_DETAIL')}:</div>
+        <div class="label-link col-24 {$isReadOnlyMode$ ? '' : 'label-button-hover'}" on:click={onAddAssignerStatus}>
+          {T('COMMON.LABEL.ADD_NEW_DETAIL')}
+        </div>
       </div>
       <div class="row">
         <div class=" col-24">
-          <CloseableList
-            className="closeable-list__floating-controller"
-            customData={$assigneeStatusList$}
-            customRender="modules/task/task/components/status/index.svelte"
-            {menuPath}
-            id={view.getViewName() + 'EvaluatorId'}>
-            <div slot="floatingController">
-              <FloatingButton on:click={onAddAssigneeStatus} title={T('TASK.LABEL.ADD_STATUS')} />
-            </div>
-          </CloseableList>
+          {#if form.assignerStatusDetails.length > 0 && form.assignerStatusDetails[0].startTime}
+            <CloseableList
+              on:edit={onEditAssignerStatus}
+              on:view={onViewAssignerStatus}
+              directClose={true}
+              disabled={$isReadOnlyMode$}
+              bind:list={form.assignerStatusDetails}
+              className="closeable-list__floating-controller"
+              customRender="modules/task/task/components/status/index.svelte"
+              {menuPath}
+              id={view.getViewName() + 'AssignerStatusDetailId'}>
+              <!--          <div slot="floatingController">-->
+              <!--            <FloatingButton on:click={onAddAssignerStatus} title={T('TASK.LABEL.ADD_STATUS')} />-->
+              <!--          </div>-->
+            </CloseableList>
+          {/if}
         </div>
       </div>
+    </Section>
+    <!-- // Assigner Info-->
 
-      <!-- End date-->
+    <div style="height: 20px;" />
+
+    <!-- Assignee Info-->
+    <Section title={T('TASK.LABEL.ASSIGNEE')} id={view.getViewName() + 'AssigneeSectionId'} {menuPath}>
+      <!-- Start date-->
       <div class="row">
         <div class="col-xs-24 col-md-12 col-lg-6">
-          <FloatDatePicker placeholder={T('COMMON.LABEL.END_DATE')} name="endDate" disabled={$isReadOnlyMode$} />
+          <FloatDatePicker placeholder={T('COMMON.LABEL.START_DATE')} name="startDate" disabled={$isReadOnlyMode$} />
         </div>
 
         <div class="col-xs-24 col-md-12 col-lg-6">
           <FloatCheckbox
             text={T('COMMON.LABEL.CONFIRM')}
             disabled={$isReadOnlyMode$}
-            bind:checked={form.endDateConfirm} />
+            bind:checked={form.startDateConfirm} />
         </div>
       </div>
-      <!-- // End date-->
-    {/if}
-  </Section>
-  <!-- // Assignee Info-->
+      <!-- // Start date-->
 
-  <div style="height: 20px;" />
+      {#if form.startDateConfirm}
+        <div class="row" style="margin-top: 6px;">
+          <div class="col-24">{T('COMMON.LABEL.STATUS_DETAIL')}:</div>
+        </div>
+        <div class="row">
+          <div class=" col-24">
+            <CloseableList
+              className="closeable-list__floating-controller"
+              customData={$assigneeStatusList$}
+              customRender="modules/task/task/components/status/index.svelte"
+              {menuPath}
+              id={view.getViewName() + 'EvaluatorId'}>
+              <div slot="floatingController">
+                <FloatingButton on:click={onAddAssigneeStatus} title={T('TASK.LABEL.ADD_STATUS')} />
+              </div>
+            </CloseableList>
+          </div>
+        </div>
 
-  <!-- Evaluator Info-->
-  <Section title={T('TASK.LABEL.EVALUATOR')} id={view.getViewName() + 'EvaluatorSectionId'} {menuPath}>
-    <!-- Date-->
-    <div class="row">
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatDatePicker placeholder={T('COMMON.LABEL.DATE')} name="evaluateDate" disabled={$isReadOnlyMode$} />
+        <!-- End date-->
+        <div class="row">
+          <div class="col-xs-24 col-md-12 col-lg-6">
+            <FloatDatePicker placeholder={T('COMMON.LABEL.END_DATE')} name="endDate" disabled={$isReadOnlyMode$} />
+          </div>
+
+          <div class="col-xs-24 col-md-12 col-lg-6">
+            <FloatCheckbox
+              text={T('COMMON.LABEL.CONFIRM')}
+              disabled={$isReadOnlyMode$}
+              bind:checked={form.endDateConfirm} />
+          </div>
+        </div>
+        <!-- // End date-->
+      {/if}
+    </Section>
+    <!-- // Assignee Info-->
+
+    <div style="height: 20px;" />
+
+    <!-- Evaluator Info-->
+    <Section title={T('TASK.LABEL.EVALUATOR')} id={view.getViewName() + 'EvaluatorSectionId'} {menuPath}>
+      <!-- Date-->
+      <div class="row">
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatDatePicker placeholder={T('COMMON.LABEL.DATE')} name="evaluateDate" disabled={$isReadOnlyMode$} />
+        </div>
       </div>
-    </div>
-    <!-- // Date-->
+      <!-- // Date-->
 
-    <!-- Comment-->
-    <div class="row">
-      <div class="col-24">
-        <RichEditor bind:this={accessCommentRef}>{T('TASK.LABEL.COMMENT')}:</RichEditor>
+      <!-- Comment-->
+      <div class="row">
+        <div class="col-24">
+          <RichEditor bind:this={accessCommentRef}>{T('TASK.LABEL.COMMENT')}:</RichEditor>
+        </div>
       </div>
-    </div>
-    <!-- // Comment-->
+      <!-- // Comment-->
 
-    <div class="row">
-      <!-- Task Verification-->
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatSelect
-          id={view.getViewName() + 'TaskVerificationId'}
-          placeholder={T('TASK.LABEL.TASK_VERIFICATION')}
-          {menuPath}
-          disabled={$isReadOnlyMode$}
-          data$={taskVerification$} />
+      <div class="row">
+        <!-- Task Verification-->
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatSelect
+            id={view.getViewName() + 'TaskVerificationId'}
+            placeholder={T('TASK.LABEL.TASK_VERIFICATION')}
+            {menuPath}
+            disabled={$isReadOnlyMode$}
+            data$={taskVerification$} />
+        </div>
+        <!-- // Task Verification-->
+
+        <!-- Task Qualification-->
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatSelect
+            id={view.getViewName() + 'TaskQualificationId'}
+            placeholder={T('TASK.LABEL.TASK_QUALIFICATION')}
+            {menuPath}
+            disabled={$isReadOnlyMode$}
+            data$={taskQualification$} />
+        </div>
+        <!-- // Task Qualification-->
+
+        <!-- Status-->
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatSelect
+            id={view.getViewName() + 'EvaluateStatusId'}
+            {menuPath}
+            placeholder={T('COMMON.LABEL.EVALUATE_STATUS')}
+            disabled={$isReadOnlyMode$} />
+        </div>
+
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatCheckbox text={T('COMMON.LABEL.COMPLETE')} disabled={$isReadOnlyMode$} bind:checked={form.complete} />
+        </div>
+        <!-- // Status-->
       </div>
-      <!-- // Task Verification-->
 
-      <!-- Task Qualification-->
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatSelect
-          id={view.getViewName() + 'TaskQualificationId'}
-          placeholder={T('TASK.LABEL.TASK_QUALIFICATION')}
-          {menuPath}
-          disabled={$isReadOnlyMode$}
-          data$={taskQualification$} />
-      </div>
-      <!-- // Task Qualification-->
-
-      <!-- Status-->
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatSelect
-          id={view.getViewName() + 'EvaluateStatusId'}
-          {menuPath}
-          placeholder={T('COMMON.LABEL.EVALUATE_STATUS')}
-          disabled={$isReadOnlyMode$} />
-      </div>
-
-      <div class="col-xs-24 col-md-12 col-lg-6">
-        <FloatCheckbox text={T('COMMON.LABEL.COMPLETE')} disabled={$isReadOnlyMode$} bind:checked={form.complete} />
-      </div>
-      <!-- // Status-->
-    </div>
-
-  </Section>
-  <!-- // Evaluator Info-->
+    </Section>
+    <!-- // Evaluator Info-->
   </form>
 </section>
 <!--//Main content-->

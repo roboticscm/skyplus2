@@ -164,7 +164,7 @@
   </select>
 
   <label
-    on:click={onClickLabel}
+    on:click|stopPropagation={onClickLabel}
     class="floating__label {disabled ? '' : 'floating__hover'}"
     data-content={placeholder} />
   {#if checked !== undefined}

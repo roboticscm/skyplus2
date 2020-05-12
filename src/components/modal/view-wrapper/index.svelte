@@ -22,6 +22,7 @@
 </script>
 
 <Modal
+  wrapperClass="high-z-index"
   {menuPath}
   {defaultWidth}
   {defaultHeight}

@@ -16,6 +16,7 @@ export class RxHttp {
     } else {
       fullUrl = `${API.BASE_URL}${url}`;
     }
+
     return Axios.request({
       url: fullUrl,
       method,

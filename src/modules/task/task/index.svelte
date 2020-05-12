@@ -13,13 +13,13 @@
   export let menuPath: string;
   export let fullControl: boolean;
   export let roleControls: [];
-  export let callFrom = 'Self';
   export let showWorkList = true;
 
   // Init view
   const view = new ViewStore(menuPath);
   view.fullControl = fullControl;
   view.roleControls = roleControls;
+  view.tableName = 'tsk_task';
 
   const store = new Store(view);
 
@@ -27,10 +27,7 @@
   const { showDashboard$ } = store;
 
   let mainContentRef: any;
-  const onceLoad = () => {
-    // test
-    // store.findUploadFiles(undefined);
-  };
+  const onceLoad = () => {};
 
   onMount(() => {
     onceLoad();
@@ -48,7 +45,7 @@
     {#if $showDashboard$}
       <DashboardWorkList {view} {store} />
     {:else}
-      <WorkList {view} {store} {menuPath} {callFrom} on:callback on:addNew={onAddNew} />
+      <WorkList {view} {store} {menuPath} on:callback on:addNew={onAddNew} />
     {/if}
   </div>
 

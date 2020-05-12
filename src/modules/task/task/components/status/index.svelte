@@ -12,6 +12,10 @@
     dispatch('edit', event);
   };
 
+  const onSubmit = (event: any) => {
+    dispatch('submit', event);
+  };
+
   const onView = (event: any) => {
     dispatch('view', event);
   };
@@ -26,10 +30,16 @@
     width: 300px;
     position: relative;
     height: 100%;
-    &__controller {
+    &__submit {
+      position: absolute;
+      right: 46px;
+      bottom: 0px;
+    }
+
+    &__edit {
       position: absolute;
       right: 6px;
-      bottom: 4px;
+      bottom: 0px;
     }
   }
 
@@ -48,23 +58,31 @@
     <div style="width: 50%;">{T('COMMON.LABEL.END')}: {SDate.convertMillisecondToDateTimeString(data.endTime)}</div>
   </div>
 
-  {#if data.percent}
-    <div>{data.percent}</div>
-  {/if}
+  {#if data.percent || data.status}
+    {#if data.percent}
+      <div>{data.percent}</div>
+    {/if}
 
-  {#if data.status}
-    <div>{data.status}</div>
-  {/if}
+    {#if data.status}
+      <div>{data.status}</div>
+    {/if}
+  {:else}{T('TASK.MSG.NO_STATUS')}{/if}
 
   <div>{data.note}</div>
 
   <div style="display:flex; justify-content: space-between;">
     <div>
-      {#if data.attachFiles &&  data.attachFiles.length > 0}
-        <i class="fa fa-paperclip" /> ({data.attachFiles.length})
+      {#if data.attachFiles && data.attachFiles.length > 0}
+        <i class="fa fa-paperclip" />
+        ({data.attachFiles.length})
       {/if}
     </div>
-    <div class="label-link status-wrapper__controller" on:click|stopPropagation={() => onEdit(data)}>{T('COMMON.LABEL.EDIT')}</div>
+    <div class="label-link status-wrapper__submit" on:click|stopPropagation={() => onSubmit(data)}>
+      {T('COMMON.LABEL.SUBMIT')}
+    </div>
+    <div class="label-link status-wrapper__edit" on:click|stopPropagation={() => onEdit(data)}>
+      {T('COMMON.LABEL.EDIT')}
+    </div>
   </div>
 
 </div>

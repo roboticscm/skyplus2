@@ -32,7 +32,6 @@
       width: calc(100% - 100px);
       min-width: 100px;
       &:hover {
-        font-weight: 500;
         color: var(--my-active-color);
         cursor: pointer;
       }
@@ -41,6 +40,15 @@
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        font-size: 1rem;
+        font-weight: 500;
+      }
+      &__status {
+        font-size: 0.9rem;
+      }
+
+      &__time {
+        font-size: 0.9rem;
       }
     }
     &__project {
@@ -56,7 +64,8 @@
     }
 
     &.selected {
-      font-weight: 500;
+      /*font-weight: 500;*/
+      background: var(--selection-bgcolor);
     }
   }
 </style>
@@ -65,12 +74,30 @@
   class="task-wrapper {selectedTask && task.id.toString() === selectedTask.id.toString() ? 'selected' : ''}"
   on:click={onClick}>
   <div class="task-wrapper__task">
-    <div class="task-wrapper__task__name">{task.name}</div>
-    <div>{task.lastStatusName}</div>
-    <div>
-      {SDate.convertMillisecondToDateString(task.startTime)} ~ {SDate.convertMillisecondToDateString(task.deadline)}
-    </div>
+    <div title={T('TASK.LABEL.TASK_NAME')} class="task-wrapper__task__name">{task.name}</div>
+    <span title={T('TASK.LABEL.ASSIGNER')}>
+      {task.assigners ? task.assigners.join(', ') : T('TASK.MSG.NO_ASSIGNER')}
+    </span>
+    -
+    <span title={T('TASK.LABEL.EVALUATOR')}>
+      {task.evaluators ? task.evaluators.join(', ') : T('TASK.MSG.NO_EVALUATOR')}
+    </span>
+    <br />
+    <span title={T('TASK.LABEL.LAST_STATUS')} class="task-wrapper__task__status">
+      {task.lastStatusName || T('TASK.LABEL.NO_STATUS')}
+    </span>
+    <span title={T('TASK.LABEL.ASSIGNEE')}>
+      ({task.assignees ? task.assignees.join(', ') : T('TASK.MSG.NO_ASSIGNEE')})
+    </span>
+    <br />
+    <span title={T('TASK.LABEL.START_TIME')} class="task-wrapper__task__time">
+      {SDate.convertMillisecondToDateString(task.startTime)}
+    </span>
+    ~
+    <span title={T('TASK.LABEL.DEADLINE')}>{SDate.convertMillisecondToDateString(task.deadline)}</span>
   </div>
 
-  <div class="task-wrapper__project">({task.projectName || T('TASK.LABEL.NO_PROJECT')})</div>
+  <div title={T('TASK.LABEL.PROJECT')} class="task-wrapper__project">
+    ({task.projectName || T('TASK.LABEL.NO_PROJECT')})
+  </div>
 </div>

@@ -40,6 +40,7 @@
   onMount(() => {
     subscription();
   });
+  // ================= //KOOK ========================
 
   export const getViewTitle = () => {
     return view.getViewTitle();
@@ -48,7 +49,6 @@
   export const getMenuInfo$ = () => {
     return view.menuInfo$;
   };
-  // ================= //KOOK ========================
 </script>
 
 <style lang="scss">

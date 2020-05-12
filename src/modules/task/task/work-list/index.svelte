@@ -22,16 +22,13 @@
   import { apolloClient } from '@/lib/js/hasura-client';
   import { App } from '@/lib/js/constants';
   import { appStore } from '@/store/app';
+  import Pagination from '@/components/ui/pagination';
 
   export let menuPath: string;
-  export let callFrom = 'Self';
   export let view: ViewStore;
   export let store: Store;
 
-  menuPath;
-  callFrom;
-  view;
-
+  const { fullCount$ } = view;
   const { taskList$, projectList$, showDashboard$ } = store;
   let quickSearchRef: any;
   let searchWrapperRef: any;
@@ -45,7 +42,7 @@
 
   let taskSub, selectSub: Subscription;
   let taskApolloClient$: any;
-  let viewByTaskRef: any;
+  let viewByTaskRef, pageRef: any;
 
   const dispatch = createEventDispatcher();
   const doFilter = (ob$: Observable<any>) => {
@@ -160,17 +157,26 @@
     onSelectSearchField();
   };
 
+  let firstTimes = true;
   const registerSubscription = () => {
     taskSub = ViewStore.loadTableMetaData$('tsk_task').subscribe((res) => {
       const query = ViewStore.createCustomQuerySubscription('tsk_task', res.data);
+
       taskApolloClient$ = apolloClient.subscribe({
         query,
       });
       taskApolloClient$.subscribe((res: any) => {
-        console.log(menuPath, appStore.org.departmentId);
-        store.tskFindTasks(menuPath, appStore.org.departmentId);
+        if (!firstTimes) {
+          reload();
+        }
+        firstTimes = false;
       });
     });
+  };
+
+  const reload = () => {
+    store.tskFindTasks(menuPath, appStore.org.departmentId);
+    view.checkDeletedRecord(false);
   };
 
   const onClickTask = (event: any) => {
@@ -192,10 +198,14 @@
   };
 
   onMount(() => {
-    registerSubscription();
+    // registerSubscription();
     setTimeout(() => {
       selectSub = doSelect(fromEvent(viewByTaskRef, 'click'));
     }, 1000);
+
+    pageRef.loadSettings().then(() => {
+      reload();
+    });
   });
 
   onDestroy(() => {
@@ -211,6 +221,16 @@
   const onAddNew = () => {
     dispatch('addNew');
     selectedTask = undefined;
+  };
+
+  const onLoadPage = (event) => {
+    view.pageSize = event.detail.pageSize;
+    view.page = event.detail.page;
+    reload();
+  };
+
+  const onPaginationInit = (event) => {
+    view.pageSize = event.detail;
   };
 </script>
 
@@ -335,66 +355,23 @@
   </div>
   <!-- // Option task or project view -->
 
-  <!-- Task Summary -->
-  <!--  <div class="summary">-->
-  <!--    {#if viewBy === 'task'}-->
-  <!--      <div class="summary__task">-->
-  <!--        <span>-->
-  <!--          {T('TASK.LABEL.OVERDUE')}(-->
-  <!--          <span class="summary__task__overdue">1</span>-->
-  <!--          )-->
-  <!--        </span>-->
-  <!--        <span>-->
-  <!--          {T('TASK.LABEL.COMPLETED')}(-->
-  <!--          <span class="summary__task__completed">2</span>-->
-  <!--          )-->
-  <!--        </span>-->
-  <!--        <span>-->
-  <!--          {T('TASK.LABEL.IN_PROGRESS')}(-->
-  <!--          <span class="summary__task__in-progress">1</span>-->
-  <!--          )-->
-  <!--        </span>-->
-  <!--        <span>-->
-  <!--          {T('TASK.LABEL.NOT_STARTED')}(-->
-  <!--          <span class="summary__task__not-started">3</span>-->
-  <!--          )-->
-  <!--        </span>-->
-  <!--      </div>-->
-  <!--    {/if}-->
-
-  <!--    {#if viewBy === 'project'}-->
-  <!--      <div class="summary__project">-->
-  <!--        <span>-->
-  <!--          {T('TASK.LABEL.OVERDUE')}(-->
-  <!--          <span class="summary__project__overdue">2</span>-->
-  <!--          )-->
-  <!--        </span>-->
-  <!--        <span>-->
-  <!--          {T('TASK.LABEL.COMPLETED')}(-->
-  <!--          <span class="summary__project__completed">0</span>-->
-  <!--          )-->
-  <!--        </span>-->
-  <!--        <span>-->
-  <!--          {T('TASK.LABEL.IN_PROGRESS')}(-->
-  <!--          <span class="summary__project__in-progress">2</span>-->
-  <!--          )-->
-  <!--        </span>-->
-  <!--        <span>-->
-  <!--          {T('TASK.LABEL.NOT_STARTED')}(-->
-  <!--          <span class="summary__project__not-started">0</span>-->
-  <!--          )-->
-  <!--        </span>-->
-  <!--      </div>-->
-  <!--    {/if}-->
-  <!--  </div>-->
-  <!-- // Task Summary -->
-
   {#if viewBy === 'task'}
+    <div style="margin-top: 1px;">
+      <Pagination
+        {menuPath}
+        totalRecords={$fullCount$}
+        smallSize={true}
+        on:loadPage={onLoadPage}
+        on:init={onPaginationInit}
+        bind:this={pageRef} />
+    </div>
     <div bind:this={viewByTaskRef}>
       {#if $taskList$}
-        {#each $taskList$ as task}
-          <TaskView {task} {selectedTask} on:click={onClickTask} />
-        {/each}
+        {#if $taskList$.length > 0}
+          {#each $taskList$ as task}
+            <TaskView task={SObject.convertFieldsToCamelCase(task)} {selectedTask} on:click={onClickTask} />
+          {/each}
+        {:else}{T('TASK.MSG.NO_TASK_FOUND')}{/if}
       {:else}
         {@html App.PROGRESS_BAR}
       {/if}

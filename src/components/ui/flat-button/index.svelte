@@ -98,8 +98,14 @@
       case ButtonType.Submit:
         preset(undefined, 'SUBMIT', '<i class="fa fa-check"></i>', 'btn-flat');
         break;
+      case ButtonType.CancelSubmit:
+        preset(undefined, 'CANCEL_SUBMIT', '', 'btn-flat');
+        break;
       case ButtonType.Approve:
         preset(undefined, 'APPROVE', '<i class="fa fa-check"></i>', 'btn-flat');
+        break;
+      case ButtonType.CancelApprove:
+        preset(undefined, 'CANCEL_APPROVE', '', 'btn-flat');
         break;
       default:
     }
