@@ -84,7 +84,7 @@
     </span>
     <br />
     <span title={T('TASK.LABEL.LAST_STATUS')} class="task-wrapper__task__status">
-      {task.lastStatusName || T('TASK.LABEL.NO_STATUS')}
+      {task.lastStatusName[0] || T('TASK.LABEL.NO_STATUS')}
     </span>
     <span title={T('TASK.LABEL.ASSIGNEE')}>
       ({task.assignees ? task.assignees.join(', ') : T('TASK.MSG.NO_ASSIGNEE')})

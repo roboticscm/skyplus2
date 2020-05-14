@@ -160,7 +160,7 @@
   let firstTimes = true;
   const registerSubscription = () => {
     taskSub = ViewStore.loadTableMetaData$('tsk_task').subscribe((res) => {
-      const query = ViewStore.createCustomQuerySubscription('tsk_task', res.data);
+      const query = ViewStore.createReloadSubscription('tsk_task');
 
       taskApolloClient$ = apolloClient.subscribe({
         query,
@@ -198,7 +198,7 @@
   };
 
   onMount(() => {
-    // registerSubscription();
+    registerSubscription();
     setTimeout(() => {
       selectSub = doSelect(fromEvent(viewByTaskRef, 'click'));
     }, 1000);

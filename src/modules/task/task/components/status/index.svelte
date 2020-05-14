@@ -2,6 +2,9 @@
   import { T } from '@/lib/js/locale/locale';
   import { SDate } from '@/lib/js/sdate';
   import { createEventDispatcher } from 'svelte';
+  import EditIcon from '@/components/layout/icons/common/edit.svelte';
+  import SubmitIcon from '@/components/layout/icons/common/submit.svelte';
+  import CancelSubmitIcon from '@/components/layout/icons/common/cancel-submit.svelte';
 
   export let data: any;
   export let disabled = false;
@@ -9,6 +12,10 @@
   const dispatch = createEventDispatcher();
 
   const onEdit = (event: any) => {
+    if (event.submitStatus === 1) {
+      return;
+    }
+
     dispatch('edit', event);
   };
 
@@ -34,12 +41,16 @@
       position: absolute;
       right: 46px;
       bottom: 0px;
+      width: 16px;
+      height: 16px;
     }
 
     &__edit {
       position: absolute;
       right: 6px;
       bottom: 0px;
+      width: 16px;
+      height: 16px;
     }
   }
 
@@ -78,10 +89,14 @@
       {/if}
     </div>
     <div class="label-link status-wrapper__submit" on:click|stopPropagation={() => onSubmit(data)}>
-      {T('COMMON.LABEL.SUBMIT')}
+      {#if data.submitStatus === 1}
+        <CancelSubmitIcon />
+      {:else}
+        <SubmitIcon />
+      {/if}
     </div>
     <div class="label-link status-wrapper__edit" on:click|stopPropagation={() => onEdit(data)}>
-      {T('COMMON.LABEL.EDIT')}
+      <EditIcon disabled={data.submitStatus === 1} />
     </div>
   </div>
 

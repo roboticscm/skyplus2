@@ -82,6 +82,8 @@ export class StatusDetail {
   attachFiles: File[] = [];
   status? = '';
   percent? = '';
+  submitStatus = 0;
+  closeable? = true;
 }
 
 export class Priority {

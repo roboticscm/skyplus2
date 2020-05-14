@@ -14,6 +14,7 @@
   import { AppStore } from '@/store/app';
   import { passwordChar } from './helper';
   import { Browser } from '@/lib/js/browser';
+  import SearchIcon from '@/components/layout/icons/common/search.svelte';
 
   export let columns: TableColumn[];
   export let height = '50vh';
@@ -434,7 +435,11 @@
     <i on:click={onClickBack} class="back-button fa fa-arrow-left" />
     <i on:click={onClickNext} class="next-button fa fa-arrow-right" />
   {/if}
-  <i class="search-icon fa fa-search" />
+  <!--  <i class="search-icon fa fa-search" />-->
+  <div class="search-icon">
+    <SearchIcon />
+  </div>
+
   <ProgressBar loading$={searching$} smallSize={true} />
   <div style={`height: ${height};`} class="auto-dropdown {className}" id={'dropdown' + id}>
     <SelectableTable

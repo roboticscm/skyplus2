@@ -1,7 +1,7 @@
 import { RxHttp } from '@/lib/js/rx-http';
 import { Http } from '@/lib/js/http';
-import { BehaviorSubject } from 'rxjs';
-import { skip, take } from 'rxjs/operators';
+import { BehaviorSubject, of } from 'rxjs';
+import { catchError, skip, take } from 'rxjs/operators';
 import { HistoryMenu, RoleMenu } from '@/modules/sys/menu/model';
 import { toSnackCase } from '@/lib/js/util';
 import { Debug } from '@/lib/js/debug';
@@ -19,7 +19,10 @@ class MenuStore {
       includeDeleted: false,
       includeDisabled: false,
     })
-      .pipe(take(1))
+      .pipe(
+        take(1),
+        catchError((e) => of(e)),
+      )
       .subscribe(
         (res: any) => {
           this.menuPaths$.next(res.data.map((it: RoleMenu) => it.path));

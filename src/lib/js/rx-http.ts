@@ -55,6 +55,10 @@ export class RxHttp {
     return RxHttp.callApi('post', url, null, jsonData);
   }
 
+  public static put(url: string, jsonData: string) {
+    return RxHttp.callApi('put', url, null, jsonData);
+  }
+
   public static delete(url: string, params: any = null) {
     return RxHttp.callApi('delete', url, params, null);
   }

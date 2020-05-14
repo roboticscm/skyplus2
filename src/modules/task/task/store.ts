@@ -1,12 +1,14 @@
 import { ViewStore } from '@/store/view';
 import { BehaviorSubject } from 'rxjs';
-import { Project, File, TaskVerification, TaskQualification, Status, Task, Priority } from '../types';
+import { Project, File, TaskVerification, TaskQualification, Status, Task, Priority, StatusDetail } from '../types';
 import { User } from '@/model/user';
 import { OwnerOrg } from '@/modules/sys/owner-org/model';
 import { TableUtilStore } from '@/store/table-util';
 import { RxHttp } from '@/lib/js/rx-http';
 import { toSnackCase } from '@/lib/js/util';
 import { Http } from '@/lib/js/http';
+import { SObject } from '@/lib/js/sobject';
+import { SJSON } from '@/lib/js/sjson';
 
 const BASE_URL = 'task/task/';
 export default class Store {
@@ -131,10 +133,16 @@ export default class Store {
       page: this.view.page,
       pageSize: this.view.pageSize,
     }).subscribe((res: any) => {
-      this.taskList$.next(res.data.payload);
-      this.view.fullCount$.next(res.data.fullCount);
       const end = Date.now();
       console.log('Took ', end - start);
+
+      if (res.data.payload.length === 0 && this.view.page > 1) {
+        this.view.page--;
+        this.tskFindTasks(menuPath, departmentId);
+      } else {
+        this.taskList$.next(res.data.payload);
+        this.view.fullCount$.next(res.data.fullCount);
+      }
     });
   };
 
@@ -142,5 +150,9 @@ export default class Store {
     return RxHttp.get(`${BASE_URL}${toSnackCase('tskGetTaskById')}`, {
       id,
     });
+  }
+
+  submitOrCancelSubmit(status: StatusDetail) {
+    return RxHttp.put(`${BASE_URL}${toSnackCase('submitOrCancelSubmit')}`, SJSON.stringify(status));
   }
 }

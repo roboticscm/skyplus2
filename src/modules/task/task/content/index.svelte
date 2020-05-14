@@ -86,7 +86,7 @@
   let saveOrUpdateSub: any;
 
   let assignerModalTitle = '';
-
+  let submitType = undefined;
   /**
    * Reset form (reset input and errors)
    * @param {none}
@@ -106,6 +106,9 @@
   };
   const saveUpdateUri = 'task/task/save-or-update';
 
+  let readOnlyMode: boolean;
+  // @ts-ignore
+  $: readOnlyMode = $isReadOnlyMode$ || form.submitStatus === 1;
   // ============================== EVENT HANDLE ==========================
   /**
    * Event handle for Add New button.
@@ -204,6 +207,38 @@
     });
   };
 
+  const onSubmitAssignerStatus = (event: any) => {
+    // @ts-ignore
+    if ($isReadOnlyMode$) {
+      return;
+    }
+    doSubmitAssignerStatus(event.detail);
+  };
+
+  const doSubmitAssignerStatus = (status: StatusDetail) => {
+    if (selectedData) {
+      status.taskId = selectedData.id;
+
+      postprocessEditAssignerStatusDetail();
+      const index = form.editAssignerStatusDetails.findIndex((st: StatusDetail) => st.id === status.id);
+      if (index >= 0) {
+        status = form.editAssignerStatusDetails[index];
+      }
+    }
+
+    console.log(status);
+
+    store.submitOrCancelSubmit(status).subscribe((res) => {
+      if (res.data) {
+        const index = form.assignerStatusDetails.findIndex((st: StatusDetail) => st.id === res.data.id);
+        if (index >= 0) {
+          form.assignerStatusDetails[index].submitStatus = res.data.submitStatus;
+          form.assignerStatusDetails = [...form.assignerStatusDetails];
+        }
+      }
+    });
+  };
+
   const onEditAssignerStatus = (event: any) => {
     // @ts-ignore
     if ($isReadOnlyMode$) {
@@ -232,7 +267,7 @@
 
   const onAddAssignerStatus = () => {
     // @ts-ignore
-    if ($isReadOnlyMode$) {
+    if ($isReadOnlyMode$ || !selectedData) {
       return;
     }
 
@@ -278,7 +313,7 @@
   const addAssignHumanOrOrg = (source: any[]) => {
     return new Promise((resolve, reject) => {
       // @ts-ignore
-      if ($isReadOnlyMode$) {
+      if (readOnlyMode) {
         return;
       }
 
@@ -303,7 +338,7 @@
   const addAssignOwnerOrg = (source: any[]) => {
     return new Promise((resolve, reject) => {
       // @ts-ignore
-      if ($isReadOnlyMode$) {
+      if (readOnlyMode) {
         return;
       }
 
@@ -385,6 +420,16 @@
     );
 
     // Edit Assigner status detail
+    postprocessEditAssignerStatusDetail();
+
+    if (submitType === 'submit') {
+      form.submitStatus = 1;
+    } else if (submitType === 'cancelSubmit') {
+      form.submitStatus = 0;
+    }
+  };
+
+  const postprocessEditAssignerStatusDetail = () => {
     if (isUpdateMode$.value) {
       const [a, b] = findEditStatusDetail(beforeForm.assignerStatusDetails, SObject.clone(form.assignerStatusDetails));
       const dataChange = view.checkObjectArrayChange(a, b);
@@ -407,7 +452,6 @@
       }
     }
   };
-
   // ============================== // HELPER ==========================
 
   // ============================== CLIENT VALIDATION ==========================
@@ -427,7 +471,7 @@
   };
 
   const verifySubmit = () => {
-    form.submitStatus = 1;
+    submitType = 'submit';
     return fromPromise(
       /* verify permission*/
       view.verifySubmitAction(ButtonId.Submit, scRef),
@@ -439,7 +483,7 @@
   };
 
   const verifyCancelSubmit = () => {
-    form.submitStatus = 0;
+    submitType = 'cancelSubmit';
     return fromPromise(
       /* verify permission*/
       view.verifyCancelSubmitAction(ButtonId.CancelSubmit, scRef),
@@ -510,6 +554,13 @@
     });
   };
 
+  const rollbackSubmitState = () => {
+    if (submitType === 'submit') {
+      form.submitStatus = 0;
+    } else if (submitType === 'cancelSubmit') {
+      form.submitStatus = 1;
+    }
+  };
   /**
    * Save or update form. Called by onSave and onUpdate event handle
    * @param {ob$} Observable event of the button click or shortcut key(fromEvent)
@@ -528,6 +579,7 @@
           console.log('save data: ', form.data());
           return form.post(saveUpdateUri).pipe(
             catchError((error) => {
+              rollbackSubmitState();
               return of(error);
             }),
           );
@@ -537,6 +589,7 @@
         /* do something after form submit*/
         next: (res: any) => {
           if (res.response && res.response.data) {
+            rollbackSubmitState();
             // if error
             if (res.response.data.message) {
               scRef.snackbarRef().showUnknownError(res.response.data.message);
@@ -555,12 +608,14 @@
               scRef.snackbarRef().showSaveSuccess();
               doAddNew();
             }
+            submitType = undefined;
           }
           saveRunning$.next(false);
         },
         error: (error) => {
           Debug.errorSection('Task - doSaveOrUpdate', error);
           saveRunning$.next(false);
+          rollbackSubmitState();
         },
       });
   };
@@ -728,7 +783,7 @@
   //             )
   //             .subscribe(async (res) => {
   //               // @ts-ignore
-  //               view.doNotifyConflictData(form, res.data, selectedData.id, $isReadOnlyMode$, scRef);
+  //               view.doNotifyConflictData(form, res.data, selectedData.id, readOnlyMode, scRef);
   //             });
   //   }
   // });
@@ -737,6 +792,15 @@
   const selectDataSub = view.selectedData$.subscribe((data) => {
     doSelect(data);
   });
+
+  let mapAssignerStatusDetails: any[] = [];
+  // @ts-ignore
+  $: {
+    mapAssignerStatusDetails = form.assignerStatusDetails.map((it: StatusDetail) => {
+      it.closeable = it.submitStatus !== 1;
+      return it;
+    });
+  }
 
   // ============================== //REACTIVE ==========================
 </script>
@@ -808,21 +872,21 @@
     <Button
       action={useSubmitAction}
       btnType={ButtonType.Submit}
-      disabled={view.isDisabled(ButtonId.Submit, form.errors.any())} />
+      disabled={view.isDisabled(ButtonId.Submit, form.errors.any() || $isReadOnlyMode$)} />
   {/if}
 
   {#if view.isRendered(ButtonId.CancelSubmit, form.submitStatus === 1)}
     <Button
       action={useCancelSubmitAction}
       btnType={ButtonType.CancelSubmit}
-      disabled={view.isDisabled(ButtonId.CancelSubmit)} />
+      disabled={(view.isDisabled(ButtonId.CancelSubmit), $isReadOnlyMode$)} />
   {/if}
 
   {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
     <Button
       btnType={ButtonType.Delete}
       on:click={onDelete}
-      disabled={view.isDisabled(ButtonId.Delete)}
+      disabled={view.isDisabled(ButtonId.Delete, readOnlyMode)}
       running={$deleteRunning$} />
   {/if}
 
@@ -854,7 +918,7 @@
             bind:this={taskNameRef}
             placeholder={T('COMMON.LABEL.NAME')}
             name="name"
-            disabled={$isReadOnlyMode$}
+            disabled={readOnlyMode}
             bind:value={form.name} />
           <Error {form} field="name" />
         </div>
@@ -870,7 +934,7 @@
             id={view.getViewName() + 'ProjectId'}
             placeholder={T('TASK.LABEL.PROJECT') + '(+)'}
             {menuPath}
-            disabled={$isReadOnlyMode$}
+            disabled={readOnlyMode}
             data$={projects$} />
         </div>
         <!-- // Project -->
@@ -879,7 +943,7 @@
       <div class="row">
         <!-- Task Description -->
         <div class="col-xs-24 col-md-12">
-          <RichEditor bind:value={form.description} disabled={$isReadOnlyMode$}>
+          <RichEditor bind:value={form.description} disabled={readOnlyMode}>
             {T('TASK.LABEL.TASK_DESCRIPTION')}:
           </RichEditor>
         </div>
@@ -891,7 +955,7 @@
             bind:list={form.taskAttachFiles}
             {menuPath}
             id={view.getViewName() + 'UploadFiles'}
-            disabled={$isReadOnlyMode$} />
+            disabled={readOnlyMode} />
         </div>
         <!-- // Attach file -->
       </div>
@@ -907,7 +971,7 @@
             id={view.getViewName() + 'PriorityId'}
             placeholder={T('TASK.LABEL.PRIORITY') + '(+)'}
             {menuPath}
-            disabled={$isReadOnlyMode$}
+            disabled={readOnlyMode}
             data$={priority$} />
           <!-- // Last status -->
         </div>
@@ -924,7 +988,7 @@
           <FloatDatePicker
             bind:value={form.startTime}
             placeholder={T('COMMON.LABEL.START_TIME')}
-            disabled={$isReadOnlyMode$} />
+            disabled={readOnlyMode} />
         </div>
         <!-- // tart time -->
 
@@ -933,7 +997,7 @@
           <FloatDatePicker
             placeholder={T('COMMON.LABEL.DEADLINE')}
             bind:value={form.deadline}
-            disabled={$isReadOnlyMode$} />
+            disabled={readOnlyMode} />
         </div>
         <!-- // Deadline -->
 
@@ -941,14 +1005,14 @@
           <FloatDatePicker
             placeholder={T('COMMON.LABEL.FIRST_REMINDER')}
             bind:value={form.firstReminder}
-            disabled={$isReadOnlyMode$} />
+            disabled={readOnlyMode} />
         </div>
 
         <div class="col-xs-24 col-md-12 col-lg-6">
           <FloatDatePicker
             placeholder={T('COMMON.LABEL.SECOND_REMINDER')}
             bind:value={form.secondReminder}
-            disabled={$isReadOnlyMode$} />
+            disabled={readOnlyMode} />
         </div>
       </div>
 
@@ -957,7 +1021,7 @@
         <div class="col-xs-24 col-md-12">
           <CloseableList
             directClose={true}
-            disabled={$isReadOnlyMode$}
+            disabled={readOnlyMode}
             bind:list={form.assigners}
             {menuPath}
             id={view.getViewName() + 'AssignerId'}>
@@ -983,7 +1047,7 @@
         <div class="col-xs-24 col-md-12">
           <CloseableList
             directClose={true}
-            disabled={$isReadOnlyMode$}
+            disabled={readOnlyMode}
             bind:list={form.assignees}
             {menuPath}
             id={view.getViewName() + 'AssigneeId'}>
@@ -1000,7 +1064,7 @@
         <div class="col-xs-24 col-md-12">
           <CloseableList
             directClose={true}
-            disabled={$isReadOnlyMode$}
+            disabled={readOnlyMode}
             bind:list={form.evaluators}
             {menuPath}
             id={view.getViewName() + 'EvaluatorId'}>
@@ -1027,7 +1091,7 @@
               <div class="col-xs-24 col-md-12 col-lg-8">
                 <CloseableList
                   directClose={true}
-                  disabled={$isReadOnlyMode$}
+                  disabled={readOnlyMode}
                   bind:list={form.chars}
                   {menuPath}
                   id={view.getViewName() + 'TaskCharacteristicId'}>
@@ -1043,7 +1107,7 @@
               <div class="col-xs-24 col-md-12 col-lg-8">
                 <CloseableList
                   directClose={true}
-                  disabled={$isReadOnlyMode$}
+                  disabled={readOnlyMode}
                   bind:list={form.targetPersons}
                   {menuPath}
                   id={view.getViewName() + 'TargetPersonId'}>
@@ -1058,7 +1122,7 @@
               <div class="col-xs-24 col-md-12 col-lg-8">
                 <CloseableList
                   directClose={true}
-                  disabled={$isReadOnlyMode$}
+                  disabled={readOnlyMode}
                   bind:list={form.targetTeams}
                   {menuPath}
                   id={view.getViewName() + 'TargetTeamId'}>
@@ -1081,7 +1145,9 @@
     <!-- Assigner Info-->
     <Section title={T('TASK.LABEL.ASSIGNER')} id={view.getViewName() + 'AssignerSectionId'} {menuPath}>
       <div class="row" style="margin-top: 6px;">
-        <div class="label-link col-24 {$isReadOnlyMode$ ? '' : 'label-button-hover'}" on:click={onAddAssignerStatus}>
+        <div
+          class="label-link col-24 {$isReadOnlyMode$ || !selectedData ? '' : 'label-button-hover'}"
+          on:click={onAddAssignerStatus}>
           {T('COMMON.LABEL.ADD_NEW_DETAIL')}
         </div>
       </div>
@@ -1090,10 +1156,11 @@
           {#if form.assignerStatusDetails.length > 0 && form.assignerStatusDetails[0].startTime}
             <CloseableList
               on:edit={onEditAssignerStatus}
+              on:submit={onSubmitAssignerStatus}
               on:view={onViewAssignerStatus}
               directClose={true}
               disabled={$isReadOnlyMode$}
-              bind:list={form.assignerStatusDetails}
+              bind:list={mapAssignerStatusDetails}
               className="closeable-list__floating-controller"
               customRender="modules/task/task/components/status/index.svelte"
               {menuPath}

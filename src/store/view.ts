@@ -114,6 +114,13 @@ export class ViewStore {
       .pipe(take(1))
       .subscribe((res: AxiosResponse) => {
         const data: PayloadRes = res.data;
+        if (res.data.payload.length === 0 && this.page > 1) {
+          this.page--;
+          this.getSimpleList(textSearch);
+        } else {
+          this.dataList$.next(data.payload);
+          this.fullCount$.next(data.fullCount);
+        }
         this.dataList$.next(data.payload);
         this.fullCount$.next(data.fullCount);
       });
@@ -160,10 +167,21 @@ export class ViewStore {
   static createCustomQuerySubscription = (table: string, columns: any[], withVar: boolean = false) => {
     const query = `
       subscription ${table}Subscription ${withVar ? '($id: bigint!, $updatedBy: bigint!)' : ''} {
-        ${table} ${
-      withVar ? '(limit: 1, where: {_and: [ {id: { _eq: $id }}, {updated_by: { _neq: $updatedBy }}]})' : '(limit: 1)'
-    } {
+        ${table} ${withVar ? '(where: {_and: [ {id: { _eq: $id }}, {updated_by: { _neq: $updatedBy }}]})' : ''} {
           ${columns.map((it) => it.columnName).join('\n')}
+        }
+      }
+    `;
+
+    return gql(query);
+  };
+
+  static createReloadSubscription = (table: string) => {
+    const query = `
+      subscription ${table}Subscription {
+        ${table}(limit: 1, order_by: {access_date: desc_nulls_last}) {
+          id
+          access_date
         }
       }
     `;

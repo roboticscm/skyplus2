@@ -1,0 +1,21 @@
+<svg
+  version="1.1"
+  id="Layer_1"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  x="0px"
+  y="0px"
+  viewBox="0 0 24 24"
+  style="enable-background:new 0 0 24 24;"
+  xml:space="preserve">
+  <g id="XMLID_42_">
+    <path
+      id="XMLID_41_"
+      class="notify-icon__color"
+      d="M18.6,15.5v-4.7C18.6,7,15.8,4,12,4h0c-3.8,0-6.6,3-6.6,6.8v4.7c0,0.8-0.8,1.5-1.7,1.5h0
+      C2.8,17,2,17.6,2,18.5v0C2,19.3,2.7,20,3.5,20h16.9c0.8,0,1.5-0.7,1.5-1.5v0c0-0.8-0.9-1.5-1.7-1.5h0C19.4,17,18.6,16.3,18.6,15.5z
+      " />
+    <circle id="XMLID_40_" class="notify-icon__color" cx="12" cy="2" r="2" />
+    <path id="XMLID_27_" class="notify-icon__color" d="M16,20c0,2.2-1.8,4-4,4s-4-1.8-4-4" />
+  </g>
+</svg>

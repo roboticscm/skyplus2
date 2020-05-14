@@ -49,7 +49,9 @@ const startApp = () => {
             AppStore.rememberLogin = isRememberLogin();
             loginSuccess(userId, token);
             setHeader(userId, token);
-            loadMenuAndUserSettings(_companyId);
+            setTimeout(() => {
+              loadMenuAndUserSettings(_companyId);
+            }, 100);
           } else {
             logout();
           }
@@ -69,6 +71,7 @@ export const applyAlphaColor = (alpha: number) => {
 
 export const loadMenuAndUserSettings = (companyId) => {
   menuStore.sysGetRoledMenuPathListByUserId();
+
   menuStore.menuPaths$.pipe(take(1)).subscribe(
     (_) => {
       appStore.getCurrentUserInfo();

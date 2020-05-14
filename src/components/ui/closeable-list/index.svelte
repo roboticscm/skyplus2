@@ -19,7 +19,7 @@
   const dispatch = createEventDispatcher();
 
   let modalRef: any;
-  let _data: CloseableListItem[] = [];
+  let _data: any[] = [];
   let CustomRender: any;
 
   // @ts-ignore
@@ -95,8 +95,10 @@
       {#if customRender}
         {#each _data as row}
           <li on:click={() => onClickItem(row)}>
-            <svelte:component this={CustomRender} data={row} {disabled} on:view on:edit />
-            <span class="close" on:click={(e) => onClose(e, row)}>&times;</span>
+            <svelte:component this={CustomRender} data={row} {disabled} on:view on:edit on:submit />
+            {#if row.closeable}
+              <span class="close" on:click={(e) => onClose(e, row)}>&times;</span>
+            {/if}
           </li>
         {/each}
       {:else}
