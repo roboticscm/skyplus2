@@ -94,12 +94,14 @@
     <ul>
       {#if customRender}
         {#each _data as row}
-          <li on:click={() => onClickItem(row)}>
-            <svelte:component this={CustomRender} data={row} {disabled} on:view on:edit on:submit />
-            {#if row.closeable}
-              <span class="close" on:click={(e) => onClose(e, row)}>&times;</span>
-            {/if}
-          </li>
+          {#if row.show}
+            <li on:click={() => onClickItem(row)}>
+              <svelte:component this={CustomRender} data={row} {disabled} on:view on:edit on:submit />
+              {#if row.closeable}
+                <span class="close" on:click={(e) => onClose(e, row)}>&times;</span>
+              {/if}
+            </li>
+          {/if}
         {/each}
       {:else}
         {#each _data as row}

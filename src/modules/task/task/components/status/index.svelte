@@ -12,7 +12,7 @@
   const dispatch = createEventDispatcher();
 
   const onEdit = (event: any) => {
-    if (event.submitStatus === 1) {
+    if (disabled || event.submitStatus === 1) {
       return;
     }
 
@@ -20,6 +20,9 @@
   };
 
   const onSubmit = (event: any) => {
+    if (disabled) {
+      return;
+    }
     dispatch('submit', event);
   };
 
@@ -69,14 +72,8 @@
     <div style="width: 50%;">{T('COMMON.LABEL.END')}: {SDate.convertMillisecondToDateTimeString(data.endTime)}</div>
   </div>
 
-  {#if data.percent || data.status}
-    {#if data.percent}
-      <div>{data.percent}</div>
-    {/if}
-
-    {#if data.status}
-      <div>{data.status}</div>
-    {/if}
+  {#if data.status}
+    <div>{data.status}</div>
   {:else}{T('TASK.MSG.NO_STATUS')}{/if}
 
   <div>{data.note}</div>

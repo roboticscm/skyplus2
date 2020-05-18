@@ -2,70 +2,152 @@
   import { T } from '@/lib/js/locale/locale';
   import { SDate } from '@/lib/js/sdate';
   import { Task } from '../../../types';
-  import { createEventDispatcher } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
+  import { SObject } from '@/lib/js/sobject';
+  import { appStore } from '@/store/app';
+  import { User } from '@/model/user';
 
   export let task: Task;
   export let selectedTask: Task = undefined;
 
+  const { user$ } = appStore;
+  const user = user$.value;
+
   const dispatch = createEventDispatcher();
+  let taskTimeRef, assigneeTimeRef: any;
 
   const onClick = () => {
     dispatch('click', task);
   };
+
+  onMount(() => {});
+
+  // @ts-ignore
+  $: {
+    const minTime = task.startTime;
+    const length = Math.max(task.deadline, task.assigneeEndTime ? task.assigneeEndTime : Date.now()) - minTime;
+
+    if (taskTimeRef) {
+      const taskTimeWidth = ((task.deadline - minTime) / length) * 100;
+      taskTimeRef.style.width = `${taskTimeWidth}%`;
+    }
+
+    if (assigneeTimeRef) {
+      const time = task.assigneeEndTime ? task.assigneeEndTime : Date.now();
+      const assigneeTimeWidth = ((time - minTime) / length) * 100;
+      assigneeTimeRef.style.right = `${100 - assigneeTimeWidth}%`;
+      const left = ((task.assigneeStartTime - minTime) / length) * 100;
+      if (left >= 0) {
+        assigneeTimeRef.style.left = `${left}%`;
+      }
+    }
+  }
+
+  const getHuman = (humanNames: string[]) => {
+    let index = humanNames.findIndex((humanName: string) => humanName === user.lastName + ' ' + user.firstName);
+    if (index < 0) {
+      index = 0;
+    }
+    const tmp = SObject.clone(humanNames);
+    tmp.splice(index, 1);
+    return [humanNames[index], tmp];
+  };
+
+  let moreAssignees: string[] = [];
+  let firstAssignee: string = undefined;
+  // @ts-ignore
+  $: {
+    [firstAssignee, moreAssignees] = getHuman(task.assignees);
+  }
+
+  let moreAssigners: string[] = [];
+  let firstAssigner: string = undefined;
+  // @ts-ignore
+  $: {
+    [firstAssigner, moreAssigners] = getHuman(task.assigners);
+  }
+
+  let moreEvaluators: string[] = [];
+  let firstEvaluator: string = undefined;
+  // @ts-ignore
+  $: {
+    [firstEvaluator, moreEvaluators] = getHuman(task.evaluators);
+  }
 </script>
 
 <style lang="scss">
   @import '../sass/sass/helpers/variables.scss';
 
   .task-wrapper {
-    margin-top: $default-padding;
+    margin-top: $large-padding;
+    margin-bottom: $large-padding;
     padding: $default-padding;
     font-size: 1rem;
     font-family: $default-font-family;
     border: $default-border;
     border-radius: $default-border-radius;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
     width: 100%;
+    &:hover {
+      color: var(--my-active-color);
+      cursor: pointer;
+    }
     &__task {
-      width: calc(100% - 100px);
-      min-width: 100px;
-      &:hover {
-        color: var(--my-active-color);
-        cursor: pointer;
-      }
+      position: relative;
       &__name {
         width: 100%;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: 500;
       }
       &__status {
         font-size: 0.9rem;
       }
 
-      &__time {
-        font-size: 0.9rem;
+      &__task-time {
+        position: absolute;
+        left: 0;
+        bottom: 0px;
+        height: 4px;
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      &__assignee-time {
+        position: absolute;
+        left: 0px;
+        bottom: 0px;
+        height: 4px;
+        background: rgba(255, 0, 0, 0.2);
+      }
+
+      &__item {
+        display: flex;
+        align-content: space-between;
+        justify-content: space-between;
+        &__assignee {
+          font-weight: 500;
+        }
       }
     }
     &__project {
-      width: 100px;
-      text-align: right;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
       color: var(--readonly-text-color);
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+      font-size: 1.1rem;
+      text-align: right;
+      font-weight: 500;
     }
 
     &.selected {
       /*font-weight: 500;*/
       background: var(--selection-bgcolor);
+    }
+
+    .horizontal-separator {
+      margin-top: $default-padding;
+      margin-bottom: $default-padding;
     }
   }
 </style>
@@ -74,30 +156,58 @@
   class="task-wrapper {selectedTask && task.id.toString() === selectedTask.id.toString() ? 'selected' : ''}"
   on:click={onClick}>
   <div class="task-wrapper__task">
-    <div title={T('TASK.LABEL.TASK_NAME')} class="task-wrapper__task__name">{task.name}</div>
-    <span title={T('TASK.LABEL.ASSIGNER')}>
-      {task.assigners ? task.assigners.join(', ') : T('TASK.MSG.NO_ASSIGNER')}
-    </span>
-    -
-    <span title={T('TASK.LABEL.EVALUATOR')}>
-      {task.evaluators ? task.evaluators.join(', ') : T('TASK.MSG.NO_EVALUATOR')}
-    </span>
-    <br />
-    <span title={T('TASK.LABEL.LAST_STATUS')} class="task-wrapper__task__status">
-      {task.lastStatusName[0] || T('TASK.LABEL.NO_STATUS')}
-    </span>
-    <span title={T('TASK.LABEL.ASSIGNEE')}>
-      ({task.assignees ? task.assignees.join(', ') : T('TASK.MSG.NO_ASSIGNEE')})
-    </span>
-    <br />
-    <span title={T('TASK.LABEL.START_TIME')} class="task-wrapper__task__time">
-      {SDate.convertMillisecondToDateString(task.startTime)}
-    </span>
-    ~
-    <span title={T('TASK.LABEL.DEADLINE')}>{SDate.convertMillisecondToDateString(task.deadline)}</span>
-  </div>
+    <div title={T('TASK.LABEL.TASK_NAME') + ': ' + task.name} class="task-wrapper__task__name">{task.name}</div>
+    <div title={T('TASK.LABEL.PROJECT')} class="task-wrapper__project">
+      ({task.projectName || T('TASK.LABEL.NO_PROJECT')})
+    </div>
 
-  <div title={T('TASK.LABEL.PROJECT')} class="task-wrapper__project">
-    ({task.projectName || T('TASK.LABEL.NO_PROJECT')})
+    <div class="task-wrapper__task__item">
+      <span class="task-wrapper__task__item__assignee" title={T('TASK.LABEL.ASSIGNEE')}>
+        {firstAssignee ? firstAssignee : T('TASK.MSG.NO_ASSIGNEE')}
+        {#if moreAssignees && moreAssignees.length > 0}
+          <span title={moreAssignees.join(', ')}>(+{moreAssignees.length})</span>
+        {/if}
+      </span>
+      <span title={T('TASK.LABEL.DEADLINE')}>{SDate.convertMillisecondToDateString(task.deadline)}</span>
+    </div>
+
+    <div class="horizontal-separator" />
+
+    <div class="task-wrapper__task__item">
+      <span title={T('TASK.LABEL.EVALUATOR')}>
+        {firstAssigner ? firstAssigner : T('TASK.MSG.NO_ASSIGNER')}
+        {#if moreAssigners && moreAssigners.length > 0}
+          <span title={moreAssigners.join(', ')}>(+{moreAssigners.length})</span>
+        {/if}
+      </span>
+      <span title={T('TASK.LABEL.LAST_STATUS')} class="task-wrapper__task__status">
+        {task.lastStatusName[0] || T('TASK.LABEL.NO_STATUS')}
+      </span>
+    </div>
+
+    <div class="task-wrapper__task__item">
+      <span title={T('TASK.LABEL.ASSIGNER')}>
+        {firstEvaluator ? firstEvaluator : T('TASK.MSG.NO_EVALUATOR')}
+        {#if moreEvaluators && moreEvaluators.length > 0}
+          <span title={moreEvaluators.join(', ')}>(+{moreEvaluators.length})</span>
+        {/if}
+      </span>
+
+      <span title={T('TASK.LABEL.PRIORITY')}>{task.priorityName ? task.priorityName : T('TASK.MSG.NO_PRIORITY')}</span>
+    </div>
+
+    <div style="min-height: 10px; height: 10px;" />
+
+    <div
+      title={T('COMMON.LABEL.TASK_START_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.startTime)}
+      bind:this={taskTimeRef}
+      class="task-wrapper__task__task-time" />
+
+    {#if task.assigneeStartTime}
+      <div
+        title={T('COMMON.LABEL.ASSIGNEE_START_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.assigneeStartTime) + '\n' + (task.assigneeEndTime ? T('COMMON.LABEL.ASSIGNEE_END_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.assigneeEndTime) : T('COMMON.LABEL.CURRENT_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(Date.now()))}
+        bind:this={assigneeTimeRef}
+        class="task-wrapper__task__assignee-time" />
+    {/if}
   </div>
 </div>

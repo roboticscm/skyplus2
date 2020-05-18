@@ -22,17 +22,6 @@
   // @ts-ignore
   $: name = T(`COMMON.MENU.${menuName}`);
 
-  const navigate = (ctx, next) => {
-    const path = ctx.path.replace('--', '/');
-    const comUri = `modules${path}/index.svelte`;
-    dispatch('navigate', path);
-
-    currentComponentUri$.next(comUri);
-    // menuStore.dataList$.pipe(skip(1), take(1)).subscribe((_) => {
-    //   currentComponentUri$.next(comUri);
-    // });
-  };
-
   let isActiveComponent;
   // @ts-ignore
   $: {

@@ -19,9 +19,6 @@ export default class Store {
   taskVerification$ = new BehaviorSubject<TaskVerification[]>([]);
   taskQualification$ = new BehaviorSubject<TaskQualification[]>([]);
 
-  assigneeStatusList$ = new BehaviorSubject<any[]>([]);
-  assignerStatusList$ = new BehaviorSubject<any[]>([]);
-
   taskStatus$ = new BehaviorSubject<Status[]>([]);
 
   taskList$ = new BehaviorSubject<Task[]>(undefined);
@@ -30,50 +27,6 @@ export default class Store {
   showDashboard$ = new BehaviorSubject<boolean>(false);
 
   constructor(private view: ViewStore) {
-    this.taskVerification$.next([
-      { id: '0', name: '0%' },
-      { id: '1', name: '10%' },
-      { id: '2', name: '20%' },
-      { id: '3', name: '30%' },
-      { id: '4', name: '40%' },
-      { id: '5', name: '50%' },
-      { id: '6', name: '60%' },
-      { id: '7', name: '70%' },
-      { id: '8', name: '80%' },
-      { id: '9', name: '90%' },
-      { id: '10', name: '100%' },
-    ]);
-
-    this.taskQualification$.next([
-      { id: '0', name: 'Bad' },
-      { id: '0', name: 'So so' },
-      { id: '0', name: 'Good' },
-      { id: '0', name: 'Excellent' },
-    ]);
-
-    this.assigneeStatusList$.next([
-      { id: '1', date: new Date(), percent: '100%', note: 'Note1...', attach: 'xxxx' },
-      { id: '2', date: new Date(), percent: '90%', note: 'Note2...' },
-      { id: '1', date: new Date(), percent: '100%', note: 'Note1...' },
-      { id: '2', date: new Date(), percent: '90%', note: 'Note2...' },
-      { id: '1', date: new Date(), percent: '100%', note: 'Note1...' },
-      { id: '2', date: new Date(), percent: '90%', note: 'Note2...' },
-      { id: '1', date: new Date(), percent: '100%', note: 'Note1...' },
-      { id: '2', date: new Date(), percent: '90%', note: 'Note2...' },
-      { id: '1', date: new Date(), percent: '100%', note: 'Note1...', attach: 'xxxx' },
-      {
-        id: '2',
-        date: new Date(),
-        percent: '90%',
-        note: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis, ullam!',
-      },
-    ]);
-
-    this.assignerStatusList$.next([
-      { id: '1', date: new Date(), status: 'start doing...', note: 'Note1...', attach: 'xxxx' },
-      { id: '2', date: new Date(), status: 'stop....', note: 'Note2...' },
-    ]);
-
     this.projectList$.next([
       { id: '1', name: 'SkyHub', inProgressTask: 5, completedTask: 15, notStartedTask: 2 },
       { id: '2', name: 'SkyOne', inProgressTask: 6, completedTask: 25, notStartedTask: 5 },
@@ -122,6 +75,36 @@ export default class Store {
       includeDisabled: false,
     }).subscribe((res: any) => {
       this.taskStatus$.next(res.data.payload);
+    });
+  };
+
+  findTaskVerification = () => {
+    TableUtilStore.getSimpleList({
+      tableName: 'tsk_task_verification',
+      columns: 'id,name,percent',
+      orderBy: 'sort',
+      textSearch: '',
+      page: 1,
+      pageSize: -1,
+      onlyMe: false,
+      includeDisabled: false,
+    }).subscribe((res: any) => {
+      this.taskVerification$.next(res.data.payload);
+    });
+  };
+
+  findTaskQualification = () => {
+    TableUtilStore.getSimpleList({
+      tableName: 'tsk_task_qualification',
+      columns: 'id,name',
+      orderBy: 'sort',
+      textSearch: '',
+      page: 1,
+      pageSize: -1,
+      onlyMe: false,
+      includeDisabled: false,
+    }).subscribe((res: any) => {
+      this.taskQualification$.next(res.data.payload);
     });
   };
 

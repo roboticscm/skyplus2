@@ -16,40 +16,6 @@ export const getBrowserID = (): string => {
   return guid;
 };
 
-// export const getLoginInfo = function() {
-//   let username: string | null = '';
-//   let lastName: string | null = '';
-//   let firstName: string | null = '';
-//   let avatarUrl: string | null = '';
-//
-//   username = localStorage.getItem('username');
-//   if (!username) {
-//     let href = new URL((window as any).location.href);
-//     username = href.searchParams.get('username');
-//   }
-//
-//   lastName = localStorage.getItem('lastName');
-//   if (!lastName) {
-//     let href = new URL((window as any).location.href);
-//     lastName = href.searchParams.get('lastName');
-//   }
-//
-//   firstName = localStorage.getItem('firstName');
-//   if (!firstName) {
-//     let href = new URL((window as any).location.href);
-//     firstName = href.searchParams.get('firstName');
-//   }
-//
-//   return {
-//     username: username,
-//     lastName: lastName,
-//     firstName: firstName,
-//     avatarUrl: avatarUrl,
-//
-//
-//   };
-// };
-
 export const getLanguage = (): string => {
   return localStorage.getItem('localeLanguage') || 'vi-VN';
 };
@@ -60,6 +26,10 @@ export const getCompanyId = (): string | null => {
 
 export const getUserId = () => {
   return localStorage.getItem('userId');
+};
+
+export const getUserFullName = () => {
+  return appStore.user.lastName + ' ' + appStore.user.firstName;
 };
 
 export const getToken = () => {

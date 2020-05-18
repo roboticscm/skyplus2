@@ -31,7 +31,7 @@
   import { Debug } from '@/lib/js/debug';
   import { validation } from './validation';
   import { catchError, concatMap, switchMap, filter, take } from 'rxjs/operators';
-  import { fromEvent, of, Observable, EMPTY, Subscription } from 'rxjs';
+  import { fromEvent, of, Observable, EMPTY, Subscription, noop } from 'rxjs';
   import { fromPromise } from 'rxjs/internal-compatibility';
   import {
     findEditStatusDetail,
@@ -39,6 +39,10 @@
     findRemoveAndInsertItem,
     findRemoveAndInsertStatusDetail,
   } from './helper';
+  import { StringUtil } from '@/lib/js/string-util';
+  import { SDate } from '@/lib/js/sdate';
+  import { getUserFullName } from '@/lib/js/security';
+  import { getUserId } from '@/lib/js/security';
 
   // Props
   export let view: ViewStore;
@@ -59,14 +63,7 @@
   } = view;
 
   // @ts-ignore
-  const {
-    projects$,
-    taskQualification$,
-    taskVerification$,
-    assigneeStatusList$,
-    assignerStatusList$,
-    priority$,
-  } = store;
+  const { projects$, taskQualification$, taskVerification$, priority$, taskStatus$ } = store;
 
   // Refs
   let scRef: any;
@@ -81,11 +78,9 @@
   let forAssigner = undefined;
   let modalMenuPath: string;
 
-  let projectSub, prioritySub, statusSub: Subscription;
+  let saveOrUpdateSub: Subscription;
 
-  let saveOrUpdateSub: any;
-
-  let assignerModalTitle = '';
+  let modalTitle = '';
   let submitType = undefined;
   /**
    * Reset form (reset input and errors)
@@ -107,8 +102,40 @@
   const saveUpdateUri = 'task/task/save-or-update';
 
   let readOnlyMode: boolean;
+  let readOnlyModeAssignee, readOnlyModeAssigner, readOnlyModeEvaluator: boolean;
+
   // @ts-ignore
-  $: readOnlyMode = $isReadOnlyMode$ || form.submitStatus === 1;
+  $: readOnlyMode = $isReadOnlyMode$ || form.submitStatus == 1 || !isEditTaskUser();
+
+  // @ts-ignore
+  $: readOnlyModeAssignee = $isReadOnlyMode$ || form.submitStatus !== 1 || !isAssigneeUser();
+
+  // @ts-ignore
+  $: readOnlyModeAssigner = $isReadOnlyMode$ || form.submitStatus !== 1 || !isAssignerUser();
+
+  // @ts-ignore
+  $: readOnlyModeEvaluator = $isReadOnlyMode$ || form.submitStatus !== 1 || !isEvaluatorUser();
+
+  const isEditTaskUser = () => {
+    return (
+      !selectedData ||
+      selectedData.createdBy == getUserId() ||
+      form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0 ||
+      form.evaluators.findIndex((it: any) => it.id == getUserId()) >= 0
+    );
+  };
+
+  const isAssigneeUser = () => {
+    return form.assignees.findIndex((it: any) => it.id == getUserId()) >= 0;
+  };
+
+  const isAssignerUser = () => {
+    return form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0;
+  };
+
+  const isEvaluatorUser = () => {
+    return form.evaluators.findIndex((it: any) => it.id == getUserId()) >= 0;
+  };
   // ============================== EVENT HANDLE ==========================
   /**
    * Event handle for Add New button.
@@ -215,6 +242,14 @@
     doSubmitAssignerStatus(event.detail);
   };
 
+  const onSubmitAssigneeStatus = (event: any) => {
+    // @ts-ignore
+    if ($isReadOnlyMode$) {
+      return;
+    }
+    doSubmitAssigneeStatus(event.detail);
+  };
+
   const doSubmitAssignerStatus = (status: StatusDetail) => {
     if (selectedData) {
       status.taskId = selectedData.id;
@@ -225,17 +260,85 @@
         status = form.editAssignerStatusDetails[index];
       }
     }
-
-    console.log(status);
-
+    status.assignPosition = 'ASSIGNER';
     store.submitOrCancelSubmit(status).subscribe((res) => {
       if (res.data) {
-        const index = form.assignerStatusDetails.findIndex((st: StatusDetail) => st.id === res.data.id);
+        let index = form.assignerStatusDetails.findIndex((st: StatusDetail) => st.id === res.data.id);
+        if (index < 0) {
+          index = form.assignerStatusDetails.findIndex((st: StatusDetail) => st.id === status.id);
+        }
         if (index >= 0) {
           form.assignerStatusDetails[index].submitStatus = res.data.submitStatus;
+          form.assignerStatusDetails[index].closeable = res.data.submitStatus !== 1;
+          form.assignerStatusDetails[index].id = res.data.id;
           form.assignerStatusDetails = [...form.assignerStatusDetails];
+
+          console.log(res);
+          console.log(form.assignerStatusDetails);
+        }
+
+        // save notification on submit or cancel submit
+        const title =
+          SDate.convertMillisecondToDateTimeString(status.startTime) +
+          ' - ' +
+          SDate.convertMillisecondToDateTimeString(status.endTime) +
+          '</br>' +
+          (status.status ? status.status + '</br>' : '') +
+          status.note;
+        if (res.data.submitStatus === 1) {
+          saveNotification(title, status.taskId);
+        } else if (res.data.submitStatus === 0) {
+          saveNotification(title, status.taskId, true);
         }
       }
+
+      // save init value for checking data change
+      beforeForm = SObject.clone(form);
+    });
+  };
+
+  const doSubmitAssigneeStatus = (status: StatusDetail) => {
+    if (selectedData) {
+      status.taskId = selectedData.id;
+
+      postprocessEditAssigneeStatusDetail();
+      const index = form.editAssigneeStatusDetails.findIndex((st: StatusDetail) => st.id === status.id);
+      if (index >= 0) {
+        status = form.editAssigneeStatusDetails[index];
+      }
+    }
+
+    status.assignPosition = 'ASSIGNEE';
+    store.submitOrCancelSubmit(status).subscribe((res) => {
+      if (res.data) {
+        let index = form.assigneeStatusDetails.findIndex((st: StatusDetail) => st.id === res.data.id);
+        if (index < 0) {
+          index = form.assigneeStatusDetails.findIndex((st: StatusDetail) => st.id === status.id);
+        }
+        if (index >= 0) {
+          form.assigneeStatusDetails[index].submitStatus = res.data.submitStatus;
+          form.assigneeStatusDetails[index].closeable = res.data.submitStatus !== 1;
+          form.assigneeStatusDetails[index].id = res.data.id;
+          form.assigneeStatusDetails = [...form.assigneeStatusDetails];
+        }
+
+        // save notification on submit or cancel submit
+        const title =
+          SDate.convertMillisecondToDateTimeString(status.startTime) +
+          ' - ' +
+          SDate.convertMillisecondToDateTimeString(status.endTime) +
+          '</br>' +
+          (status.status ? status.status + '</br>' : '') +
+          status.note;
+        if (res.data.submitStatus === 1) {
+          saveNotification(title, status.taskId);
+        } else if (res.data.submitStatus === 0) {
+          saveNotification(title, status.taskId, true);
+        }
+      }
+
+      // save init value for checking data change
+      beforeForm = SObject.clone(form);
     });
   };
 
@@ -245,7 +348,7 @@
       return;
     }
 
-    assignerModalTitle = T('COMMON.LABEL.EDIT_STATUS');
+    modalTitle = T('COMMON.LABEL.EDIT_STATUS');
     forAssigner = true;
     statusModalRef.show(event.detail).then((buttonPressed: ButtonPressed) => {
       if (buttonPressed === ButtonPressed.OK) {
@@ -260,18 +363,24 @@
   };
 
   const onViewAssignerStatus = (event: any) => {
-    assignerModalTitle = T('COMMON.LABEL.STATUS_DETAIL');
+    modalTitle = T('COMMON.LABEL.STATUS_DETAIL');
     forAssigner = true;
+    statusModalRef.show(event.detail, true);
+  };
+
+  const onViewAssigneeStatus = (event: any) => {
+    modalTitle = T('COMMON.LABEL.STATUS_DETAIL');
+    forAssigner = false;
     statusModalRef.show(event.detail, true);
   };
 
   const onAddAssignerStatus = () => {
     // @ts-ignore
-    if ($isReadOnlyMode$ || !selectedData) {
+    if (readOnlyModeAssigner) {
       return;
     }
 
-    assignerModalTitle = T('COMMON.LABEL.ADD_STATUS');
+    modalTitle = T('COMMON.LABEL.ADD_STATUS');
     forAssigner = true;
     statusModalRef.show().then((buttonPressed: ButtonPressed) => {
       if (buttonPressed === ButtonPressed.OK) {
@@ -284,16 +393,41 @@
     });
   };
 
-  const onAddAssigneeStatus = () => {
+  const onEditAssigneeStatus = (event: any) => {
     // @ts-ignore
-    if ($isReadOnlyMode$) {
+    if (readOnlyModeAssignee) {
       return;
     }
 
+    modalTitle = T('COMMON.LABEL.EDIT_STATUS');
+    forAssigner = false;
+    statusModalRef.show(event.detail).then((buttonPressed: ButtonPressed) => {
+      if (buttonPressed === ButtonPressed.OK) {
+        const editedData = statusModalRef.getData();
+        const index = form.assigneeStatusDetails.findIndex((it: StatusDetail) => it.id === editedData.id);
+        if (index >= 0) {
+          form.assigneeStatusDetails[index] = editedData;
+          form.assigneeStatusDetails = [...form.assigneeStatusDetails];
+        }
+      }
+    });
+  };
+
+  const onAddAssigneeStatus = () => {
+    // @ts-ignore
+    if (readOnlyModeAssignee) {
+      return;
+    }
+
+    modalTitle = T('COMMON.LABEL.ADD_STATUS');
     forAssigner = false;
     statusModalRef.show().then((buttonPressed: ButtonPressed) => {
       if (buttonPressed === ButtonPressed.OK) {
-        assigneeStatusList$.next([{ id: '1', date: new Date(), percent: 'New status', note: 'Note xxx...' }]);
+        if (form.assigneeStatusDetails && form.assigneeStatusDetails.length > 0 && form.assigneeStatusDetails[0].id) {
+          form.assigneeStatusDetails = [...form.assigneeStatusDetails, { ...statusModalRef.getData() }];
+        } else {
+          form.assigneeStatusDetails = [{ ...statusModalRef.getData() }];
+        }
       }
     });
   };
@@ -412,6 +546,16 @@
       form.targetTeams,
     );
 
+    // Add or remove Assignee status detail
+    [form.removeAssigneeStatusDetails, form.insertAssigneeStatusDetails] = findRemoveAndInsertStatusDetail(
+      isUpdateMode$.value,
+      beforeForm && beforeForm.assigneeStatusDetails,
+      form.assigneeStatusDetails,
+    );
+
+    // Edit Assigner status detail
+    postprocessEditAssigneeStatusDetail();
+
     // Add or remove Assigner status detail
     [form.removeAssignerStatusDetails, form.insertAssignerStatusDetails] = findRemoveAndInsertStatusDetail(
       isUpdateMode$.value,
@@ -452,6 +596,45 @@
       }
     }
   };
+
+  const postprocessEditAssigneeStatusDetail = () => {
+    if (isUpdateMode$.value) {
+      const [a, b] = findEditStatusDetail(beforeForm.assigneeStatusDetails, SObject.clone(form.assigneeStatusDetails));
+      const dataChange = view.checkObjectArrayChange(a, b);
+      if (dataChange) {
+        form.editAssigneeStatusDetails = dataChange;
+
+        for (let statusDetail of form.editAssigneeStatusDetails) {
+          const index = beforeForm.assigneeStatusDetails.findIndex((it: StatusDetail) => {
+            return it.id === statusDetail.id;
+          });
+
+          if (index >= 0) {
+            [statusDetail.removeAttachFiles, statusDetail.insertAttachFiles] = findRemoveAndInsertFile(
+              isUpdateMode$.value,
+              beforeForm && beforeForm.assigneeStatusDetails[index].attachFiles,
+              statusDetail.attachFiles,
+            );
+          }
+        }
+      }
+    }
+  };
+
+  const getHumanIds = () => {
+    return [
+      ...new Set([
+        ...form.assigners.map((it: any) => it.id),
+        ...form.assignees.map((it: any) => it.id),
+        ...form.evaluators.map((it: any) => it.id),
+      ]),
+    ].filter((it) => it !== null);
+  };
+
+  const saveNotification = (title: string, targetId: string, isCancel = false) => {
+    view.saveFunctionalNotification(getHumanIds(), title, targetId, isCancel).subscribe();
+  };
+
   // ============================== // HELPER ==========================
 
   // ============================== CLIENT VALIDATION ==========================
@@ -598,16 +781,29 @@
             }
           } else {
             // success
+
+            // save notification on submit or cancel submit
+            if (submitType === 'submit') {
+              const title = res.data.name;
+              saveNotification(title, res.data.id);
+            } else if (submitType === 'cancelSubmit') {
+              const title = res.data.name;
+              saveNotification(title, res.data.id, true);
+            }
+
             // @ts-ignore
             if ($isUpdateMode$) {
               // update
               scRef.snackbarRef().showUpdateSuccess();
               view.needSelectId$.next(selectedData.id);
+              // save init value for checking data change
+              beforeForm = SObject.clone(form);
             } else {
               // save
               scRef.snackbarRef().showSaveSuccess();
               doAddNew();
             }
+
             submitType = undefined;
           }
           saveRunning$.next(false);
@@ -651,9 +847,24 @@
         removeAssignerStatusDetails: [],
         insertAssignerStatusDetails: [],
         editAssignerStatusDetails: [],
+
+        removeAssigneeStatusDetails: [],
+        insertAssigneeStatusDetails: [],
+        editAssigneeStatusDetails: [],
       });
 
-      form.assignerStatusDetails = SObject.distinctArrayObject(form.assignerStatusDetails);
+      form.assigneeStatusDetails = SObject.distinctArrayObject(form.assigneeStatusDetails).map((it: StatusDetail) => {
+        it.closeable = it.submitStatus !== 1;
+        it.show = isAssigneeUser() ? true : it.submitStatus == 1;
+        return it;
+      });
+
+      form.assignerStatusDetails = SObject.distinctArrayObject(form.assignerStatusDetails).map((it: StatusDetail) => {
+        it.closeable = it.submitStatus !== 1;
+        it.show = isAssignerUser() ? true : it.submitStatus == 1;
+        return it;
+      });
+
       // save init value for checking data change
       beforeForm = SObject.clone(form);
     }
@@ -705,35 +916,45 @@
   };
 
   const registerSubscription = () => {
-    projectSub = ViewStore.loadTableMetaData$('tsk_project').subscribe((res) => {
-      const query = ViewStore.createCustomQuerySubscription('tsk_project', res.data);
-      const apolloClient$ = apolloClient.subscribe({
-        query,
-      });
-      apolloClient$.subscribe((res: any) => {
+    apolloClient
+      .subscribe({
+        query: ViewStore.createReloadSubscription('tsk_project'),
+      })
+      .subscribe((_) => {
         store.findProjects();
       });
-    });
 
-    prioritySub = ViewStore.loadTableMetaData$('tsk_priority').subscribe((res) => {
-      const query = ViewStore.createCustomQuerySubscription('tsk_priority', res.data);
-      const apolloClient$ = apolloClient.subscribe({
-        query,
-      });
-      apolloClient$.subscribe((res: any) => {
+    apolloClient
+      .subscribe({
+        query: ViewStore.createReloadSubscription('tsk_priority'),
+      })
+      .subscribe((_) => {
         store.findPriorities();
       });
-    });
 
-    statusSub = ViewStore.loadTableMetaData$('tsk_status').subscribe((res) => {
-      const query = ViewStore.createCustomQuerySubscription('tsk_status', res.data);
-      const apolloClient$ = apolloClient.subscribe({
-        query,
-      });
-      apolloClient$.subscribe((res: any) => {
+    apolloClient
+      .subscribe({
+        query: ViewStore.createReloadSubscription('tsk_status'),
+      })
+      .subscribe((_) => {
         store.findStatus();
       });
-    });
+
+    apolloClient
+      .subscribe({
+        query: ViewStore.createReloadSubscription('tsk_task_verification'),
+      })
+      .subscribe((_) => {
+        store.findTaskVerification();
+      });
+
+    apolloClient
+      .subscribe({
+        query: ViewStore.createReloadSubscription('tsk_task_qualification'),
+      })
+      .subscribe((_) => {
+        store.findTaskQualification();
+      });
   };
 
   onMount(() => {
@@ -745,21 +966,7 @@
   });
 
   onDestroy(() => {
-    if (projectSub) {
-      projectSub.unsubscribe();
-    }
-
-    if (prioritySub) {
-      prioritySub.unsubscribe();
-    }
-
-    if (statusSub) {
-      statusSub.unsubscribe();
-    }
-
-    if (saveOrUpdateSub) {
-      saveOrUpdateSub.unsubscribe();
-    }
+    saveOrUpdateSub && saveOrUpdateSub.unsubscribe();
   });
 
   // ============================== REACTIVE ==========================
@@ -793,13 +1000,15 @@
     doSelect(data);
   });
 
-  let mapAssignerStatusDetails: any[] = [];
+  let lastAssigneeSubmittedStatus: string;
   // @ts-ignore
   $: {
-    mapAssignerStatusDetails = form.assignerStatusDetails.map((it: StatusDetail) => {
-      it.closeable = it.submitStatus !== 1;
-      return it;
-    });
+    const filtered = form.assigneeStatusDetails.filter((it: StatusDetail) => it.submitStatus === 1);
+    if (filtered.length > 0) {
+      lastAssigneeSubmittedStatus = filtered[filtered.length - 1].status;
+    } else {
+      lastAssigneeSubmittedStatus = T('TASK.LABEL.NO_STATUS');
+    }
   }
 
   // ============================== //REACTIVE ==========================
@@ -815,7 +1024,7 @@
 <SelectOrgModal id={view.getViewName() + 'SelectOrgModal'} {menuPath} bind:this={selectOrgModalRef} />
 <StatusModal
   {view}
-  title={assignerModalTitle}
+  title={modalTitle}
   {forAssigner}
   id={view.getViewName() + 'StatusModal'}
   {menuPath}
@@ -872,14 +1081,14 @@
     <Button
       action={useSubmitAction}
       btnType={ButtonType.Submit}
-      disabled={view.isDisabled(ButtonId.Submit, form.errors.any() || $isReadOnlyMode$)} />
+      disabled={view.isDisabled(ButtonId.Submit, form.errors.any() || $isReadOnlyMode$ || !isEditTaskUser())} />
   {/if}
 
   {#if view.isRendered(ButtonId.CancelSubmit, form.submitStatus === 1)}
     <Button
       action={useCancelSubmitAction}
       btnType={ButtonType.CancelSubmit}
-      disabled={(view.isDisabled(ButtonId.CancelSubmit), $isReadOnlyMode$)} />
+      disabled={(view.isDisabled(ButtonId.CancelSubmit), $isReadOnlyMode$ || !isEditTaskUser())} />
   {/if}
 
   {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
@@ -912,7 +1121,7 @@
         <!-- Name -->
         <div class="col-xs-24 col-md-12">
           <FloatTextInput
-            checked={form.private}
+            bind:checked={form.isPrivate}
             rightCheck={true}
             checkTitle={T('COMMON.LABEL.PRIVATE_TASK')}
             bind:this={taskNameRef}
@@ -973,11 +1182,14 @@
             {menuPath}
             disabled={readOnlyMode}
             data$={priority$} />
-          <!-- // Last status -->
         </div>
+        <!-- // Last status -->
         <!-- Last status -->
         <div class="col-xs-24 col-md-12">
-          <FloatTextInput placeholder={T('COMMON.LABEL.STATUS')} disabled={true} bind:value={form.lastStatusName} />
+          <FloatTextInput
+            placeholder={T('COMMON.LABEL.STATUS')}
+            disabled={true}
+            value={lastAssigneeSubmittedStatus ? lastAssigneeSubmittedStatus : T('COMMON.LABEL.NO_STATUS')} />
         </div>
         <!-- // Last status -->
       </div>
@@ -1037,7 +1249,9 @@
         <div class="col-xs-24 col-md-12">
           <div class="default-rounded-border">
             <div class="my-placeholder" style="padding: 6px;">{T('COMMON.LABEL.CREATOR')}:</div>
-            <div style="margin-top: 5px; padding: 6px;">{'Tony Lua'}</div>
+            <div style="margin-top: 5px; padding: 6px;">
+              {form.creatorFullName ? form.creatorFullName : getUserFullName()}
+            </div>
           </div>
         </div>
       </div>
@@ -1142,11 +1356,81 @@
     <!-- //Task Info-->
     <div style="height: 20px;" />
 
+    <!-- Assignee Info-->
+    <Section title={T('TASK.LABEL.ASSIGNEE')} id={view.getViewName() + 'AssigneeSectionId'} {menuPath}>
+      <!-- Start date-->
+      <div class="row">
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatDatePicker
+            placeholder={T('COMMON.LABEL.START_TIME')}
+            name="assigneeStartTime"
+            bind:value={form.assigneeStartTime}
+            disabled={readOnlyModeAssignee} />
+        </div>
+
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatCheckbox
+            text={T('COMMON.LABEL.CONFIRM')}
+            disabled={readOnlyModeAssignee}
+            bind:checked={form.assigneeStartConfirm} />
+        </div>
+      </div>
+      <!-- // Start date-->
+
+      {#if form.assigneeStartConfirm}
+        <div class="row" style="margin-top: 6px;">
+          <div
+            class="label-link col-24 {readOnlyModeAssignee ? '' : 'label-button-hover'}"
+            on:click={onAddAssigneeStatus}>
+            {T('COMMON.LABEL.ADD_NEW_DETAIL')}
+          </div>
+        </div>
+        <div class="row">
+          <div class=" col-24">
+            {#if form.assigneeStatusDetails.length > 0 && form.assigneeStatusDetails[0].startTime}
+              <CloseableList
+                on:edit={onEditAssigneeStatus}
+                on:submit={onSubmitAssigneeStatus}
+                on:view={onViewAssigneeStatus}
+                directClose={true}
+                disabled={readOnlyModeAssignee}
+                bind:list={form.assigneeStatusDetails}
+                className="closeable-list__floating-controller"
+                customRender="modules/task/task/components/status/index.svelte"
+                {menuPath}
+                id={view.getViewName() + 'AssigneeStatusDetailId'} />
+            {/if}
+          </div>
+        </div>
+
+        <!-- End date-->
+        <div class="row">
+          <div class="col-xs-24 col-md-12 col-lg-6">
+            <FloatDatePicker
+              placeholder={T('COMMON.LABEL.END_TIME')}
+              bind:value={form.assigneeEndTime}
+              disabled={readOnlyModeAssignee} />
+          </div>
+
+          <div class="col-xs-24 col-md-12 col-lg-6">
+            <FloatCheckbox
+              text={T('COMMON.LABEL.CONFIRM')}
+              disabled={$isReadOnlyMode$}
+              bind:checked={form.assigneeEndConfirm} />
+          </div>
+        </div>
+        <!-- // End date-->
+      {/if}
+    </Section>
+    <!-- // Assignee Info-->
+
+    <div style="height: 20px;" />
+
     <!-- Assigner Info-->
     <Section title={T('TASK.LABEL.ASSIGNER')} id={view.getViewName() + 'AssignerSectionId'} {menuPath}>
       <div class="row" style="margin-top: 6px;">
         <div
-          class="label-link col-24 {$isReadOnlyMode$ || !selectedData ? '' : 'label-button-hover'}"
+          class="label-link col-24 {readOnlyModeAssigner ? '' : 'label-button-hover'}"
           on:click={onAddAssignerStatus}>
           {T('COMMON.LABEL.ADD_NEW_DETAIL')}
         </div>
@@ -1159,16 +1443,12 @@
               on:submit={onSubmitAssignerStatus}
               on:view={onViewAssignerStatus}
               directClose={true}
-              disabled={$isReadOnlyMode$}
-              bind:list={mapAssignerStatusDetails}
+              disabled={readOnlyModeAssigner}
+              bind:list={form.assignerStatusDetails}
               className="closeable-list__floating-controller"
               customRender="modules/task/task/components/status/index.svelte"
               {menuPath}
-              id={view.getViewName() + 'AssignerStatusDetailId'}>
-              <!--          <div slot="floatingController">-->
-              <!--            <FloatingButton on:click={onAddAssignerStatus} title={T('TASK.LABEL.ADD_STATUS')} />-->
-              <!--          </div>-->
-            </CloseableList>
+              id={view.getViewName() + 'AssignerStatusDetailId'} />
           {/if}
         </div>
       </div>
@@ -1177,68 +1457,16 @@
 
     <div style="height: 20px;" />
 
-    <!-- Assignee Info-->
-    <Section title={T('TASK.LABEL.ASSIGNEE')} id={view.getViewName() + 'AssigneeSectionId'} {menuPath}>
-      <!-- Start date-->
-      <div class="row">
-        <div class="col-xs-24 col-md-12 col-lg-6">
-          <FloatDatePicker placeholder={T('COMMON.LABEL.START_DATE')} name="startDate" disabled={$isReadOnlyMode$} />
-        </div>
-
-        <div class="col-xs-24 col-md-12 col-lg-6">
-          <FloatCheckbox
-            text={T('COMMON.LABEL.CONFIRM')}
-            disabled={$isReadOnlyMode$}
-            bind:checked={form.startDateConfirm} />
-        </div>
-      </div>
-      <!-- // Start date-->
-
-      {#if form.startDateConfirm}
-        <div class="row" style="margin-top: 6px;">
-          <div class="col-24">{T('COMMON.LABEL.STATUS_DETAIL')}:</div>
-        </div>
-        <div class="row">
-          <div class=" col-24">
-            <CloseableList
-              className="closeable-list__floating-controller"
-              customData={$assigneeStatusList$}
-              customRender="modules/task/task/components/status/index.svelte"
-              {menuPath}
-              id={view.getViewName() + 'EvaluatorId'}>
-              <div slot="floatingController">
-                <FloatingButton on:click={onAddAssigneeStatus} title={T('TASK.LABEL.ADD_STATUS')} />
-              </div>
-            </CloseableList>
-          </div>
-        </div>
-
-        <!-- End date-->
-        <div class="row">
-          <div class="col-xs-24 col-md-12 col-lg-6">
-            <FloatDatePicker placeholder={T('COMMON.LABEL.END_DATE')} name="endDate" disabled={$isReadOnlyMode$} />
-          </div>
-
-          <div class="col-xs-24 col-md-12 col-lg-6">
-            <FloatCheckbox
-              text={T('COMMON.LABEL.CONFIRM')}
-              disabled={$isReadOnlyMode$}
-              bind:checked={form.endDateConfirm} />
-          </div>
-        </div>
-        <!-- // End date-->
-      {/if}
-    </Section>
-    <!-- // Assignee Info-->
-
-    <div style="height: 20px;" />
-
     <!-- Evaluator Info-->
     <Section title={T('TASK.LABEL.EVALUATOR')} id={view.getViewName() + 'EvaluatorSectionId'} {menuPath}>
       <!-- Date-->
       <div class="row">
         <div class="col-xs-24 col-md-12 col-lg-6">
-          <FloatDatePicker placeholder={T('COMMON.LABEL.DATE')} name="evaluateDate" disabled={$isReadOnlyMode$} />
+          <FloatDatePicker
+            placeholder={T('COMMON.LABEL.DATE')}
+            name="evaluateTime"
+            bind:value={form.evaluateTime}
+            disabled={readOnlyModeEvaluator} />
         </div>
       </div>
       <!-- // Date-->
@@ -1246,7 +1474,9 @@
       <!-- Comment-->
       <div class="row">
         <div class="col-24">
-          <RichEditor bind:this={accessCommentRef}>{T('TASK.LABEL.COMMENT')}:</RichEditor>
+          <RichEditor bind:value={form.evaluateComment} disabled={readOnlyModeEvaluator}>
+            {T('TASK.LABEL.COMMENT')}:
+          </RichEditor>
         </div>
       </div>
       <!-- // Comment-->
@@ -1255,10 +1485,12 @@
         <!-- Task Verification-->
         <div class="col-xs-24 col-md-12 col-lg-6">
           <FloatSelect
+            bind:value={form.evaluateVerificationId}
+            on:clickLabel={() => onOpenModal('task/task-verification')}
             id={view.getViewName() + 'TaskVerificationId'}
-            placeholder={T('TASK.LABEL.TASK_VERIFICATION')}
+            placeholder={T('TASK.LABEL.TASK_VERIFICATION') + '(+)'}
             {menuPath}
-            disabled={$isReadOnlyMode$}
+            disabled={readOnlyModeEvaluator}
             data$={taskVerification$} />
         </div>
         <!-- // Task Verification-->
@@ -1266,10 +1498,12 @@
         <!-- Task Qualification-->
         <div class="col-xs-24 col-md-12 col-lg-6">
           <FloatSelect
+            bind:value={form.evaluateQualificationId}
+            on:clickLabel={() => onOpenModal('task/task-qualification')}
             id={view.getViewName() + 'TaskQualificationId'}
-            placeholder={T('TASK.LABEL.TASK_QUALIFICATION')}
+            placeholder={T('TASK.LABEL.TASK_QUALIFICATION') + '(+)'}
             {menuPath}
-            disabled={$isReadOnlyMode$}
+            disabled={readOnlyModeEvaluator}
             data$={taskQualification$} />
         </div>
         <!-- // Task Qualification-->
@@ -1277,14 +1511,20 @@
         <!-- Status-->
         <div class="col-xs-24 col-md-12 col-lg-6">
           <FloatSelect
+            bind:value={form.evaluateStatusId}
+            on:clickLabel={() => onOpenModal('task/status')}
             id={view.getViewName() + 'EvaluateStatusId'}
+            placeholder={T('TASK.LABEL.EVALUATE_STATUS') + '(+)'}
             {menuPath}
-            placeholder={T('COMMON.LABEL.EVALUATE_STATUS')}
-            disabled={$isReadOnlyMode$} />
+            disabled={readOnlyModeEvaluator}
+            data$={taskStatus$} />
         </div>
 
         <div class="col-xs-24 col-md-12 col-lg-6">
-          <FloatCheckbox text={T('COMMON.LABEL.COMPLETE')} disabled={$isReadOnlyMode$} bind:checked={form.complete} />
+          <FloatCheckbox
+            text={T('COMMON.LABEL.COMPLETE')}
+            disabled={readOnlyModeEvaluator}
+            bind:checked={form.evaluateComplete} />
         </div>
         <!-- // Status-->
       </div>

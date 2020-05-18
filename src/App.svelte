@@ -1,7 +1,5 @@
 <script lang="ts">
   import { AppStore, appStore } from '@/store/app';
-  import { menuStore } from '@/store/menu';
-  import { onMount, setContext } from 'svelte';
   import MainLayout from '@/components/layout/main-layout';
   import MainNavBar from '@/components/layout/main-nav-bar';
   import BranchDropdown from '@/components/layout/branch-dropdown';
@@ -12,11 +10,8 @@
   import SearchBar from '@/components/layout/search-bar';
   import { T } from '@/lib/js/locale/locale';
   import RouterView from '@/components/ui/router-view';
-  import { skip, take } from 'rxjs/operators';
   import { ModalType } from '@/components/ui/modal/types';
   import { unlockScreen } from '@/lib/js/security';
-  import { getMenuPathFromUrl } from '@/lib/js/url-util';
-  import { StringUtil } from '@/lib/js/string-util';
 
   let routerView: any;
   let confirmPasswordModalRef: any;
@@ -25,28 +20,6 @@
   const { isLogged$, screenLock$ } = AppStore;
   // @ts-ignore
   const { user$ } = appStore;
-
-  onMount(() => {
-    if (routerView) {
-      menuStore.dataList$.pipe(skip(1), take(1)).subscribe((_) => {
-        const savedMenuPath = getMenuPathFromUrl();
-        console.log(savedMenuPath);
-        if (StringUtil.isEmpty(savedMenuPath)) {
-          routerView.show(appStore.org.menuPath);
-        } else {
-          // TODO Check if menuPath in list
-          // else page 404
-          menuStore.menuPaths$.subscribe((res: string[]) => {
-            if (res.indexOf(savedMenuPath) >= 0) {
-              routerView.show(savedMenuPath);
-            } else {
-              routerView.show404();
-            }
-          });
-        }
-      });
-    }
-  });
 
   // @ts-ignore
   $: if ($screenLock$) {
@@ -73,13 +46,14 @@
     <div class="layout-header__top {!$isLogged$ ? 'layout-header__large_top' : ''}">
       <div class="layout-header__top__left">
         <BranchDropdown />
-      </div>
-      <div class="layout-header__top__center">
+
         {#if $isLogged$}
           <div class="separator" />
           <ModulesDropdown id="moduleId" />
         {/if}
 
+      </div>
+      <div class="layout-header__top__center">
         {#if !$isLogged$}
           <div class="layout-header__top__center__body">
             <div class="layout-header__top__center__body__welcome">

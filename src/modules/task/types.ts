@@ -2,21 +2,19 @@ import { StringUtil } from '@/lib/js/string-util';
 import { genNumberUUID } from '@/lib/js/util';
 
 export class Task {
-  id = '';
-  name = '';
+  id? = '';
+  name? = '';
   description? = '';
-  projectId? = '-1';
+  projectId? = null;
   projectName? = '';
   isPrivate? = false;
-  priorityId? = '-1';
-  lastStatusName = 'Open';
+  priorityId? = null;
+  priorityName? = '';
   startTime? = Date.now();
   deadline? = Date.now();
-  startDateConfirm? = false;
-  endDate? = Date.now();
-  endDateConfirm? = false;
-  evaluateDate? = Date.now();
-  complete? = false;
+  creatorFullName = '';
+  createdBy = '';
+
   firstReminder? = Date.now();
   secondReminder? = Date.now();
   submitStatus? = 0;
@@ -26,20 +24,30 @@ export class Task {
   removeTaskAttachFiles?: any[] = [];
   insertTaskAttachFiles?: any[] = [];
 
+  // Assignee
+  assignees?: any[] = [];
+  removeAssignees?: any[] = [];
+  insertAssignees?: any[] = [];
+  assigneeStartConfirm? = false;
+  assigneeStartTime? = Date.now();
+  assigneeEndConfirm? = false;
+  assigneeEndTime? = Date.now();
+
   // Assigner
   assigners?: any[] = [];
   removeAssigners?: any[] = [];
   insertAssigners?: any[] = [];
 
-  // Assignee
-  assignees?: any[] = [];
-  removeAssignees?: any[] = [];
-  insertAssignees?: any[] = [];
-
   // Evaluator
   evaluators?: any[] = [];
   removeEvaluators?: any[] = [];
   insertEvaluators?: any[] = [];
+  evaluateTime? = Date.now();
+  evaluateComment? = '';
+  evaluateQualificationId = null;
+  evaluateVerificationId = null;
+  evaluateStatusId = null;
+  evaluateComplete = false;
 
   // Characteristic
   chars?: any[] = [];
@@ -61,6 +69,12 @@ export class Task {
   removeAssignerStatusDetails?: any[] = [];
   insertAssignerStatusDetails?: any[] = [];
   editAssignerStatusDetails?: any[] = [];
+
+  // assignee status detail
+  assigneeStatusDetails?: any[] = [];
+  removeAssigneeStatusDetails?: any[] = [];
+  insertAssigneeStatusDetails?: any[] = [];
+  editAssigneeStatusDetails?: any[] = [];
 }
 
 export class Status {
@@ -73,17 +87,17 @@ export class Status {
 export class StatusDetail {
   id? = genNumberUUID();
   taskId? = '';
-  statusId? = '';
-  verificationId? = '';
+  statusId? = null;
+  verificationId? = null;
   startTime? = Date.now();
   endTime? = Date.now();
   note? = '';
   assignPosition? = '';
   attachFiles: File[] = [];
   status? = '';
-  percent? = '';
   submitStatus = 0;
   closeable? = true;
+  show? = true;
 }
 
 export class Priority {
@@ -111,8 +125,8 @@ export class File {
 }
 
 export class TaskQualification {
-  id = '';
-  name = '';
+  id? = '';
+  name? = '';
 }
 
 export class TaskVerification {

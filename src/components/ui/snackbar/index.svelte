@@ -10,7 +10,7 @@
     msg = _msg;
     snackbarRef.classList.add('show-snackbar');
     setTimeout(() => {
-      snackbarRef.classList.remove('show-snackbar');
+      snackbarRef && snackbarRef.classList.remove('show-snackbar');
     }, App.SNACKBAR_TIMEOUT);
   };
 

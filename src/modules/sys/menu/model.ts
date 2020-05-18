@@ -23,6 +23,7 @@ export class RoleMenu {
   iconData = '';
   departmentId = '';
   departmentName = '';
+  selectedId? = '';
 }
 
 export class HistoryMenu {

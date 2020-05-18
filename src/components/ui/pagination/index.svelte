@@ -12,15 +12,23 @@
   export let autoLoad = false;
   export let showDisabledButton = true;
   export let showFirstLastButton = true;
+  export let showNextPrev = false;
+  7;
   export let menuPath: string;
+  export let viewablePage = 7;
 
-  const sizes = [3, 10, 20, 50, 100];
+  const sizes = [30, 50, 100, 200];
   let pageSize = sizes[0];
   let curPage = 1;
+  let fromPage = 1;
+  let toPage = 1;
 
   let totalPages, prevStatus, firstStatus, nextStatus, lastStatus;
   // @ts-ignore
-  $: totalPages = Math.ceil(totalRecords / pageSize);
+  $: {
+    totalPages = Math.ceil(totalRecords / pageSize);
+    toPage = Math.min(viewablePage, totalPages);
+  }
   // @ts-ignore
   $: prevStatus = totalPages > 1 && curPage > 1;
   // @ts-ignore
@@ -96,11 +104,11 @@
     });
   };
 
-  const onPageChange = (event) => {
-    curPage = +event.currentTarget.value;
-
-    requireLoadPage();
-  };
+  // const onPageChange = (event) => {
+  //   curPage = +event.currentTarget.value;
+  //
+  //   requireLoadPage();
+  // };
 
   const jumpToPage = (page: number) => {
     if (page < 1) {
@@ -110,6 +118,21 @@
     }
     curPage = page;
     requireLoadPage();
+    if (curPage > viewablePage / 2) {
+      let to = curPage + Math.floor(viewablePage / 2);
+      if (to > totalPages) {
+        to = totalPages;
+      }
+      let from = to - viewablePage + 1;
+      if (from < 1) {
+        from = 1;
+      }
+      fromPage = from;
+      toPage = to;
+    } else {
+      fromPage = 1;
+      toPage = Math.min(viewablePage, totalPages);
+    }
   };
 </script>
 
@@ -137,42 +160,40 @@
             title={T('COMMON.LABEL.FIRST')}
             disabled={!firstStatus}
             on:click={() => jumpToPage(1)}
-            class={smallSize ? 'btn-small-info' : 'btn-info'}>
-            ⇤
+            class={smallSize ? 'btn-small-round-flat' : 'btn-round-flat'}>
+            <i class="fa fa-angle-double-left" />
           </button>
         {/if}
         <!--      prev button-->
-        {#if prevStatus || showDisabledButton}
+        {#if (prevStatus || showDisabledButton) && showNextPrev}
           <button
             type="button"
             title={T('COMMON.LABEL.PREVIOUS')}
             disabled={!prevStatus}
             on:click={() => jumpToPage(curPage - 1)}
-            class={smallSize ? 'btn-small-success' : 'btn-success'}>
-            ←
+            class={smallSize ? 'btn-small-round-flat' : 'btn-round-flat'}>
+            <i class="fa fa-angle-left" />
           </button>
         {/if}
         <!-- page-->
-        <!-- TODO-->
-        {#if totalPages > 0 && totalPages < 100}
-          <select
-            title={T('SYS.LABEL.RECORDS')}
-            on:change={onPageChange}
-            class={smallSize ? 'small-control-dropdown' : 'control-dropdown'}>
-            {#each getPages() as page}
-              <option selected={page.id === curPage} value={page.id}>{page.value}</option>
-            {/each}
-          </select>
-        {:else if totalPages >= 100}{T('COMMON.LABEL.PAGE')} : {SNumber.toLocaleString(curPage)}{/if}
-        <!--      next button-->
-        {#if nextStatus || showDisabledButton}
+        {#each Array(toPage - fromPage + 1) as _, page}
+          <button
+            type="button"
+            title={T('COMMON.LABEL.PAGE') + ' ' + SNumber.toLocaleString(page + fromPage)}
+            disabled={page + fromPage === curPage}
+            on:click={() => jumpToPage(page + fromPage)}
+            class={smallSize ? 'btn-small-round-flat' : 'btn-round-flat'}>
+            {page + fromPage}
+          </button>
+        {/each}
+        {#if (nextStatus || showDisabledButton) && showNextPrev}
           <button
             type="button"
             title={T('COMMON.LABEL.NEXT')}
             disabled={!nextStatus}
             on:click={() => jumpToPage(curPage + 1)}
-            class={smallSize ? 'btn-small-success' : 'btn-success'}>
-            →
+            class={smallSize ? 'btn-small-round-flat' : 'btn-round-flat'}>
+            <i class="fa fa-angle-right" />
           </button>
         {/if}
         <!--     last button-->
@@ -182,22 +203,27 @@
             title={T('COMMON.LABEL.LAST')}
             disabled={!lastStatus}
             on:click={() => jumpToPage(totalPages)}
-            class={smallSize ? 'btn-small-info' : 'btn-info'}>
-            ⇥
+            class={smallSize ? 'btn-small-round-flat' : 'btn-round-flat'}>
+            <i class="fa fa-angle-double-right" />
           </button>
         {/if}
       </span>
     {/if}
-    <select
-      title={T('SYS.LABEL.PAGE_SIZE')}
-      on:change={onPageSizeChange}
-      bind:value={pageSize}
-      class={smallSize ? 'small-control-dropdown' : 'control-dropdown'}>
-      {#each sizes as size}
-        <option value={size}>{size !== -1 ? size : T('SYS.LABEL.ALL')}</option>
-      {/each}
-    </select>
-    <span title={T('COMMON.LABEL.TOTAL_RECORD')}>{'#' + SNumber.toLocaleString(totalRecords)}</span>
+    <span class={smallSize ? 'small-control-dropdown-wrapper' : 'control-dropdown-wrapper'}>
+      <select
+        title={T('SYS.LABEL.PAGE_SIZE')}
+        on:change={onPageSizeChange}
+        bind:value={pageSize}
+        class={smallSize ? 'small-control-dropdown' : 'control-dropdown'}>
+        {#each sizes as size}
+          <option value={size}>{size !== -1 ? size : T('SYS.LABEL.ALL')}</option>
+        {/each}
+      </select>
+    </span>
+    <span title={T('COMMON.LABEL.TOTAL_RECORD') + ': ' + SNumber.toLocaleString(totalRecords)}>
+      Σ{SNumber.toLocaleString(totalPages)}
+    </span>
+    <!--    <span title={T('COMMON.LABEL.TOTAL_RECORD')}>{'#' + SNumber.toLocaleString(totalRecords)}</span>-->
     <!--     Default slot-->
     <slot />
   </span>

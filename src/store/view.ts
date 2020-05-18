@@ -20,6 +20,9 @@ import { Menu } from '@/modules/sys/menu/model';
 import HumanOrOrgStore from '@/modules/sys/user/store';
 import { roleControlStore } from '@/store/role-control';
 import { appStore } from '@/store/app';
+import { NotificationStore, NotifyType } from '@/store/notification';
+import { getUserId } from '@/lib/js/security';
+import { getMenuNameFromPath, getViewTitleFromMenuPath } from '@/lib/js/url-util';
 
 export class ViewStore {
   tableName: string;
@@ -85,11 +88,11 @@ export class ViewStore {
   };
 
   getMenuNameFromPath = () => {
-    return this.menuPath.includes('/') ? this.menuPath.split('/')[this.menuPath.split('/').length - 1] : this.menuPath;
+    return getMenuNameFromPath(this.menuPath);
   };
 
   getViewTitle = () => {
-    return T(`COMMON.MENU.${StringUtil.replaceAll(this.getMenuNameFromPath().toUpperCase(), '-', '_')}`);
+    return getViewTitleFromMenuPath(this.menuPath);
   };
 
   getViewName = () => {
@@ -655,4 +658,30 @@ export class ViewStore {
 
     return controlS$;
   };
+
+  saveNotification(type: string, toHumanListIds: string[], title: string, targetId: string, isCancel = false) {
+    const notification = {
+      fromHumanId: getUserId(),
+      toHumanListIds,
+      menuPath: this.menuPath,
+      departmentId: appStore.org.departmentId,
+      targetId,
+      title,
+      type,
+      isCancel,
+    };
+    return NotificationStore.save(notification);
+  }
+
+  saveChatNotification(toHumanListIds: string[], title: string, targetId: string, isCancel = false) {
+    return this.saveNotification(NotifyType.Chat, toHumanListIds, title, targetId, isCancel);
+  }
+
+  saveAlarmNotification(toHumanListIds: string[], title: string, targetId: string, isCancel = false) {
+    return this.saveNotification(NotifyType.Alarm, toHumanListIds, title, targetId, isCancel);
+  }
+
+  saveFunctionalNotification(toHumanListIds: string[], title: string, targetId: string, isCancel = false) {
+    return this.saveNotification(NotifyType.Functional, toHumanListIds, title, targetId, isCancel);
+  }
 }

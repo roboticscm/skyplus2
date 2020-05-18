@@ -14,6 +14,7 @@
   export let fullControl: boolean;
   export let roleControls: [];
   export let showWorkList = true;
+  export let selectedId: string;
 
   // Init view
   const view = new ViewStore(menuPath);
@@ -45,7 +46,7 @@
     {#if $showDashboard$}
       <DashboardWorkList {view} {store} />
     {:else}
-      <WorkList {view} {store} {menuPath} on:callback on:addNew={onAddNew} />
+      <WorkList {selectedId} {view} {store} {menuPath} on:callback on:addNew={onAddNew} />
     {/if}
   </div>
 

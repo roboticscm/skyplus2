@@ -88,6 +88,7 @@
           if (res.length > 0) {
             if (res[0].key === 'lastSelected') {
               _selectedId = res[0].value;
+              value = res[0].value;
             }
           }
 
@@ -145,9 +146,7 @@
     {className}"
     bind:this={inputRef}>
 
-    <option disabled selected={!saveState && _selectedId === undefined} value={-1}>
-      {T('COMMON.MSG.PLEASE_SELECT_ONE')}
-    </option>
+    <option value={null}>{T('COMMON.MSG.PLEASE_SELECT_ONE')}</option>
 
     {#if showAllItem}
       <option value={undefined}>{'--- ' + T('COMMON.LABEL.ALL') + ' ---'}</option>

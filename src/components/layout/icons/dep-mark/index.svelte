@@ -1,4 +1,4 @@
-<div class="dep-icon-mark-wrapper ">
+<div class="dep-icon-mark-wrapper " on:mouseover on:mouseout>
   <svg
     class="dep-icon-mark"
     version="1.1"

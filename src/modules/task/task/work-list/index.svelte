@@ -5,7 +5,7 @@
   import { switchMap, map, tap, filter, delay } from 'rxjs/operators';
   import { fromEvents } from '@/lib/js/rx';
   import { T } from '@/lib/js/locale/locale';
-  import { forkJoin, fromEvent, Observable, Subscription } from 'rxjs';
+  import { forkJoin, fromEvent, Observable, Subscription, of } from 'rxjs';
   import { Dropdown } from '@/lib/js/dropdown';
   import Radio from '@/components/ui/float-input/radio';
   import Store from '../store';
@@ -27,6 +27,7 @@
   export let menuPath: string;
   export let view: ViewStore;
   export let store: Store;
+  export let selectedId: string = undefined;
 
   const { fullCount$ } = view;
   const { taskList$, projectList$, showDashboard$ } = store;
@@ -232,6 +233,16 @@
   const onPaginationInit = (event) => {
     view.pageSize = event.detail;
   };
+
+  // @ts-ignore
+  $: {
+    if (selectedId) {
+      selectedTask = {
+        id: selectedId,
+      };
+      doSelect(of(1));
+    }
+  }
 </script>
 
 <style lang="scss">

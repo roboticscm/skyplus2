@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import '@/lib/js/vendor/daterangepicker';
   import { App } from '@/lib/js/constants';
   import { T } from '@/lib/js/locale/locale';
@@ -39,6 +39,8 @@
       {
         singleDatePicker: !dateRange,
         timePicker,
+        opens: 'center',
+        drops: 'down',
         ranges: {
           [T('COMMON.LABEL.TODAY')]: [moment(), moment()],
           [T('COMMON.LABEL.TOMORROW')]: [moment().add(1, 'days'), moment().add(1, 'days')],
@@ -119,13 +121,15 @@
   };
 
   export const setTimestampValue = (timestamp: number) => {
-    const ele = window['$'](inputRef).data('daterangepicker');
-    if (timestamp) {
-      ele && ele.setStartDate(new Date(timestamp));
-      currentStartDate = new Date(timestamp);
-    } else {
-      clearDate();
-    }
+    tick().then(() => {
+      const ele = window['$'](inputRef).data('daterangepicker');
+      if (timestamp) {
+        ele && ele.setStartDate(new Date(timestamp));
+        currentStartDate = new Date(timestamp);
+      } else {
+        clearDate();
+      }
+    });
   };
 
   export const getTimestampValue = () => {

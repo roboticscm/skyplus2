@@ -37,3 +37,25 @@ export interface AuthRequest {
   username: string;
   password: string;
 }
+
+export interface Notification {
+  id?: string;
+  fromHumanId?: string;
+  fromHumanFullName?: string;
+  toHumanId?: string;
+  toHumanListIds?: string[];
+  fromGroupId?: string;
+  toGroupId?: string;
+  menuPath?: string;
+  departmentId?: string;
+  departmentName?: string;
+  targetId?: string;
+  title: string;
+  type?: string;
+  isRead?: boolean;
+  isFinished?: boolean;
+  createdDate?: number;
+  isCancel?: boolean;
+  top?: number;
+  right?: number;
+}

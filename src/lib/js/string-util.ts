@@ -31,6 +31,9 @@ export class StringUtil {
   }
 
   public static replaceAll(source: string, find: string, replace: string) {
+    if (!source) {
+      return '';
+    }
     return source.replace(new RegExp(find, 'g'), replace);
   }
 
@@ -92,5 +95,9 @@ export class StringUtil {
 
   public static toBoolean(str: string) {
     return JSON.parse(str.toLowerCase());
+  }
+
+  public static distinctArrayString(array: string[]) {
+    return [...new Set(array)];
   }
 }

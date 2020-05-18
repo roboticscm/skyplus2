@@ -5,6 +5,8 @@
   import { roleControlStore } from '@/store/role-control';
   import { take, first, catchError, skip } from 'rxjs/operators';
   import { AppStore, appStore } from '@/store/app';
+  import { menuStore } from '@/store/menu';
+  import { onMount } from 'svelte';
 
   let TheComponent;
   const { currentComponentUri$ } = routerLinkStore;
@@ -13,6 +15,7 @@
   let roleControls = [];
 
   const { isLogged$ } = AppStore;
+  let selectedId: string;
 
   const loadComponent = (uri: string) => {
     if (uri && uri.length > 0) {
@@ -58,10 +61,20 @@
       loadRoleControl(uri);
     }
   }
+
+  onMount(() => {
+    menuStore.selectedData$.subscribe((selectedMenu: any) => {
+      if (selectedMenu) {
+        selectedId = selectedMenu.selectedId;
+        show(selectedMenu.path);
+        window.history.pushState('', '', '/' + selectedMenu.path.replace('/', '--'));
+      }
+    });
+  });
 </script>
 
 {#if $isLogged$}
-  <svelte:component this={TheComponent} {menuPath} {fullControl} {roleControls} />
+  <svelte:component this={TheComponent} {menuPath} {fullControl} {roleControls} {selectedId} />
 {:else}
   <svelte:component this={PageIntro} />
 {/if}

@@ -22,7 +22,7 @@
   export let title: string;
   export let view: ViewStore;
 
-  const { taskStatus$, taskQualification$ } = store;
+  const { taskStatus$, taskVerification$ } = store;
 
   let modalRef, taskVerificationRef, statusRef: any;
   const defaultWidth = 800;
@@ -62,10 +62,11 @@
   export const getData = () => {
     return {
       ...form,
-      status: statusRef && statusRef.getSelectedName(),
+      status: forAssigner
+        ? statusRef && statusRef.getSelectedName()
+        : taskVerificationRef && taskVerificationRef.getSelectedName(),
       statusId: statusRef && statusRef.getSelectedId(),
       verificationId: taskVerificationRef && taskVerificationRef.getSelectedId(),
-      percent: taskVerificationRef && taskVerificationRef.getSelectedName(),
     };
   };
 
@@ -92,6 +93,8 @@
 
   const onShowStatusModal = (menuPath: string) => {
     modalMenuPath = menuPath;
+    console.log(modalMenuPath);
+
     loadModalComponent(menuPath).then((res) => {
       viewWrapperModalRef.show().then((res) => {
         console.log(res);
@@ -126,7 +129,6 @@
       <FloatDatePicker {disabled} bind:value={form.endTime} placeholder={T('COMMON.LABEL.END_TIME')} />
     </div>
   </div>
-
   <div class="row">
     <div class="col-24">
       {#if forAssigner}
@@ -141,13 +143,14 @@
           data$={taskStatus$} />
       {:else}
         <FloatSelect
+          on:clickLabel={() => onShowStatusModal('task/task-verification')}
           {disabled}
           bind:this={taskVerificationRef}
           bind:value={form.verificationId}
           id={id + 'Percentage'}
           placeholder={T('TASK.LABEL.PERCENTAGE')}
           {menuPath}
-          data$={taskQualification$} />
+          data$={taskVerification$} />
       {/if}
     </div>
   </div>
