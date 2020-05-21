@@ -11,8 +11,8 @@ const BASE_URL = 'sys/menu/';
 class MenuStore {
   menuPaths$ = new BehaviorSubject<string[]>([]);
   dataList$ = new BehaviorSubject<RoleMenu[]>([]);
-  selectedData$ = new BehaviorSubject<RoleMenu>(null);
-  selectedData: RoleMenu = null;
+  selectedData$ = new BehaviorSubject<RoleMenu>(undefined);
+  selectedData: RoleMenu = undefined;
 
   sysGetRoledMenuPathListByUserId() {
     RxHttp.get(`${BASE_URL}${toSnackCase('sysGetRoledMenuPathListByUserId')}`, {
@@ -58,16 +58,16 @@ class MenuStore {
     return ob$;
   }
 
-  setSelectedData(menuPath: string) {
-    const path = menuPath.startsWith('/') ? menuPath.slice(1) : menuPath;
-    this.dataList$.pipe(take(1)).subscribe((data: RoleMenu[]) => {
-      const item = data.find((it) => it.path === path);
-      if (item) {
-        this.selectedData = item;
-        this.selectedData$.next(item);
-      }
-    });
-  }
+  // setSelectedData(menuPath: string) {
+  //   const path = menuPath.startsWith('/') ? menuPath.slice(1) : menuPath;
+  //   this.dataList$.pipe(take(1)).subscribe((data: RoleMenu[]) => {
+  //     const item = data.find((it) => it.path === path);
+  //     if (item) {
+  //       this.selectedData = item;
+  //       this.selectedData$.next(item);
+  //     }
+  //   });
+  // }
 }
 export const menuStore = new MenuStore();
 

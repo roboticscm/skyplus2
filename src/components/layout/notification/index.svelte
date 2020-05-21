@@ -5,7 +5,7 @@
   import AlertIcon from '@/components/layout/icons/common/alert.svelte';
   import { onMount, onDestroy } from 'svelte';
   import { apolloClient } from '@/lib/js/hasura-client';
-  import { NotificationStore, NotifyType } from '@/store/notification';
+  import { notificationStore, NotifyType } from '@/store/notification';
   import { Notification } from '@/model/base';
   import { getUserId } from '@/lib/js/security';
   import gql from 'graphql-tag';
@@ -39,7 +39,9 @@
   const drawingList: string[] = [];
 
   const reload = () => {
-    NotificationStore.findNotifications('');
+    notificationStore.findNotifications('', '').subscribe((res: any) => {
+      notificationStore.data$.next(res.data.map((it: any) => SObject.convertFieldsToCamelCase(it)));
+    });
   };
 
   const pushToDrawingList = (id: string) => {
@@ -95,11 +97,13 @@
       reload();
     });
 
-    dataSub = NotificationStore.data$.subscribe((res: Notification[]) => {
+    dataSub = notificationStore.data$.subscribe((res: Notification[]) => {
       if (beforeList && !firstTimes) {
         const { addArray } = SObject.getDiffRowObjectArray2(beforeList, res, ['id']);
         newestNotificationList = [...newestNotificationList, ...addArray];
         calcPosition();
+      } else {
+        newestNotificationList = [];
       }
 
       if (res.length > 0) {
@@ -116,7 +120,7 @@
 
       if (countAlarm + countChat + countFunctional > 0) {
         if (!firstTimes) {
-          messageToneRef.play();
+          // messageToneRef.play();
         }
       }
     });
@@ -143,7 +147,13 @@
 
   const onMouseover = (id) => {
     (document.querySelector('#' + id) as any).style.transform = 'translateY(-5px)';
-    Dropdown.show(id);
+    if (
+      (id === 'chatDropdown' && chat && chat.length > 0) ||
+      (id === 'alarmDropdown' && alarm && alarm.length > 0) ||
+      (id === 'functionalDropdown' && functional && functional.length > 0)
+    ) {
+      Dropdown.show(id);
+    }
   };
 
   const onMouseout = (id) => {
@@ -163,7 +173,7 @@
         menu.selectedId = notification.targetId;
         menuStore.selectedData$.next(menu);
 
-        NotificationStore.update(notification.id, true, true).subscribe();
+        notificationStore.update(notification.id, true, true).subscribe();
       }, 500);
     }
   };
@@ -215,7 +225,7 @@
       class="notify-icon {countChat === 0 ? 'notify-icon-disabled' : ''}">
       <ChatIcon />
       <div id="chatDropdown" class="right-dropdown-content" style="height: 600px;">
-        <MessageDropdownContent title={T('TASK.LABEL.CHAT')} on:click={onClickItem} data={chat} />
+        <MessageDropdownContent type={NotifyType.Chat} on:click={onClickItem} data={chat} />
       </div>
     </div>
     {#if countChat > 0}
@@ -228,7 +238,7 @@
       class="notify-icon {countFunctional === 0 ? 'notify-icon-disabled' : ''}">
       <BellIcon />
       <div id="functionalDropdown" class="right-dropdown-content" style="height: 600px;">
-        <MessageDropdownContent title={T('TASK.LABEL.FUNCTIONAL')} on:click={onClickItem} data={functional} />
+        <MessageDropdownContent type={NotifyType.Functional} on:click={onClickItem} data={functional} />
       </div>
     </div>
 
@@ -242,7 +252,7 @@
       class="notify-icon {countAlarm === 0 ? 'notify-icon-disabled' : ''}">
       <AlertIcon />
       <div id="alarmDropdown" class="right-dropdown-content" style="height: 600px;">
-        <MessageDropdownContent title={T('TASK.LABEL.ALARM')} on:click={onClickItem} data={alarm} />
+        <MessageDropdownContent type={NotifyType.Alarm} on:click={onClickItem} data={alarm} />
       </div>
     </div>
     {#if countAlarm > 0}

@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { ViewStore } from '@/store/view';
-  import QuickSearch from '@/components/ui/float-input/quick-search';
-  import { switchMap, map, tap, filter, delay } from 'rxjs/operators';
+  import QuickSearch from '@/components/ui/input/quick-search';
+  import { switchMap, map, tap, filter, delay, debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
   import { fromEvents } from '@/lib/js/rx';
   import { T } from '@/lib/js/locale/locale';
-  import { forkJoin, fromEvent, Observable, Subscription, of } from 'rxjs';
+  import { forkJoin, fromEvent, Observable, Subscription, of, BehaviorSubject } from 'rxjs';
   import { Dropdown } from '@/lib/js/dropdown';
   import Radio from '@/components/ui/float-input/radio';
   import Store from '../store';
@@ -15,7 +15,7 @@
   import Button from '@/components/ui/flat-button';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import ContentFilter from '@/components/ui/float-input/content-filter';
-  import { filterColumns } from './helper';
+  import {convertArrayObjectToObject, filterColumns} from './helper';
   import CloseableList from '@/components/ui/closeable-list';
   import { StringUtil } from '@/lib/js/string-util';
   import { SObject } from '@/lib/js/sobject';
@@ -23,13 +23,14 @@
   import { App } from '@/lib/js/constants';
   import { appStore } from '@/store/app';
   import Pagination from '@/components/ui/pagination';
+  import {markStringSearch} from "../../../../lib/js/util";
 
   export let menuPath: string;
   export let view: ViewStore;
   export let store: Store;
   export let selectedId: string = undefined;
 
-  const { fullCount$ } = view;
+  const { fullCount$, needSelectId$} = view;
   const { taskList$, projectList$, showDashboard$ } = store;
   let quickSearchRef: any;
   let searchWrapperRef: any;
@@ -45,13 +46,36 @@
   let taskApolloClient$: any;
   let viewByTaskRef, pageRef: any;
 
+  const searchProgress$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  let markedData: any[] = undefined;
+  let textSearch: string = '';
+
   const dispatch = createEventDispatcher();
   const doFilter = (ob$: Observable<any>) => {
+    let start = Date.now();
     ob$
-      // .pipe()
+      .pipe(
+        filter((e: any) => e.value.length >= App.MIN_SEARCH_LENGTH || e.value.length === 0),
+        debounceTime(App.DELAY_ON_INPUT),
+        distinctUntilChanged(),
+        tap((e: any) => {
+          start = Date.now();
+          searchProgress$.next(true);
+          textSearch = e.value;
+        }),
+        switchMap((e: any) => {
+          if(StringUtil.isEmpty(e.value)) {
+            return store.tskFindTasks({menuPath, departmentId: appStore.org.departmentId, isCompleted: false});
+          } else {
+            return store.tskFindTasks({menuPath, departmentId: appStore.org.departmentId, textSearch: StringUtil.formatFTSParam(e.value)});
+          }
+        }),
+      )
       .subscribe((res) => {
-        // console.log(res);
-        // data = res.data;
+        const end = Date.now();
+        console.log('Quick Search Took ', end - start);
+        searchProgress$.next(false);
+        didSearch(res, textSearch);
       });
   };
 
@@ -61,7 +85,7 @@
         map((event: any) => {
           return {
             type: event.type,
-            value: event.target.value,
+            value: event.target.value.trim(),
           };
         }),
       );
@@ -86,7 +110,9 @@
   const onItemChangeFilter = (event: any, item: any) => {
     item.id = event.detail.current;
 
-    if (event.detail.before == '-1') {
+    console.log( event.detail.before);
+
+    if (event.detail.before == '') {
       usedFilterColumns.push(event.detail.current);
     } else {
       const index = usedFilterColumns.indexOf(event.detail.before);
@@ -95,6 +121,8 @@
       }
     }
     usedFilterColumns = [...usedFilterColumns];
+
+    console.log(usedFilterColumns);
   };
 
   const onSearch = (event: any, item: any) => {
@@ -111,6 +139,7 @@
         name: '',
       },
     ];
+
   };
 
   const onRemoveFilter = (event: any) => {
@@ -139,9 +168,46 @@
           name: T('TASK.LABEL.' + StringUtil.toUpperCaseWithUnderscore(it.id)) + ': ' + it.name,
         };
       });
+
+    // TODO
+
+    const param = convertArrayObjectToObject(filterList.map((it: any) => {
+      return {
+        [it.id]: it.name
+      }
+    }));
+
+
+    doAdvSearch(param);
     onCloseSearch();
   };
 
+  const doAdvSearch = (param: any = {
+    taskName: '',
+    projectName: '',
+    assigneeName: '',
+    assignerName: '',
+    evaluatorName: '',
+    isCompleted: '',
+    isDelayDeadline: '',
+    createdDateFrom: '',
+    createdDateTo: ''
+  } ) => {
+    const start = Date.now();
+    store.tskFindTasks({
+      menuPath,
+      departmentId: appStore.org.departmentId,
+      textSearch,
+      ...param
+    }).subscribe((res) => {
+      console.log(res);
+      const end = Date.now();
+      console.log('Took ', end - start);
+      searchProgress$.next(false);
+      didSearch(res, textSearch);
+    });
+
+  }
   const onCloseFilter = (event: any) => {
     const _filterList = SObject.clone(filterList);
 
@@ -157,6 +223,11 @@
     }
     onSelectSearchField();
   };
+
+  const onCloseAllFilter = () => {
+    filterList = [{ id: '', name: '' }];
+    onSelectSearchField();
+  }
 
   let firstTimes = true;
   const registerSubscription = () => {
@@ -175,8 +246,33 @@
     });
   };
 
+
+
+  const didSearch = (res: any, textSearch = '') => {
+    if(!res.data) {
+      store.taskList$.next([]);
+      view.fullCount$.next(0);
+      return;
+    }
+
+    if (res.data.payload.length === 0 && view.page > 1) {
+      view.page--;
+      store.tskFindTasks({menuPath, departmentId: appStore.org.departmentId});
+    } else {
+      store.taskList$.next(res.data.payload);
+      view.fullCount$.next(res.data.fullCount);
+      mark(textSearch, res.data.payload);
+    }
+  };
+
+
   const reload = () => {
-    store.tskFindTasks(menuPath, appStore.org.departmentId);
+    const start = Date.now();
+    store.tskFindTasks({menuPath, departmentId: appStore.org.departmentId, isCompleted: false}).subscribe((res: any) => {
+      const end = Date.now();
+      console.log('Reload Took ', end - start);
+      didSearch(res);
+    });
     view.checkDeletedRecord(false);
   };
 
@@ -243,6 +339,40 @@
       doSelect(of(1));
     }
   }
+
+  // @ts-ignore
+  $: {
+    // @ts-ignore
+    const needSelectId = $needSelectId$;
+    if (needSelectId) {
+      selectedTask = {
+        id: needSelectId,
+      };
+      doSelect(of(1));
+    }
+  }
+
+
+  const mark = (textSearch: string, source: any) => {
+    if (StringUtil.isEmpty(textSearch)) {
+      markedData = source;
+    }
+
+    markedData = SObject.clone(source).map((item: Task) => {
+      const markedName = markStringSearch(item.name, textSearch, true);
+      const markedProjectName = markStringSearch(item.projectName, textSearch, true);
+
+      if (markedName !== item.name) {
+        item.name = markedName;
+      }
+      if (markedProjectName !== item.projectName) {
+        item.projectName = markedProjectName;
+      }
+
+      return item;
+    });
+  };
+
 </script>
 
 <style lang="scss">
@@ -308,6 +438,7 @@
   <!-- Search-->
   <div bind:this={searchWrapperRef}>
     <QuickSearch
+      loading$={searchProgress$}
       on:clickAdvanced={onClickAdvanced}
       showAdvancedSearch={true}
       action={useSearchAction}
@@ -334,7 +465,7 @@
               on:click={() => onRemoveFilter(item)}
               class="fa fa-times"
               style="font-size: 0.7rem; display: flex; flex-direction: column; justify-content: flex-end; padding-left:
-              5px;" />
+              5px; margin-bottom: 5px;" />
           </div>
         {/each}
 
@@ -350,17 +481,18 @@
   {#if mappedFilterList.length > 0}
     <div style="margin-top: 6px;">
       <CloseableList
+        directClose={true}
         className="closeable-list__floating-controller"
         on:close={onCloseFilter}
-        data={mappedFilterList}
+        on:closeAll={onCloseAllFilter}
+        bind:list={mappedFilterList}
         {menuPath}
         id={view.getViewName() + 'FilterId'} />
     </div>
   {/if}
   <!-- // Filter -->
-
   <!-- Option task or project view -->
-  <div style="display: flex; justify-content: space-evenly; margin-bottom: 6px;">
+  <div style="display: flex; justify-content: space-evenly; margin-bottom: 6px; margin-top: 10px;">
     <Radio text={T('TASK.LABEL.TASK')} bind:group={viewBy} value="task" />
     <Radio text={T('TASK.LABEL.PROJECT')} bind:group={viewBy} value="project" />
   </div>
@@ -377,9 +509,9 @@
         bind:this={pageRef} />
     </div>
     <div bind:this={viewByTaskRef}>
-      {#if $taskList$}
-        {#if $taskList$.length > 0}
-          {#each $taskList$ as task}
+      {#if markedData}
+        {#if markedData.length > 0}
+          {#each markedData as task}
             <TaskView task={SObject.convertFieldsToCamelCase(task)} {selectedTask} on:click={onClickTask} />
           {/each}
         {:else}{T('TASK.MSG.NO_TASK_FOUND')}{/if}

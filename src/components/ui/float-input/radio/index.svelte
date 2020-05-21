@@ -15,7 +15,7 @@
 
 <style lang="scss">
   .floating-radio {
-    margin-top: 25px;
+    /*margin-top: 25px;*/
   }
 </style>
 

@@ -5,6 +5,7 @@ import { take } from 'rxjs/operators';
 import { Notification } from '@/model/base';
 import { SJSON } from '@/lib/js/sjson';
 import { SObject } from '@/lib/js/sobject';
+import { getUserId } from '@/lib/js/security';
 
 export enum NotifyType {
   Chat = 'CHAT',
@@ -13,22 +14,21 @@ export enum NotifyType {
 }
 
 const BASE_URL = 'sys/notification/';
-export class NotificationStore {
-  static data$ = new BehaviorSubject<Notification[]>([]);
+class NotificationStore {
+  data$ = new BehaviorSubject<Notification[]>([]);
 
-  static findNotifications(textSearch: string) {
-    RxHttp.get(`${BASE_URL}${toSnackCase('findNotifications')}`, {
+  findNotifications(type, textSearch: string) {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('findNotifications')}`, {
+      type,
       textSearch,
-    }).subscribe((res: any) => {
-      this.data$.next(res.data.map((it: any) => SObject.convertFieldsToCamelCase(it)));
     });
   }
 
-  static save(data: Notification) {
+  save(data: Notification) {
     return RxHttp.post(`${BASE_URL}${toSnackCase('save')}`, SJSON.stringify(data));
   }
 
-  static update(id: string, isRead: boolean = null, isFinished: boolean = null) {
+  update(id: string, isRead: boolean = null, isFinished: boolean = null) {
     return RxHttp.put(
       `${BASE_URL}${toSnackCase('update')}`,
       SJSON.stringify({
@@ -39,3 +39,5 @@ export class NotificationStore {
     );
   }
 }
+
+export const notificationStore = new NotificationStore();

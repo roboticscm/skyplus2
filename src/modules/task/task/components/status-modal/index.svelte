@@ -14,6 +14,8 @@
   import { take } from 'rxjs/operators';
   import { roleControlStore } from '@/store/role-control';
   import { appStore } from '@/store/app';
+  import Error from '@/components/ui/error';
+  import { validation } from './validation';
 
   export let menuPath: string;
   export let id: string;
@@ -41,6 +43,7 @@
   let modalRoleControls: any[] = [];
 
   export const show = (_data: any = undefined, _disabled = false) => {
+    console.log(_data);
     disabled = _disabled;
     if (_data) {
       form = new Form({
@@ -93,12 +96,9 @@
 
   const onShowStatusModal = (menuPath: string) => {
     modalMenuPath = menuPath;
-    console.log(modalMenuPath);
 
     loadModalComponent(menuPath).then((res) => {
-      viewWrapperModalRef.show().then((res) => {
-        console.log(res);
-      });
+      viewWrapperModalRef.show().then((res) => {});
     });
   };
 
@@ -109,9 +109,26 @@
       form.verificationId = event.detail;
     }
   };
+
+  const validate = () => {
+    return new Promise((resolve, reject) => {
+      // client validation
+      form.errors.errors = form.recordErrors(validation(form));
+      if (form.errors.any()) {
+        resolve(false);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
+  const onChangeEndTime = () => {
+    form.errors.clear('endTime');
+  };
 </script>
 
 <Modal
+  beforeOK={validate}
   {defaultWidth}
   {defaultHeight}
   {menuPath}
@@ -120,56 +137,67 @@
   {title}
   {id}
   bind:this={modalRef}>
-  <div class="row">
-    <div class="col-xs-24 col-md-12">
-      <FloatDatePicker {disabled} bind:value={form.startTime} placeholder={T('COMMON.LABEL.START_TIME')} />
+  <form
+    class="form"
+    on:click={(event) => form.errors.clear(event.target.name)}
+    on:keydown={(event) => form.errors.clear(event.target.name)}>
+    <div class="row">
+      <div class="col-xs-24 col-md-12">
+        <FloatDatePicker {disabled} bind:value={form.startTime} placeholder={T('COMMON.LABEL.START_TIME')} />
+      </div>
+
+      <div class="col-xs-24 col-md-12">
+        <FloatDatePicker
+          {disabled}
+          name="endTime"
+          bind:value={form.endTime}
+          placeholder={T('COMMON.LABEL.END_TIME')}
+          on:change={onChangeEndTime} />
+        <Error {form} field="endTime" />
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-24">
+        {#if forAssigner}
+          <FloatSelect
+            on:clickLabel={() => onShowStatusModal('task/status')}
+            {disabled}
+            bind:this={statusRef}
+            bind:value={form.statusId}
+            id={id + 'Status'}
+            placeholder={T('TASK.LABEL.STATUS')}
+            {menuPath}
+            data$={taskStatus$} />
+        {:else}
+          <FloatSelect
+            on:clickLabel={() => onShowStatusModal('task/task-verification')}
+            {disabled}
+            bind:this={taskVerificationRef}
+            bind:value={form.verificationId}
+            id={id + 'Percentage'}
+            placeholder={T('TASK.LABEL.PERCENTAGE')}
+            {menuPath}
+            data$={taskVerification$} />
+        {/if}
+      </div>
     </div>
 
-    <div class="col-xs-24 col-md-12">
-      <FloatDatePicker {disabled} bind:value={form.endTime} placeholder={T('COMMON.LABEL.END_TIME')} />
+    <div class="row">
+      <div class="col-24">
+        <FloatTextInput {disabled} placeholder={T('COMMON.LABEL.NOTE')} bind:value={form.note} />
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-24">
-      {#if forAssigner}
-        <FloatSelect
-          on:clickLabel={() => onShowStatusModal('task/status')}
+    <div class="row">
+      <div class="col-24" style="margin-top: 6px;">
+        <UploadFiles
+          savePath="upload_files/task"
           {disabled}
-          bind:this={statusRef}
-          bind:value={form.statusId}
-          id={id + 'Status'}
-          placeholder={T('TASK.LABEL.STATUS')}
           {menuPath}
-          data$={taskStatus$} />
-      {:else}
-        <FloatSelect
-          on:clickLabel={() => onShowStatusModal('task/task-verification')}
-          {disabled}
-          bind:this={taskVerificationRef}
-          bind:value={form.verificationId}
-          id={id + 'Percentage'}
-          placeholder={T('TASK.LABEL.PERCENTAGE')}
-          {menuPath}
-          data$={taskVerification$} />
-      {/if}
+          id={id + 'UploadFiles'}
+          bind:list={form.attachFiles} />
+      </div>
     </div>
-  </div>
-
-  <div class="row">
-    <div class="col-24">
-      <FloatTextInput {disabled} placeholder={T('COMMON.LABEL.NOTE')} bind:value={form.note} />
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-24" style="margin-top: 6px;">
-      <UploadFiles
-        savePath="upload_files/task"
-        {disabled}
-        {menuPath}
-        id={id + 'UploadFiles'}
-        bind:list={form.attachFiles} />
-    </div>
-  </div>
+  </form>
 </Modal>
 
 <ViewWrapperModal

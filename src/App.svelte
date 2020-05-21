@@ -41,48 +41,55 @@
     menuPath="screenLock"
     bind:this={confirmPasswordModalRef} />
 {/if}
-<MainLayout>
-  <section slot="header" class="layout-header {$isLogged$ ? 'layout-header-logged-in' : ''}">
-    <div class="layout-header__top {!$isLogged$ ? 'layout-header__large_top' : ''}">
-      <div class="layout-header__top__left">
-        <BranchDropdown />
 
-        {#if $isLogged$}
-          <div class="separator" />
-          <ModulesDropdown id="moduleId" />
-        {/if}
+{#if $isLogged$}
+  <MainLayout>
+    <section slot="header" class="layout-header {$isLogged$ ? 'layout-header-logged-in' : ''}">
+      <div class="layout-header__top {!$isLogged$ ? 'layout-header__large_top' : ''}">
+        <div class="layout-header__top__left">
+          <BranchDropdown />
 
-      </div>
-      <div class="layout-header__top__center">
-        {#if !$isLogged$}
-          <div class="layout-header__top__center__body">
-            <div class="layout-header__top__center__body__welcome">
-              <i class="fa fa-sign-in-alt" />
-              {@html `${T('SYS.MSG.WELCOME_TO')} <b>SKYHUB</b>`}
+          {#if $isLogged$}
+            <div class="separator" />
+            <ModulesDropdown id="moduleId" />
+          {/if}
+
+        </div>
+        <div class="layout-header__top__center">
+          {#if !$isLogged$}
+            <div class="layout-header__top__center__body">
+              <div class="layout-header__top__center__body__welcome">
+                <i class="fa fa-sign-in-alt" />
+                {@html `${T('SYS.MSG.WELCOME_TO')} <b>SKYHUB</b>`}
+              </div>
+              <SearchBar id="mainSearchBarId" menuPath="intro" />
             </div>
+          {/if}
+
+          {#if $isLogged$}
             <SearchBar id="mainSearchBarId" menuPath="intro" />
-          </div>
+          {/if}
+        </div>
+        <div class="layout-header__top__right">
+          {#if $isLogged$}
+            <Notification />
+          {/if}
+          <UserProfiles />
+        </div>
+      </div>
+      <nav class="layout-header__bottom">
+        {#if $isLogged$}
+          <MainNavBar />
         {/if}
+      </nav>
+    </section>
 
-        {#if $isLogged$}
-          <SearchBar id="mainSearchBarId" menuPath="intro" />
-        {/if}
-      </div>
-      <div class="layout-header__top__right">
-        {#if $isLogged$}
-          <Notification />
-        {/if}
-        <UserProfiles />
-      </div>
+    <div slot="default" style="height: 100%; background: var(--bg-tertiary); overflow: auto;">
+      <RouterView bind:this={routerView} />
     </div>
-    <nav class="layout-header__bottom">
-      {#if $isLogged$}
-        <MainNavBar />
-      {/if}
-    </nav>
-  </section>
-
-  <div slot="default" style="height: 100%; background: var(--bg-tertiary); overflow: auto;">
+  </MainLayout>
+{:else}
+  <div style="height: 100%; background: var(--bg-tertiary); overflow: auto;">
     <RouterView bind:this={routerView} />
   </div>
-</MainLayout>
+{/if}

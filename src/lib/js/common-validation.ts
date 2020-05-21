@@ -1,6 +1,11 @@
 import { StringUtil } from '@/lib/js/string-util';
 
 export class CommonValidation {
+  public static DEADLINE_MUST_AFTER_START_TIME = 'TASK.MSG.DEADLINE_MUST_AFTER_START_TIME';
+  public static END_TIME_MUST_AFTER_START_TIME = 'TASK.MSG.END_TIME_MUST_AFTER_START_TIME';
+  public static SECOND_REMINDER_MUST_AFTER_THE_FIRST = 'TASK.MSG.SECOND_REMINDER_MUST_AFTER_THE_FIRST';
+  public static EVALUATE_TIME_MUST_AFTER_ASSIGNEE_START_TIME = 'TASK.MSG.EVALUATE_TIME_MUST_AFTER_ASSIGNEE_START_TIME';
+
   public static REQUIRED_VALUE = 'COMMON.MSG.REQUIRED_VALUE';
   public static SELECT_AT_LEAST_ONE_LEAF_NODE = 'COMMON.MSG.LEASE_SELECT_AT_LEAST_ONE_LEAF_NODE';
   public static SELECT_AT_LEAST_ONE_NODE = 'COMMON.MSG.LEASE_SELECT_AT_LEAST_ONE_NODE';
@@ -23,6 +28,9 @@ export class CommonValidation {
 
   public static LENGTH_BETWEEN = 'COMMON.MSG.VALUE_MUST_BE_BETWEEN_%min_AND_%max_CHARS';
   public static isLengthBetween(source: string, min: number, max: number) {
+    if (!source && min === 0) {
+      return true;
+    }
     return source.trim().length >= min && source.trim().length <= max;
   }
 

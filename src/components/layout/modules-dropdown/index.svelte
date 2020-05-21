@@ -16,6 +16,7 @@
   let selectedDep: any = undefined;
 
   const onNavigate = (event: Event, department: any) => {
+    menuStore.selectedData$.next(undefined);
     settingsStore
       .saveUserSettings({
         menuPath: 'system',
@@ -24,32 +25,40 @@
         values: [department.departmentId + ''],
       })
       .then((_: any) => {
-        // get last menu path of department
-        menuStore.sysGetRoledMenuListByUserIdAndDepId(department.departmentId, false).subscribe((res: any) => {
-          if (res.data.length > 0) {
-            settingsStore.saveUserSettings({
-              menuPath: 'system',
-              controlId: 'mainNavBarId',
-              keys: ['lastMenuPath'],
-              values: [res.data[0].path],
-            });
-
-            if (!selectedDep.noLoadMenu) {
-              menuStore.dataList$.next(res.data);
-              if (res.data.length > 0) {
-                menuStore.selectedData = res.data[0];
-                menuStore.selectedData$.next(res.data[0]);
-                window.history.pushState('', '', '/' + res.data[0].path.replace('/', '--'));
-              }
-            }
-
-            selectedDep = department;
-            appStore.org.departmentId = department.departmentId;
-          }
-        });
+        // get first menu path of department
+        loadFirstMenu(department.departmentId);
+        selectedDep = department;
+        appStore.org.departmentId = department.departmentId;
       });
 
     Dropdown.hide('moduleDropdownId');
+  };
+
+  const loadFirstMenu = (departmentId: string) => {
+    menuStore.sysGetRoledMenuListByUserIdAndDepId(departmentId, false).subscribe((res: any) => {
+      if (res.data.length > 0) {
+        settingsStore.saveUserSettings({
+          menuPath: 'system',
+          controlId: 'mainNavBarId',
+          keys: ['lastMenuPath'],
+          values: [res.data[0].path],
+        });
+
+        if (!selectedDep.noLoadMenu) {
+          menuStore.dataList$.next(res.data);
+          if (res.data.length > 0) {
+            menuStore.selectedData = res.data[0];
+            menuStore.selectedData$.next(res.data[0]);
+            window.history.pushState('', '', '/' + res.data[0].path.replace('/', '--'));
+          }
+        }
+      } else {
+        if (!selectedDep.noLoadMenu) {
+          menuStore.dataList$.next([]);
+          menuStore.selectedData$.next(null);
+        }
+      }
+    });
   };
 
   const findDepartmentById = (depId: string) => {
@@ -70,6 +79,12 @@
           modules = res.data;
           selectedDep = findDepartmentById(org.departmentId);
           appStore.org.selectedDepartment = selectedDep;
+          if (selectedDep) {
+            // loadFirstMenu(selectedDep.departmentId);
+          } else {
+            menuStore.dataList$.next([]);
+            menuStore.selectedData$.next(null);
+          }
         });
       } else if (org) {
         selectedDep = findDepartmentById(org.departmentId);
@@ -119,9 +134,10 @@
             {@html ' ' + selectedDep.departmentName}
           </span>
         </div>
-      {:else}
+      {:else if selectedDep === undefined}
         {@html App.PROGRESS_BAR}
-      {/if}
+      {:else}{T('COMMON.LABEL.NO_DEPARTMENT_AVAILABLE')}{/if}
+
     </div>
 
   </div>

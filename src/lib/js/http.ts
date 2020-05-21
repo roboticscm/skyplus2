@@ -2,8 +2,8 @@ import { SJSON } from '@/lib/js/sjson';
 // @ts-ignore
 const axios = require('axios');
 import { API } from './constants';
-import { logout } from '@/lib/js/security';
-import Axios from 'axios-observable';
+import { getToken, getUserId, logout } from '@/lib/js/security';
+import { StringUtil } from '@/lib/js/string-util';
 
 export class Http {
   public static async callApi(method: string, url: string, params: any, jsonData: any) {
@@ -84,14 +84,14 @@ export class Http {
     return Http.callApi('delete', url, params, null);
   }
 
-  private static paramParser(paramObj: any) {
-    if (!paramObj) {
+  public static paramParser(paramObj: any) {
+    if (StringUtil.isEmpty(paramObj)) {
       return '';
     }
 
     let paramsString = '?';
     for (let key in paramObj) {
-      paramsString += `${key}=${encodeURIComponent(paramObj[key])}&`;
+      paramsString += `${key}=${encodeURIComponent(StringUtil.replaceAll(paramObj[key], '%', ''))}&`;
     }
     // remove last &
     return paramsString.substring(0, paramsString.length - 1);

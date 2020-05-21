@@ -165,7 +165,7 @@
 
 <Snackbar bind:this={snackbarRef} />
 <div
-  class="search-bar-wrapper search-bar-wrapper-rounded-border {!$isLogged$ ? 'search-bar-bottom-wrapper' : ''}"
+  class="search-bar-wrapper search-bar-wrapper-rounded-border"
   bind:this={searchWrapperRef}>
 
   <Autocomplete

@@ -2,6 +2,7 @@
 import { App, Token } from '@/lib/js/constants';
 import axios from 'axios';
 import { AppStore, appStore } from '@/store/app';
+import { menuStore } from '@/store/menu';
 
 export const getBrowserID = (): string => {
   let nav = window.navigator;
@@ -75,9 +76,14 @@ export const logout = function() {
   localStorage.removeItem('userId');
   localStorage.removeItem('AppName');
   localStorage.removeItem(Token.TOKEN_KEY);
-  AppStore.isLogged$.next(false);
-  AppStore.screenLock$.next(0);
-  appStore.theme$.next(null);
+  // AppStore.isLogged$.next(false);
+  // AppStore.screenLock$.next(0);
+  // appStore.theme$.next(null);
+  // window.history.pushState('', '', '/logout');
+  // location.reload();
+  location.href = '/logout';
+  // menuStore.dataList$.next([]);
+  // menuStore.selectedData$.next(undefined);
 };
 
 export const setHeader = function(userId: string, token: string) {

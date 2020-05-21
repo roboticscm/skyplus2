@@ -1,12 +1,14 @@
 <script lang="ts">
   import { routerLinkStore } from '../router-link/store';
   import Page404 from '@/pages/404/index.svelte';
+  import PageLoading from '@/pages/loading/index.svelte';
   import PageIntro from '@/pages/intro/index.svelte';
   import { roleControlStore } from '@/store/role-control';
-  import { take, first, catchError, skip } from 'rxjs/operators';
+  import { take } from 'rxjs/operators';
   import { AppStore, appStore } from '@/store/app';
   import { menuStore } from '@/store/menu';
   import { onMount } from 'svelte';
+  import { Subscription } from 'rxjs';
 
   let TheComponent;
   const { currentComponentUri$ } = routerLinkStore;
@@ -52,24 +54,36 @@
     TheComponent = Page404;
   };
 
-  // @ts-ignore
-  $: {
-    // @ts-ignore
-    const uri = $currentComponentUri$;
-    if (uri) {
-      menuPath = uri.replace('modules/', '').replace('/index.svelte', '');
-      loadRoleControl(uri);
-    }
-  }
+  export const showLoading = () => {
+    TheComponent = PageLoading;
+  };
 
   onMount(() => {
-    menuStore.selectedData$.subscribe((selectedMenu: any) => {
-      if (selectedMenu) {
-        selectedId = selectedMenu.selectedId;
-        show(selectedMenu.path);
-        window.history.pushState('', '', '/' + selectedMenu.path.replace('/', '--'));
+    const componentSub: Subscription = currentComponentUri$.subscribe((res: any) => {
+      if (res) {
+        menuPath = res.replace('modules/', '').replace('/index.svelte', '');
+        loadRoleControl(res);
       }
     });
+
+    const menuSub: Subscription = menuStore.selectedData$.subscribe((selectedMenu: any) => {
+      if (selectedMenu === undefined) {
+        window.history.pushState('', '', '/');
+        showLoading();
+      } else if (selectedMenu === null) {
+        window.history.pushState('', '', '/');
+        show404();
+      } else {
+        selectedId = selectedMenu.selectedId;
+        window.history.pushState('', '', '/' + selectedMenu.path.replace('/', '--'));
+        show(selectedMenu.path);
+      }
+    });
+
+    return () => {
+      componentSub.unsubscribe();
+      menuSub.unsubscribe();
+    };
   });
 </script>
 

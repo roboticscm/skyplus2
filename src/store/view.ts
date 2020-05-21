@@ -20,7 +20,7 @@ import { Menu } from '@/modules/sys/menu/model';
 import HumanOrOrgStore from '@/modules/sys/user/store';
 import { roleControlStore } from '@/store/role-control';
 import { appStore } from '@/store/app';
-import { NotificationStore, NotifyType } from '@/store/notification';
+import { notificationStore, NotifyType } from '@/store/notification';
 import { getUserId } from '@/lib/js/security';
 import { getMenuNameFromPath, getViewTitleFromMenuPath } from '@/lib/js/url-util';
 
@@ -670,7 +670,7 @@ export class ViewStore {
       type,
       isCancel,
     };
-    return NotificationStore.save(notification);
+    return notificationStore.save(notification);
   }
 
   saveChatNotification(toHumanListIds: string[], title: string, targetId: string, isCancel = false) {

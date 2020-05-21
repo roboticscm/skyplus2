@@ -16,6 +16,8 @@
   const dispatch = createEventDispatcher();
   let taskTimeRef, assigneeTimeRef: any;
 
+  let progressRatio: number = undefined;
+
   const onClick = () => {
     dispatch('click', task);
   };
@@ -40,6 +42,13 @@
       if (left >= 0) {
         assigneeTimeRef.style.left = `${left}%`;
       }
+    }
+
+    if (task.startTime && task.deadline) {
+      const assigneeEndTime = task.assigneeEndTime ? task.assigneeEndTime : Date.now();
+      const extraDoingTime = task.deadline - assigneeEndTime;
+
+      progressRatio = Math.round((extraDoingTime / (task.deadline - task.startTime)) * 100);
     }
   }
 
@@ -110,7 +119,7 @@
         left: 0;
         bottom: 0px;
         height: 4px;
-        background: rgba(0, 0, 0, 0.2);
+        background: rgba(0, 0, 0, 0.3);
       }
 
       &__assignee-time {
@@ -118,7 +127,7 @@
         left: 0px;
         bottom: 0px;
         height: 4px;
-        background: rgba(255, 0, 0, 0.2);
+        background: rgba(255, 0, 0, 0.5);
       }
 
       &__item {
@@ -141,8 +150,8 @@
     }
 
     &.selected {
-      /*font-weight: 500;*/
       background: var(--selection-bgcolor);
+      border: 1px solid var(--my-active-color);
     }
 
     .horizontal-separator {
@@ -156,7 +165,7 @@
   class="task-wrapper {selectedTask && task.id.toString() === selectedTask.id.toString() ? 'selected' : ''}"
   on:click={onClick}>
   <div class="task-wrapper__task">
-    <div title={T('TASK.LABEL.TASK_NAME') + ': ' + task.name} class="task-wrapper__task__name">{task.name}</div>
+    <div title={T('TASK.LABEL.TASK_NAME') + ': ' + task.name} class="task-wrapper__task__name">{@html task.name}</div>
     <div title={T('TASK.LABEL.PROJECT')} class="task-wrapper__project">
       ({task.projectName || T('TASK.LABEL.NO_PROJECT')})
     </div>
@@ -199,13 +208,13 @@
     <div style="min-height: 10px; height: 10px;" />
 
     <div
-      title={T('COMMON.LABEL.TASK_START_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.startTime)}
+      title={(progressRatio > 0 ? `EARLY: ${progressRatio}%` : progressRatio === 0 ? `BE ON TIME` : `DELAY: ${-progressRatio}%`) + '\n' + T('COMMON.LABEL.TASK_START_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.startTime) + '\n' + T('COMMON.LABEL.TASK_DEADLINE') + ': ' + SDate.convertMillisecondToDateTimeString(task.deadline)}
       bind:this={taskTimeRef}
       class="task-wrapper__task__task-time" />
 
     {#if task.assigneeStartTime}
       <div
-        title={T('COMMON.LABEL.ASSIGNEE_START_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.assigneeStartTime) + '\n' + (task.assigneeEndTime ? T('COMMON.LABEL.ASSIGNEE_END_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.assigneeEndTime) : T('COMMON.LABEL.CURRENT_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(Date.now()))}
+        title={(progressRatio > 0 ? `EARLY: ${progressRatio}%` : progressRatio === 0 ? `BE ON TIME` : `DELAY: ${-progressRatio}%`) + '\n' + T('COMMON.LABEL.ASSIGNEE_START_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.assigneeStartTime) + '\n' + (task.assigneeEndTime ? T('COMMON.LABEL.ASSIGNEE_END_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.assigneeEndTime) : T('COMMON.LABEL.CURRENT_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(Date.now()))}
         bind:this={assigneeTimeRef}
         class="task-wrapper__task__assignee-time" />
     {/if}

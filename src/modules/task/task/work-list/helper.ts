@@ -1,4 +1,5 @@
 import { T } from '@/lib/js/locale/locale';
+import {StringUtil} from "@/lib/js/string-util";
 
 export const filterColumns = [
   {
@@ -12,23 +13,28 @@ export const filterColumns = [
     type: 'text',
   },
   {
-    id: 'assignee',
+    id: 'assigneeName',
     name: T('TASK.LABEL.ASSIGNEE'),
     type: 'text',
   },
   {
-    id: 'assigner',
+    id: 'assignerName',
     name: T('TASK.LABEL.ASSIGNER'),
     type: 'text',
   },
   {
-    id: 'evaluator',
+    id: 'evaluatorName',
     name: T('TASK.LABEL.EVALUATOR'),
     type: 'text',
   },
   {
-    id: 'completed',
+    id: 'isCompleted',
     name: T('TASK.LABEL.COMPLETED'),
+    type: 'boolean',
+  },
+  {
+    id: 'isDelayDeadline',
+    name: T('TASK.LABEL.DELAY_DEADLINE'),
     type: 'boolean',
   },
   {
@@ -37,3 +43,17 @@ export const filterColumns = [
     type: 'date',
   },
 ];
+
+
+export  const convertArrayObjectToObject = (arrayObj: any[]) => {
+  const objResult: any = {};
+  for(let obj of arrayObj) {
+    for(let field in obj) {
+      if(!StringUtil.isEmpty(obj[field])) {
+        objResult[field] = obj[field];
+      }
+    }
+  }
+
+  return objResult;
+}

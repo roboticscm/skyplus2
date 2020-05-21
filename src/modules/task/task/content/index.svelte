@@ -60,6 +60,7 @@
     ModalContentView$,
     modalFullControl$,
     modalRoleControls$,
+    needSelectId$
   } = view;
 
   // @ts-ignore
@@ -272,9 +273,6 @@
           form.assignerStatusDetails[index].closeable = res.data.submitStatus !== 1;
           form.assignerStatusDetails[index].id = res.data.id;
           form.assignerStatusDetails = [...form.assignerStatusDetails];
-
-          console.log(res);
-          console.log(form.assignerStatusDetails);
         }
 
         // save notification on submit or cancel submit
@@ -441,6 +439,31 @@
     });
   };
 
+  const onChangeDeadline = () => {
+    form.errors.clear('deadline');
+    if (!form.deadline && !form.startTime) {
+      return;
+    }
+    const period = form.deadline - form.startTime;
+    if (period <= 0) {
+      return;
+    }
+
+    form.firstReminder = form.startTime + period * 0.5;
+    form.secondReminder = form.startTime + period * 0.8;
+  };
+
+  const onChangeSecondReminder = () => {
+    form.errors.clear('secondReminder');
+  };
+
+  const onChangeAssigneeEndTime = () => {
+    form.errors.clear('assigneeEndTime');
+  };
+
+  const onChangeEvaluateTime = () => {
+    form.errors.clear('evaluateTime');
+  };
   // ============================== // EVENT HANDLE ==========================
 
   // ============================== HELPER ==========================
@@ -794,14 +817,16 @@
             // @ts-ignore
             if ($isUpdateMode$) {
               // update
+              //view.needSelectId$.next(selectedData.id);
               scRef.snackbarRef().showUpdateSuccess();
-              view.needSelectId$.next(selectedData.id);
               // save init value for checking data change
               beforeForm = SObject.clone(form);
             } else {
               // save
               scRef.snackbarRef().showSaveSuccess();
-              doAddNew();
+              // doAddNew();
+
+              view.needSelectId$.next(res.data.id);
             }
 
             submitType = undefined;
@@ -876,6 +901,12 @@
       form.projectId = event.detail;
     } else if (modalMenuPath === 'task/priority') {
       form.priorityId = event.detail;
+    } else if (modalMenuPath === 'task/task-verification') {
+      form.evaluateVerificationId = event.detail;
+    } else if (modalMenuPath === 'task/task-qualification') {
+      form.evaluateQualificationId = event.detail;
+    } else if (modalMenuPath === 'task/status') {
+      form.evaluateStatusId = event.detail;
     }
   };
 
@@ -1011,6 +1042,17 @@
     }
   }
 
+  // @ts-ignore
+  $: {
+    // @ts-ignore
+    const needSelectId = $needSelectId$;
+    if (needSelectId) {
+      setTimeout(()=> {
+        isReadOnlyMode$.next(false);
+      }, 1000);
+
+    }
+  }
   // ============================== //REACTIVE ==========================
 </script>
 
@@ -1114,7 +1156,10 @@
 
 <!--Main content-->
 <section class="view-content-main">
-  <form class="form" on:keydown={(event) => form.errors.clear(event.target.name)}>
+  <form
+    class="form"
+    on:click={(event) => form.errors.clear(event.target.name)}
+    on:keydown={(event) => form.errors.clear(event.target.name)}>
     <!-- Task Info-->
     <Section title={T('TASK.LABEL.TASK')} {menuPath} id={view.getViewName() + 'TaskSectionId'}>
       <div class="row">
@@ -1149,7 +1194,7 @@
         <!-- // Project -->
       </div>
 
-      <div class="row">
+      <div class="row" style="margin-top: 6px;">
         <!-- Task Description -->
         <div class="col-xs-24 col-md-12">
           <RichEditor bind:value={form.description} disabled={readOnlyMode}>
@@ -1201,15 +1246,19 @@
             bind:value={form.startTime}
             placeholder={T('COMMON.LABEL.START_TIME')}
             disabled={readOnlyMode} />
+
         </div>
         <!-- // tart time -->
 
         <!-- Deadline -->
         <div class="col-xs-24 col-md-12 col-lg-6">
           <FloatDatePicker
+            on:change={onChangeDeadline}
             placeholder={T('COMMON.LABEL.DEADLINE')}
             bind:value={form.deadline}
+            name="deadline"
             disabled={readOnlyMode} />
+          <Error {form} field="deadline" />
         </div>
         <!-- // Deadline -->
 
@@ -1222,9 +1271,12 @@
 
         <div class="col-xs-24 col-md-12 col-lg-6">
           <FloatDatePicker
+            on:change={onChangeSecondReminder}
             placeholder={T('COMMON.LABEL.SECOND_REMINDER')}
             bind:value={form.secondReminder}
+            name="secondReminder"
             disabled={readOnlyMode} />
+          <Error {form} field="secondReminder" />
         </div>
       </div>
 
@@ -1407,9 +1459,12 @@
         <div class="row">
           <div class="col-xs-24 col-md-12 col-lg-6">
             <FloatDatePicker
+              on:change={onChangeAssigneeEndTime}
               placeholder={T('COMMON.LABEL.END_TIME')}
               bind:value={form.assigneeEndTime}
+              name="assigneeEndTime"
               disabled={readOnlyModeAssignee} />
+            <Error {form} field="assigneeEndTime" />
           </div>
 
           <div class="col-xs-24 col-md-12 col-lg-6">
@@ -1463,10 +1518,12 @@
       <div class="row">
         <div class="col-xs-24 col-md-12 col-lg-6">
           <FloatDatePicker
+            on:change={onChangeEvaluateTime}
             placeholder={T('COMMON.LABEL.DATE')}
             name="evaluateTime"
             bind:value={form.evaluateTime}
             disabled={readOnlyModeEvaluator} />
+          <Error {form} field="evaluateTime" />
         </div>
       </div>
       <!-- // Date-->

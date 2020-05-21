@@ -17,7 +17,7 @@
   export let menuPath: string;
   export let viewablePage = 7;
 
-  const sizes = [30, 50, 100, 200];
+  const sizes = [2, 30, 50, 100, 200];
   let pageSize = sizes[0];
   let curPage = 1;
   let fromPage = 1;
@@ -28,6 +28,7 @@
   $: {
     totalPages = Math.ceil(totalRecords / pageSize);
     toPage = Math.min(viewablePage, totalPages);
+    // fromPage = 1;
   }
   // @ts-ignore
   $: prevStatus = totalPages > 1 && curPage > 1;
@@ -134,6 +135,11 @@
       toPage = Math.min(viewablePage, totalPages);
     }
   };
+
+  export const resetPage = () => {
+    curPage = 1;
+    fromPage = 1;
+  };
 </script>
 
 <style lang="scss">
@@ -221,7 +227,7 @@
       </select>
     </span>
     <span title={T('COMMON.LABEL.TOTAL_RECORD') + ': ' + SNumber.toLocaleString(totalRecords)}>
-      Σ{SNumber.toLocaleString(totalPages)}
+      {#if totalPages < 2}#{SNumber.toLocaleString(totalRecords)}{:else}Σ{SNumber.toLocaleString(totalPages)}{/if}
     </span>
     <!--    <span title={T('COMMON.LABEL.TOTAL_RECORD')}>{'#' + SNumber.toLocaleString(totalRecords)}</span>-->
     <!--     Default slot-->

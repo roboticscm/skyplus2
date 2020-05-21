@@ -31,7 +31,9 @@ export class Errors {
     if (firstError) {
       const el = document.getElementsByName(firstError)[0];
       if (el) {
-        el.focus();
+        setTimeout(() => {
+          el && el.focus();
+        }, 2000);
       } else {
         Debug.error(`Can not find element with id: ${firstError}`);
       }

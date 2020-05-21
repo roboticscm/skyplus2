@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, tick } from 'svelte';
+  import { onMount, tick, createEventDispatcher } from 'svelte';
   import '@/lib/js/vendor/daterangepicker';
   import { App } from '@/lib/js/constants';
   import { T } from '@/lib/js/locale/locale';
@@ -20,6 +20,8 @@
   export let defaultEndDate = new Date();
   export let timePicker = true;
   export let value: number;
+
+  const dispatch = createEventDispatcher();
 
   let currentStartDate: Date = defaultStartDate;
 
@@ -106,18 +108,44 @@
       function(start, end, label) {
         currentStartDate = start.toDate();
         value = start.valueOf();
+        dispatch('change', value);
       },
     );
 
     window['$'](inputRef).on('cancel.daterangepicker', function(ev, picker) {
       clearDate();
     });
+
+    window['$'](inputRef).on('show.daterangepicker', function(ev, picker) {
+      const height = window['$'](picker.container[0]).height();
+      const windowHeight = window.innerHeight;
+      const top = +picker.container[0].style.top.replace('px', '');
+
+      if (top + height > windowHeight) {
+        picker.container[0].style.top = `${(windowHeight - height) / 2}px`;
+      }
+    });
+
+    // window['$'](inputRef).on('hide.daterangepicker', function(ev, picker) {
+    //   const height = window['$'](picker.container[0]).height();
+    //   const windowHeight = window.innerHeight;
+    //   const top = +picker.container[0].style.top.replace('px', '');
+    //
+    //   if(top === 0) {
+    //     picker.drops = 'up';
+    //   }
+    //
+    //   if (top < 0) {
+    //     picker.drops = 'down';
+    //   }
+    // });
   });
 
   export const clearDate = () => {
     window['$'](inputRef).val('');
     currentStartDate = null;
     value = undefined;
+    dispatch('change', value);
   };
 
   export const setTimestampValue = (timestamp: number) => {
@@ -144,6 +172,9 @@
     return currentStartDate && SDate.toDateTimeString(currentStartDate);
   };
 
+  const onChange = () => {
+    dispatch('change', value);
+  };
   // @ts-ignore
   $: setTimestampValue(value);
 </script>

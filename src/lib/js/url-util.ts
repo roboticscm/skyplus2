@@ -10,5 +10,8 @@ export const getMenuNameFromPath = (menuPath: string) => {
 };
 
 export const getViewTitleFromMenuPath = (menuPath: string) => {
+  if (StringUtil.isEmpty(menuPath)) {
+    return T('COMMON.MSG.NO_MENU');
+  }
   return T(`COMMON.MENU.${StringUtil.replaceAll(getMenuNameFromPath(menuPath).toUpperCase(), '-', '_')}`);
 };

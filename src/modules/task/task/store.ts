@@ -1,5 +1,5 @@
 import { ViewStore } from '@/store/view';
-import { BehaviorSubject } from 'rxjs';
+import {BehaviorSubject, of} from 'rxjs';
 import { Project, File, TaskVerification, TaskQualification, Status, Task, Priority, StatusDetail } from '../types';
 import { User } from '@/model/user';
 import { OwnerOrg } from '@/modules/sys/owner-org/model';
@@ -9,6 +9,8 @@ import { toSnackCase } from '@/lib/js/util';
 import { Http } from '@/lib/js/http';
 import { SObject } from '@/lib/js/sobject';
 import { SJSON } from '@/lib/js/sjson';
+import {catchError} from "rxjs/operators";
+import {App} from "@/lib/js/constants";
 
 const BASE_URL = 'task/task/';
 export default class Store {
@@ -108,25 +110,29 @@ export default class Store {
     });
   };
 
-  tskFindTasks = (menuPath: string, departmentId: string) => {
-    const start = Date.now();
-    RxHttp.get(`${BASE_URL}${toSnackCase('tskFindTasks')}`, {
-      menuPath,
-      departmentId,
+  tskFindTasks = (param: any = {
+    menuPath: '',
+    departmentId: '',
+    page: 1,
+    pageSize: App.DEFAULT_PAGE_SIZE,
+    textSearch: '',
+    taskName: '',
+    projectName: '',
+    assigneeName: '',
+    assignerName: '',
+    evaluatorName: '',
+    isCompleted: '',
+    isDelayDeadline: '',
+    createdDateFrom: '',
+    createdDateTo: ''
+  }) => {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('tskFindTasks')}`, {
+      ...param,
       page: this.view.page,
       pageSize: this.view.pageSize,
-    }).subscribe((res: any) => {
-      const end = Date.now();
-      console.log('Took ', end - start);
-
-      if (res.data.payload.length === 0 && this.view.page > 1) {
-        this.view.page--;
-        this.tskFindTasks(menuPath, departmentId);
-      } else {
-        this.taskList$.next(res.data.payload);
-        this.view.fullCount$.next(res.data.fullCount);
-      }
-    });
+    }).pipe(
+        catchError((error) => of([]))
+    );
   };
 
   tskGetTaskById(id: string) {

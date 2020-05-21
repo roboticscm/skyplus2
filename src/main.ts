@@ -53,7 +53,9 @@ const startApp = () => {
               loadMenuAndUserSettings(_companyId);
             }, 100);
           } else {
-            logout();
+            if ((window as any).location.pathname === '/logout') {
+              logout();
+            }
           }
         });
       new App({

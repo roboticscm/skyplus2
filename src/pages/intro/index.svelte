@@ -3,45 +3,42 @@
   import Store from './store';
   import NewsItem from './news-item/index.svelte';
   import SkyhubLogo from '@/components/layout/icons/skyhub';
+  import SearchBar from '@/components/layout/search-bar';
+  import QRCode from 'qrcode';
 
   const { dataList$ } = Store;
 
+  let qrcodeRef: any;
+
   onMount(() => {
     Store.getList();
+
+    QRCode.toCanvas(qrcodeRef, 'SKYHUB', { margin: 0, version: 1 }, function(error) {
+      if (error) {
+        console.error(error);
+      }
+    });
   });
 </script>
 
-<style lang="scss">
-  @import '../sass/sass/helpers/variables.scss';
+<div class="login-wrapper">
+  <div class="login-logo {$dataList$.length > 0 ? 'login-logo-margin-top' : ''}">
+    <SkyhubLogo />
+  </div>
+  <div class="login-welcome-text">Welcome to SKYHUB</div>
 
-  .news-content {
-    height: 100%;
-    width: 100%;
-    /*max-width: 1300px;*/
-    margin: 0 auto;
-    padding-left: $large-padding;
-    padding-right: $large-padding;
-    padding-top: $default-padding;
-    background: var(--bg-primary);
-  }
+  <div class="login-search">
+    <SearchBar id="mainSearchBarId" menuPath="intro" />
+  </div>
 
-  .news {
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 50px;
-    justify-content: center;
-    align-content: space-evenly;
-  }
-</style>
-
-<div class="news-content">
+  <div class="login-qrcode">
+    <canvas bind:this={qrcodeRef} />
+  </div>
   <div class="news">
     {#if $dataList$ && $dataList$.length > 0}
       {#each $dataList$ as item}
         <NewsItem news={item} />
       {/each}
-    {:else}
-      <SkyhubLogo />
     {/if}
   </div>
 </div>

@@ -35,6 +35,7 @@
   export let defaultWidth: number = undefined; // in pixel
   export let transparent = true;
   export let wrapperClass = '';
+  export let beforeOK: Function = undefined;
 
   let modalWrapperRef: any;
   let modalRef: any;
@@ -100,7 +101,15 @@
   };
 
   const onOK = () => {
-    useModal.closeModal(modalWrapperRef, ButtonPressed.OK);
+    if (beforeOK) {
+      beforeOK().then((res) => {
+        if (res) {
+          useModal.closeModal(modalWrapperRef, ButtonPressed.OK);
+        }
+      });
+    } else {
+      useModal.closeModal(modalWrapperRef, ButtonPressed.OK);
+    }
   };
 
   onMount(() => {

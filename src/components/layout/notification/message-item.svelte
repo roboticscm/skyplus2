@@ -31,7 +31,7 @@
       <span class="notify-dropdown-item__header__from__human">
         @: {notification.fromHumanFullName || T('COMMON.LABEL.SYSTEM')}
       </span>
-      <span>\{notification.departmentName}</span>
+      <span>\{notification.departmentName || T('COMMON.MSG.NO_DEPARTMENT')}</span>
       <span>\{getViewTitleFromMenuPath(notification.menuPath)}</span>
     </div>
 

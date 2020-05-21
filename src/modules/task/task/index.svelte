@@ -14,7 +14,7 @@
   export let fullControl: boolean;
   export let roleControls: [];
   export let showWorkList = true;
-  export let selectedId: string;
+  export let selectedId: string; // for notification
 
   // Init view
   const view = new ViewStore(menuPath);

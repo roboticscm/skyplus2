@@ -7,7 +7,7 @@
   import { roleControlStore } from '@/store/role-control';
   import { appStore } from '@/store/app';
   import { distinctUntilChanged, skip, switchMap, take, tap, map, debounce } from 'rxjs/operators';
-  import { forkJoin, fromEvent, Observable } from 'rxjs';
+  import { BehaviorSubject, forkJoin, fromEvent, Observable } from 'rxjs';
   import FloatSelect from '@/components/ui/float-input/select';
   import Autocomplete from '@/components/ui/float-input/simple-autocomplete';
   import { Store } from '../store';
@@ -60,6 +60,8 @@
   let lang: any[] = [];
 
   let columns: TableColumn[] = [];
+
+  const filterProgress$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   const onAddNewLanguage = (event) => {
     loadLanguageView().then((res) => {
@@ -166,8 +168,6 @@
 
     let selectedTypeGroupId = langTypeGroupAutoRef && langTypeGroupAutoRef.getSelectedId();
     const typeGroupText = langTypeGroupAutoRef && langTypeGroupAutoRef.getInputText();
-
-    console.log('xxx ', selectedTypeGroupId, typeGroupText);
 
     if (StringUtil.isEmpty(selectedTypeGroupId) && !StringUtil.isEmpty(typeGroupText)) {
       selectedTypeGroupId = typeGroupText;
@@ -288,6 +288,8 @@
   };
 
   const onSearch = (event) => {
+    pageRef.resetPage();
+    view.page = 1;
     doSearch();
   };
 
@@ -376,7 +378,9 @@
           return before.value === after.value && after.type !== 'click';
         }),
         tap((event: string) => {
-          view.loading$.next(true);
+          pageRef.resetPage();
+          view.page = 1;
+          filterProgress$.next(true);
         }),
         switchMap((event) => {
           const [selectedCompanyId, selectedCategoryId, selectedTypeGroupId, textSearch] = getSearchParam();
@@ -393,10 +397,10 @@
       .subscribe({
         next: (res: any) => {
           didSearch(res.data);
-          view.loading$.next(false);
+          filterProgress$.next(false);
         },
         error: (error) => {
-          view.loading$.next(false);
+          filterProgress$.next(false);
         },
       });
   };
@@ -520,7 +524,7 @@
 
   <div class="row">
     <!-- Company -->
-    <div class="col-xs-24 col-md-8 col-lg-7">
+    <div class="col-xs-24 col-md-12 col-lg-6">
       <FloatSelect
         placeholder={T('COMMON.LABEL.COMPANY')}
         id={view.getViewName() + 'CompanySelectId'}
@@ -532,7 +536,7 @@
     </div>
     <!-- //Company -->
     <!-- Category -->
-    <div class="col-xs-24 col-md-8 col-lg-7 pl-xs-0 pl-md-1 pl-lg-0">
+    <div class="col-xs-24 col-md-12 col-lg-6">
       <Autocomplete
         placeholder={T('COMMON.LABEL.CATEGORY')}
         columns={[{ name: 'name', title: 'Name', type: 'html' }]}
@@ -546,7 +550,7 @@
     <!-- //Category -->
 
     <!-- Type Group -->
-    <div class="col-xs-24 col-md-8 col-lg-7 pl-xs-0 pl-md-1 pl-lg-0">
+    <div class="col-xs-24 col-md-12 col-lg-6">
       <Autocomplete
         placeholder={T('COMMON.LABEL.TYPE_GROUP')}
         columns={[{ name: 'name' }]}
@@ -559,8 +563,12 @@
     </div>
     <!-- //Type Group -->
     <!-- Search or Filter-->
-    <div class="col-md-24 col-lg-3">
-      <QuickSearch action={useFilterAction} bind:this={quickSearchRef} placeholder={T('COMMON.LABEL.FILTER') + '...'} />
+    <div class="col-md-24 col-md-12 col-lg-6">
+      <QuickSearch
+        loading$={filterProgress$}
+        action={useFilterAction}
+        bind:this={quickSearchRef}
+        placeholder={T('COMMON.LABEL.FILTER') + '...'} />
     </div>
     <!-- //Search or Filter-->
   </div>

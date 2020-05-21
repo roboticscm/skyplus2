@@ -27,13 +27,20 @@ export class StringUtil {
   }
 
   public static isEmpty(source: string) {
+    if(typeof source !== 'string') {
+      return  source === null || source === undefined;
+    }
     return source === null || source === undefined || source.trim().length === 0;
   }
 
-  public static replaceAll(source: string, find: string, replace: string) {
-    if (!source) {
+  public static replaceAll(source: any, find: string, replace: string) {
+    if (StringUtil.isEmpty(source)) {
       return '';
     }
+    if (typeof source === 'number' || typeof source === 'boolean') {
+      return source;
+    }
+
     return source.replace(new RegExp(find, 'g'), replace);
   }
 
@@ -99,5 +106,21 @@ export class StringUtil {
 
   public static distinctArrayString(array: string[]) {
     return [...new Set(array)];
+  }
+
+  public static formatFTSParam(value: string) {
+    if(StringUtil.isEmpty(value)) {
+      return '';
+    }
+
+    if(value.startsWith('"')) {
+      return StringUtil.replaceAll(value, ' ', '<->') ;
+    }
+
+    if(value.startsWith('`')) {
+      return StringUtil.replaceAll(value, '`', '');
+    }
+
+    return StringUtil.replaceAll(value, ' ', ':*&') + ':*';
   }
 }

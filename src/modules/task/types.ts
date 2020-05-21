@@ -11,12 +11,12 @@ export class Task {
   priorityId? = null;
   priorityName? = '';
   startTime? = Date.now();
-  deadline? = Date.now();
-  creatorFullName = '';
-  createdBy = '';
+  deadline? = Date.now() + 1;
+  creatorFullName? = '';
+  createdBy? = '';
 
   firstReminder? = Date.now();
-  secondReminder? = Date.now();
+  secondReminder? = Date.now() + 1;
   submitStatus? = 0;
 
   // one to many relation
@@ -29,9 +29,9 @@ export class Task {
   removeAssignees?: any[] = [];
   insertAssignees?: any[] = [];
   assigneeStartConfirm? = false;
-  assigneeStartTime? = Date.now();
+  assigneeStartTime? = null;
   assigneeEndConfirm? = false;
-  assigneeEndTime? = Date.now();
+  assigneeEndTime? = null;
 
   // Assigner
   assigners?: any[] = [];
@@ -42,12 +42,12 @@ export class Task {
   evaluators?: any[] = [];
   removeEvaluators?: any[] = [];
   insertEvaluators?: any[] = [];
-  evaluateTime? = Date.now();
+  evaluateTime? = null;
   evaluateComment? = '';
-  evaluateQualificationId = null;
-  evaluateVerificationId = null;
-  evaluateStatusId = null;
-  evaluateComplete = false;
+  evaluateQualificationId? = null;
+  evaluateVerificationId? = null;
+  evaluateStatusId? = null;
+  evaluateComplete? = false;
 
   // Characteristic
   chars?: any[] = [];
@@ -125,8 +125,10 @@ export class File {
 }
 
 export class TaskQualification {
-  id? = '';
-  name? = '';
+  id = '';
+  code? = '';
+  name = '';
+  sort? = 0;
 }
 
 export class TaskVerification {

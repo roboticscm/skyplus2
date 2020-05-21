@@ -5,6 +5,7 @@
   import Modal from '@/components/ui/modal/base';
   import { ModalType } from '@/components/ui/modal/types';
   import { ButtonPressed } from '../button/types';
+  import {T} from '@/lib/js/locale/locale';
 
   export let confirmDelete = false;
   export let menuPath: string;
@@ -73,6 +74,29 @@
     list = _data;
   };
 
+
+  const onCloseAll = () => {
+    if (disabled) {
+      return;
+    }
+
+    if (confirmDelete) {
+      modalRef.show().then((buttonPressed: ButtonPressed) => {
+        if (buttonPressed === ButtonPressed.OK) {
+          if (directClose) {
+            clearAll();
+          }
+          dispatch('closeAll');
+        }
+      });
+    } else {
+      if (directClose) {
+        clearAll();
+      }
+      dispatch('closeAll');
+    }
+  };
+
   export const push = (item: CloseableListItem) => {
     _data = [..._data, item];
     list = _data;
@@ -90,6 +114,9 @@
 
 <Modal id={'confirmModal' + id} {menuPath} modalType={ModalType.Confirm} bind:this={modalRef} />
 <div class="closeable-list {className} {disabled ? '' : 'closeable-list__hover'}">
+  {#if _data && _data.length > 1}
+    <span title={T('COMMON.LABEL.CLOSE_ALL')} class="close-all"on:click={onCloseAll} >&times;</span>
+  {/if}
   <div class="closeable-list__content ">
     <ul>
       {#if customRender}

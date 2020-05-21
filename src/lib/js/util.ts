@@ -43,29 +43,33 @@ export const unccentVietnamese = (str: string) => {
   return str;
 };
 
-export const markStringSearch = (source: string, search: string, removeAccent: boolean) => {
-  if (!source || !search) {
+export const markStringSearch = (source: string, searchs: string, removeAccent: boolean) => {
+  if (!source || !searchs) {
     return source;
   }
   let newSource;
   if (removeAccent) {
     newSource = unccentVietnamese(source);
-    search = unccentVietnamese(search);
+    searchs = unccentVietnamese(searchs);
   } else {
     newSource = source;
   }
 
-  const re = new RegExp(search, 'gi');
-  const indices = new Array();
-  let current;
-  while ((current = re.exec(newSource)) != null) {
-    indices.push(current.index);
+  for(let search of searchs.split("|")) {
+    const re = new RegExp(search, 'gi');
+    const indices = new Array();
+    let current;
+    while ((current = re.exec(newSource)) != null) {
+      indices.push(current.index);
+    }
+
+    for (let i = indices.length - 1; i >= 0; i--) {
+      source = StringUtil.insertAt(source, `</mark>`, indices[i] + search.length);
+      source = StringUtil.insertAt(source, `<mark>`, indices[i]);
+    }
+    newSource = source;
   }
 
-  for (let i = indices.length - 1; i >= 0; i--) {
-    source = StringUtil.insertAt(source, `</mark>`, indices[i] + search.length);
-    source = StringUtil.insertAt(source, `<mark>`, indices[i]);
-  }
   return source;
 };
 

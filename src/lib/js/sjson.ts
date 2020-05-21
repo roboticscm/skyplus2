@@ -32,7 +32,10 @@ export class SJSON {
 
   public static parse = (json: string) => {
     return JSONbig.parse(json, (key, value) => {
-      if (value && value.constructor && value.constructor.name === 'BigNumber') {
+      if (
+        (value && value.constructor && value.constructor.name === 'BigNumber') ||
+        (value && value.constructor && value.constructor.name.trim() === '$')
+      ) {
         return value.toString();
       }
       return value;

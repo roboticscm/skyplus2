@@ -1,10 +1,13 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { logout } from '@/lib/js/security';
   import { API } from '@/lib/js/constants';
   import { T } from '@/lib/js/locale/locale';
   import { AppStore, appStore } from '@/store/app';
   // import ThemeConfigModal from '@/components/modal/theme-config-modal/index.vue';
   const { user$ } = appStore;
+  import { User } from '@/model/user';
+  import { Subscription } from 'rxjs';
 
   // @ts-ignore
   const { isLogged$ } = AppStore;
@@ -12,9 +15,7 @@
   // @ts-ignore
   const qrcode = require('../../../../public/images/qrcode.png').default;
 
-  let user;
-  // @ts-ignore
-  $: user = $user$;
+  let user: User = undefined;
 
   const onLogout = (event) => {
     logout();
@@ -40,6 +41,16 @@
 
     (document.querySelector('#userProfilesDropdown') as any).classList.remove('show-dropdown');
   };
+
+  onMount(() => {
+    const userSub: Subscription = user$.subscribe((res) => {
+      user = res;
+    });
+
+    return () => {
+      userSub.unsubscribe();
+    };
+  });
 </script>
 
 <style lang="scss">
@@ -73,12 +84,6 @@
           {T('SYS.MENU.LOGOUT')}
         </div>
       </div>
-    </div>
-  {:else}
-    <div class="no-user-profiles">
-      <span class="no-user-profiles__img">
-        <img src={qrcode} alt="SKYHUB" />
-      </span>
     </div>
   {/if}
   <i class="user-profiles-mark fa fa-sort-down" />

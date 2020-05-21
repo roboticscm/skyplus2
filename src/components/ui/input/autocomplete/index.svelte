@@ -129,12 +129,12 @@
       } else if (!$isLogged$) {
         dispatch('change', {
           id: SearchType.Login,
-          name: inputRef.value,
+          name: inputRef && inputRef.value,
         });
       } else {
         dispatch('change', {
           id: undefined,
-          name: inputRef.value,
+          name: inputRef && inputRef.value,
         });
       }
       hideAutoDropdown();

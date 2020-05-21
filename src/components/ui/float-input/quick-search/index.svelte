@@ -3,10 +3,13 @@
   import { fromEvents } from '@/lib/js/rx';
   import { distinctUntilChanged, switchMap } from 'rxjs/operators';
   import SearchIcon from '@/components/layout/icons/common/search.svelte';
+  import { App } from '@/lib/js/constants';
+  import { BehaviorSubject } from 'rxjs';
 
   export let placeholder = '';
   export let action: any = undefined;
   export let showAdvancedSearch = false;
+  export let loading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   let inputRef: any;
 
@@ -39,13 +42,18 @@
   };
 </script>
 
-<div class="quick-search-wrapper floating-wrapper">
-  <input required use:useAction type="search" class="floating__input" bind:this={inputRef} {placeholder} />
-  <label class="floating__label" data-content={placeholder} />
+<div class="quick-search-wrapper" style="margin-top: 20px;">
+  <input required use:useAction type="search" class="quick-search-input" bind:this={inputRef} {placeholder} />
   <!--  <i class="search-icon fa fa-search" />-->
   <div class="search-icon">
     <SearchIcon />
   </div>
+
+  {#if $loading$}
+    <div class="search-progress">
+      {@html App.PROGRESS_BAR}
+    </div>
+  {/if}
   {#if showAdvancedSearch}
     <i
       on:click={onClickAdvanced}
