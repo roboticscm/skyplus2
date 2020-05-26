@@ -43,7 +43,7 @@ export const unccentVietnamese = (str: string) => {
   return str;
 };
 
-export const markStringSearch = (source: string, searchs: string, removeAccent: boolean) => {
+export const markStringSearch = (source: string, searchs: string, removeAccent: boolean = true) => {
   if (!source || !searchs) {
     return source;
   }
@@ -55,7 +55,7 @@ export const markStringSearch = (source: string, searchs: string, removeAccent: 
     newSource = source;
   }
 
-  for(let search of searchs.split("|")) {
+  for (let search of searchs.split('|')) {
     const re = new RegExp(search, 'gi');
     const indices = new Array();
     let current;

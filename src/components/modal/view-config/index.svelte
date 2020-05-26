@@ -27,7 +27,7 @@
       type: 'checkbox',
       title: T('COMMON.LABEL.USE'),
       name: 'checked',
-      width: 70,
+      width: 30,
     },
     {
       type: 'text',
@@ -45,10 +45,13 @@
     },
   ];
 
+  const calcHeight = () => {
+    const h = modalRef.getHeight().replace('px', '');
+    height = `${h - 100}px`;
+  };
   export const show = (_data: any[]) => {
     data = _data;
-    const h = modalRef.getHeight().replace('px', '');
-    height = `${h - 120}px`;
+    calcHeight();
     return new Promise((resolve, reject) => {
       import('@/components/ui/excel-grid/index.svelte').then((res) => {
         ExcelGridComponent = res.default;
@@ -62,6 +65,8 @@
 
   const onResize = (event) => {
     containerWidth = event.detail.width;
+    calcHeight();
+    // excelGridRef.refresh();
   };
 
   export const getData = () => {

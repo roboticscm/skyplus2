@@ -1,3 +1,5 @@
+import {Browser} from "@/lib/js/browser";
+
 export class SDate {
   static convertMillisecondToDateString(millisecond) {
     if (!millisecond) {
@@ -14,6 +16,14 @@ export class SDate {
     }
 
     const date = new Date(millisecond);
+    //safari
+    if(Browser.isSafari()) {
+      return  date.toLocaleString('vi-VN', {
+        dateStyle: 'short',
+      });
+    }
+
+    //other browser
     return (
       date.toLocaleString('vi-VN', {
         dateStyle: 'short',

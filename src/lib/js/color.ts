@@ -1,4 +1,4 @@
-export default class Color {
+export class Color {
   public static hexToRGBA(hex: string, alpha: number) {
     let r = parseInt(hex.slice(1, 3), 16),
       g = parseInt(hex.slice(3, 5), 16),
@@ -15,7 +15,7 @@ export default class Color {
     return rgba.replace(/[^,]+(?=\))/, `${alpha}`);
   }
 
-  public static applyApha(colors: any[], alpha: number) {
+  public static applyAlpha(colors: any[], alpha: number) {
     const body: any = document.querySelector('body');
     colors.map((item) => {
       const key = Object.keys(item)[0];
@@ -36,9 +36,24 @@ export const getThemeColors = () => {
   const body: any = document.querySelector('body');
   return [
     {
+      ['--base-background']: getComputedStyle(body as any)
+        .getPropertyValue('--base-background')
+        .trim(),
+    },
+    {
+      ['--base-color']: getComputedStyle(body as any)
+        .getPropertyValue('--base-color')
+        .trim(),
+    },
+    {
       ['--bg-primary']: getComputedStyle(body as any)
         .getPropertyValue('--bg-primary')
         .trim(),
+    },
+    {
+      ['--primary']: getComputedStyle(body as any)
+          .getPropertyValue('--primary')
+          .trim(),
     },
     {
       ['--bg-secondary']: getComputedStyle(body as any)

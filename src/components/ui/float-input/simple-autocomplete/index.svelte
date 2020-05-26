@@ -8,7 +8,6 @@
   import ProgressBar from '@/components/ui/progress-bar';
   import { BehaviorSubject, Observable } from 'rxjs';
   import { map, switchMap, tap, mergeAll, filter, distinctUntilChanged } from 'rxjs/operators';
-  import { Store } from '@/modules/sys/locale-resource/store';
   import { fromEvents } from '@/lib/js/rx';
   import SelectableTable from '@/components/ui/selectable-table';
   import { settingsStore } from '@/store/settings';
@@ -186,10 +185,14 @@
     hideAutoDropdown();
   };
   const onTableKeyup = (event: any) => {
-    if (event.detail.event.code === 'Enter') {
+    if (event.detail.event.code === 'Enter' && dropdownFocused) {
       selectItem(event.detail.data);
       hideAutoDropdown();
     }
+  };
+
+  export const focus = () => {
+    inputRef.focus();
   };
 </script>
 

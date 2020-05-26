@@ -10,6 +10,8 @@
   export let rightCheck = false;
   export let title = '';
   export let checkTitle = '';
+  export let min = 0;
+  export let max = undefined;
 
   let inputRef: any;
   export const focus = () => {
@@ -25,6 +27,9 @@
 
 <div class="floating-wrapper">
   <input
+    on:keyup
+    {min}
+    {max}
     {title}
     {name}
     type="number"

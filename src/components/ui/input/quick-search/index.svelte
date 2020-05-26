@@ -1,16 +1,22 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte';
-  import { fromEvents } from '@/lib/js/rx';
-  import { distinctUntilChanged, switchMap } from 'rxjs/operators';
+  import { createEventDispatcher } from 'svelte';
   import SearchIcon from '@/components/layout/icons/common/search.svelte';
   import { App } from '@/lib/js/constants';
   import { BehaviorSubject } from 'rxjs';
+  import { T } from '@/lib/js/locale/locale';
 
   export let placeholder = '';
   export let action: any = undefined;
   export let showAdvancedSearch = false;
   export let loading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  export let title = App.FTS_OPTION;
+  export let title = `
+    ${T('COMMON.LABEL.FULL_TEXT_SEARCH_OPTION')}:
+    1. ${T('COMMON.LABEL.EXACT')}: ${T('COMMON.LABEL.START_WITH')} " -> ${T('COMMON.LABEL.EX')}: "some text
+    2. ${T('COMMON.LABEL.SEARCH_OR')}: | -> ${T('COMMON.LABEL.EX')}: some | text
+    3. ${T('COMMON.LABEL.ADVANCED')}: ${T('COMMON.LABEL.START_WITH')} \` -> ${T(
+    'COMMON.LABEL.EX',
+  )}: \`Word<n>OtherWord (n: number)
+  `;
   let inputRef: any;
 
   const dispatch = createEventDispatcher();
@@ -43,7 +49,7 @@
 </script>
 
 <div class="quick-search-wrapper">
-  <input {title} required use:useAction type="search" class="quick-search-input" bind:this={inputRef} {placeholder} />
+  <input {title} on:input required use:useAction type="search" class="quick-search-input" bind:this={inputRef} {placeholder} />
   <!--  <i class="search-icon fa fa-search" />-->
   <div class="search-icon">
     <SearchIcon />

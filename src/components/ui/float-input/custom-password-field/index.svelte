@@ -6,6 +6,7 @@
   export let displayChar = passwordChar();
   export let name = '';
   export let value = '';
+  export let placeholder = '';
 
   const dispatch = createEventDispatcher();
 
@@ -38,11 +39,16 @@
   export const focus = () => {
     inputRef.focus();
   };
-
-  export const clear = () => {
-    inputRef.value = '';
-    memoryPassword = '';
-  };
 </script>
 
-<input autocomplete="off" {name} class="primary form-control" type="search" bind:this={inputRef} on:keyup={onKeyup} />
+<div class="floating-wrapper">
+  <input
+    autocomplete="off"
+    {name}
+    {placeholder}
+    class="floating__input"
+    type="search"
+    bind:this={inputRef}
+    on:keyup={onKeyup} />
+  <label class="floating__label" data-content={placeholder} />
+</div>

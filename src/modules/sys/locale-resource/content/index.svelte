@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { onMount, tick } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
   import Button from '@/components/ui/flat-button';
   import ViewWrapperModal from '@/components/modal/view-wrapper';
   import { T } from '@/lib/js/locale/locale';
   import { ViewStore } from '@/store/view';
   import { roleControlStore } from '@/store/role-control';
   import { appStore } from '@/store/app';
-  import { distinctUntilChanged, skip, switchMap, take, tap, map, debounce } from 'rxjs/operators';
-  import { BehaviorSubject, forkJoin, fromEvent, Observable } from 'rxjs';
+  import { distinctUntilChanged, filter, switchMap, take, tap, map, concatMap, catchError } from 'rxjs/operators';
+  import { BehaviorSubject, forkJoin, fromEvent, Observable, of } from 'rxjs';
   import FloatSelect from '@/components/ui/float-input/select';
   import Autocomplete from '@/components/ui/float-input/simple-autocomplete';
-  import { Store } from '../store';
+  import Store from '../store';
   import { settingsStore } from '@/store/settings';
   import { Debug } from '@/lib/js/debug';
   import QuickSearch from '@/components/ui/float-input/quick-search';
@@ -21,22 +21,25 @@
   import { fromEvents } from '@/lib/js/rx';
   import { markStringSearch } from '@/lib/js/util';
   import Pagination from '@/components/ui/pagination';
+  import InputModal from '@/components/ui/modal/base';
 
   import { ModalType } from '@/components/ui/modal/types';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
 
   import SC from '@/components/set-common';
+  import { ButtonPressed } from '../../../../components/ui/button/types';
 
   export let view: ViewStore;
   export let menuPath: string;
 
   view.loading$.next(true);
-  const store = new Store(view);
-  const { hasAnyDeletedRecord$ } = view;
+  // @ts-ignore
+  const { selectedData$, hasAnyDeletedRecord$, deleteRunning$, saveRunning$, isReadOnlyMode$, isUpdateMode$ } = view;
+  isReadOnlyMode$.next(true);
+  isUpdateMode$.next(true);
+  const { usedLanguages$, companies$ } = Store;
 
-  const { usedLanguages$, companies$ } = store;
-
-  let scRef: any;
+  let scRef, inputModalRef: any;
 
   let viewWrapperModalRef: any;
   let languageViewRef: any;
@@ -57,12 +60,13 @@
   let langRoleControls: any[] = [];
   let data: any[] = [];
   let beforeData: any[] = [];
+  let dataChanged: any | null = null;
   let lang: any[] = [];
 
   let columns: TableColumn[] = [];
 
   const filterProgress$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-
+  const dispatch = createEventDispatcher();
   const onAddNewLanguage = (event) => {
     loadLanguageView().then((res) => {
       viewWrapperModalRef.show().then((res) => {
@@ -82,7 +86,6 @@
           } else {
             langRoleControls = res.data;
           }
-          console.log(langFullControl, langRoleControls);
           import('@/modules/sys/language/index.svelte')
             .then((res) => {
               LanguageView = res.default;
@@ -153,6 +156,9 @@
     temp.push({});
 
     mark(quickSearchRef.getTextSearch(), SObject.clone(temp));
+    setTimeout(() => {
+      beforeData = languageGridRef && languageGridRef.getData();
+    }, 500);
     view.loading$.next(false);
   };
 
@@ -186,8 +192,8 @@
       selectedCategoryId,
       selectedTypeGroupId,
       textSearch,
-      view.page,
-      view.pageSize,
+      1, //view.page,
+      9999, //view.pageSize,
     ).subscribe(
       (res: any) => {
         didSearch(res.data);
@@ -200,7 +206,6 @@
   };
 
   const mark = (textSearch: string, source: any) => {
-    beforeData = SObject.clone(source);
     data = SObject.clone(source).map((item: any) => {
       const markedCategory = markStringSearch(item.category, textSearch, true);
       const markedTypeGroup = markStringSearch(item.typeGroup, textSearch, true);
@@ -227,17 +232,18 @@
   };
 
   onMount(() => {
-    store.sysGetUsedLanguages();
-    store.getCompaniesList();
+    // Store.sysGetUsedLanguages();
+    Store.getCompaniesList();
 
     const company$ = companyDropdownRef.loadSettings();
     const category$ = langCategoryAutoRef.loadSettings();
     const typeGroup$ = langTypeGroupAutoRef.loadSettings();
 
     forkJoin([company$, category$, typeGroup$]).subscribe(() => {
-      pageRef.loadSettings().then(() => {
-        doSearch();
-      });
+      doSearch();
+      // pageRef.loadSettings().then(() => {
+      //   doSearch();
+      // });
     });
 
     calcTableHeight(31);
@@ -288,7 +294,7 @@
   };
 
   const onSearch = (event) => {
-    pageRef.resetPage();
+    // pageRef.resetPage();
     view.page = 1;
     doSearch();
   };
@@ -302,16 +308,16 @@
   };
 
   const onLangTableBeforeChange = (event) => {
-    // if (!viewState.dataChange) {
-    //   state.beforeData = languageGridRef.value.getData();
-    //   viewState.dataChange = true;
+    // if (dataChanged) {
+    //   beforeData = languageGridRef.getData();
+    //   dataChanged = null;
     // }
   };
 
   const onLangTableBeforeDeleteRow = (event) => {
-    // if (!viewState.dataChange) {
-    //   state.beforeData = languageGridRef.value.getData();
-    //   viewState.dataChange = true;
+    // if (dataChanged) {
+    //   beforeData = languageGridRef.getData();
+    //   dataChanged = null;
     // }
     return true;
   };
@@ -320,7 +326,8 @@
     // setTimeout(() => {
     //   const x = Number(event.x);
     //   if (x > 1) {
-    //     if (viewState.isReadOnlyMode) {
+    //     // @ts-ignore
+    //     if ($isReadOnlyMode$) {
     //       event.cell.classList.add('readonly');
     //     } else {
     //       event.cell.classList.remove('readonly');
@@ -378,7 +385,7 @@
           return before.value === after.value && after.type !== 'click';
         }),
         tap((event: string) => {
-          pageRef.resetPage();
+          // pageRef.resetPage();
           view.page = 1;
           filterProgress$.next(true);
         }),
@@ -389,8 +396,8 @@
             selectedCategoryId,
             selectedTypeGroupId,
             textSearch,
-            view.page,
-            view.pageSize,
+            1, //view.page,
+            9999, //view.pageSize,
           );
         }),
       )
@@ -446,6 +453,243 @@
   const onTrashRestore = (event) => {
     view.showTrashRestoreModal(event.currentTarget.id, false, scRef);
   };
+
+  import { CommonValidation } from '@/lib/js/common-validation';
+  import { fromPromise } from 'rxjs/internal-compatibility';
+  let minNewRecord = 1,
+    maxNewRecord = 100;
+
+  const onAddNewResourceKey = () => {
+    doAddNew();
+  };
+
+  const addNewRecord = (selectedCategoryId: string, selectedTypeGroupId: string) => {
+    inputModalRef.show('', false, minNewRecord, maxNewRecord, 10).then((buttonPressed: ButtonPressed) => {
+      if (buttonPressed === ButtonPressed.OK) {
+        for (let i = 0; i < inputModalRef.getInputNumber(); i++) {
+          languageGridRef.getGridInstance().insertRow([selectedCategoryId, selectedTypeGroupId], 0, true);
+        }
+      }
+    });
+  };
+
+  const inputValidate = () => {
+    return new Promise((resolve, reject) => {
+      if (inputModalRef.getInputNumber() < minNewRecord || inputModalRef.getInputNumber() > maxNewRecord) {
+        inputModalRef.raiseError(T(CommonValidation.INTEGER_NUMBER_IN_RANGE) + `: ${minNewRecord} - ${maxNewRecord}`);
+        reject(false);
+      } else {
+        resolve(true);
+      }
+    });
+  };
+
+  const checkForTypeGroup = (selectedCategoryId: any, selectedTypeGroupId: any, typeGroupText) => {
+    // if type group is blank
+    if (StringUtil.isEmpty(selectedTypeGroupId)) {
+      // if type group not existed in DB
+      scRef
+        .confirmModalRef()
+        .show(
+          `${T('SYS.MSG.LANG_TYPE_GROUP')} <b>${typeGroupText}</b> ${T('SYS.MSG.DOES_NOT_EXISTED')}. ${T(
+            'SYS.MSG.DO_YOU_WANT_INSERT_NEW_ONE',
+          )}?`,
+        )
+        .then((pressedButton: ButtonPressed) => {
+          if (pressedButton === ButtonPressed.OK) {
+            addNewRecord(selectedCategoryId, typeGroupText);
+          }
+        });
+    } else {
+      // if Type group existed
+      addNewRecord(selectedCategoryId, selectedTypeGroupId);
+    }
+  };
+
+  const doAddNew = () => {
+    const selectedCategoryId = langCategoryAutoRef && langCategoryAutoRef.getSelectedId();
+    const categoryText = langCategoryAutoRef.getInputText().trim();
+    const selectedTypeGroupId = langTypeGroupAutoRef && langTypeGroupAutoRef.getSelectedId();
+    const typeGroupText = langTypeGroupAutoRef.getInputText().trim();
+
+    // if category is blank
+    if (StringUtil.isEmpty(selectedCategoryId) && StringUtil.isEmpty(categoryText)) {
+      scRef.snackbarRef().show(T('SYS.MSG.PLEASE_SELECT_LANG_CATEGORY'));
+      langCategoryAutoRef.focus();
+      return;
+    } else if (StringUtil.isEmpty(selectedCategoryId)) {
+      // if type group is blank
+      if (StringUtil.isEmpty(selectedTypeGroupId) && StringUtil.isEmpty(typeGroupText)) {
+        scRef.snackbarRef().show(T('SYS.MSG.PLEASE_SELECT_LANG_TYPE_GROUP'));
+        langTypeGroupAutoRef.focus();
+        return;
+      }
+      // if type group not existed in DB
+      let isContinue = true;
+      scRef
+        .confirmModalRef()
+        .show(
+          `${T('SYS.MSG.LANG_CATEGORY')} <b>${categoryText}</b> ${T('SYS.MSG.DOES_NOT_EXISTED')}. ${T(
+            'SYS.MSG.DO_YOU_WANT_INSERT_NEW_ONE',
+          )}?`,
+        )
+        .then((pressedButton: ButtonPressed) => {
+          if (pressedButton === ButtonPressed.OK) {
+            checkForTypeGroup(categoryText, selectedTypeGroupId, typeGroupText);
+          }
+        });
+    } else {
+      if (StringUtil.isEmpty(selectedTypeGroupId) && StringUtil.isEmpty(typeGroupText)) {
+        scRef.snackbarRef().show(T('SYS.MSG.PLEASE_SELECT_LANG_TYPE_GROUP'));
+        langTypeGroupAutoRef.focus();
+        return;
+      }
+      checkForTypeGroup(selectedCategoryId, selectedTypeGroupId, typeGroupText);
+    }
+  };
+
+  /**
+   * Event handle for Edit button.
+   * @param {event} Mouse click event.
+   * @return {void}.
+   */
+  const onEdit = (event) => {
+    // verify permission
+    view.verifyEditAction(event.currentTarget.id, scRef).then((_) => {
+      // just switch to edit mode
+      isReadOnlyMode$.next(false);
+    });
+  };
+
+  const convertLangLocaleToRow = (data) => {
+    const ret = [];
+
+    for (let row of data) {
+      for (let _lang of lang) {
+        const newRow = {
+          companyId: companyDropdownRef.getSelectedId(),
+          category: row.category,
+          typeGroup: row.typeGroup,
+          key: row.key,
+          locale: _lang.locale,
+          value: row[_lang.locale],
+        };
+        ret.push(newRow);
+      }
+    }
+
+    return ret;
+  };
+
+  const mergeLangLocaleToRow = (data1, data2) => {
+    const ret = [];
+    for (let i = 0; i < data1.length; i++) {
+      for (let _lang of lang) {
+        const newRow = {
+          companyId: companyDropdownRef.getSelectedId(),
+          category: data1[i].category,
+          typeGroup: data1[i].typeGroup,
+          key: data1[i].key,
+          locale: _lang.locale,
+          value: data1[i][_lang.locale],
+          newValue: data2[i] && data2[i][_lang.locale],
+        };
+        ret.push(newRow);
+      }
+    }
+
+
+    return ret;
+  };
+
+  const validate = () => {
+    const _beforeData = SObject.clone(beforeData.filter((it) => it && it.key && it.key.trim() !== ''));
+    const editedData = languageGridRef.getData().filter((it) => it && it.key && it.key.trim() !== '');
+
+    dataChanged = view.checkObjectArrayChange2(
+      _beforeData,
+      editedData,
+      ['category', 'typeGroup', 'key'],
+      scRef.snackbarRef(),
+    );
+
+    if (
+      !dataChanged ||
+      (dataChanged.addArray.length === 0 &&
+        dataChanged.editFromArray.length === 0 &&
+        dataChanged.editToArray.length === 0 &&
+        dataChanged.removeArray.length === 0)
+    ) {
+      scRef.snackbarRef().showNoDataChange();
+      return false;
+    }
+
+    return true;
+  };
+
+  const doSaveOrUpdate = (ob$: Observable<any>) => {
+    ob$
+      .pipe(
+        filter((_) => validate()) /* filter if form pass client validation */,
+        concatMap((_) =>
+          fromPromise(
+            /* verify permission*/
+            view.verifySaveAction(
+              // @ts-ignore
+              $isUpdateMode$ ? ButtonId.Update : ButtonId.Save,
+              scRef,
+            ),
+          ).pipe(
+            catchError((error) => {
+              return of(error);
+            }),
+          ),
+        ),
+        filter((value) => value !== 'fail') /* filter if pass verify permission*/,
+        switchMap((_) => {
+          const convertedData = {
+            addArray: convertLangLocaleToRow(dataChanged.addArray).filter(
+              (it) => it && it.value && it.value.trim() !== '',
+            ),
+            editArray: mergeLangLocaleToRow(dataChanged.editFromArray, dataChanged.editToArray).filter(
+              (it) => (it && it.value && it.value.trim()) !== (it && it.newValue && it.newValue.trim()),
+            ),
+            removeArray: convertLangLocaleToRow(dataChanged.removeArray).filter(
+              (it) => it && it.value && it.value.trim() !== '',
+            ),
+          };
+          saveRunning$.next(true);
+
+          /* submit data to API server*/
+
+          return Store.saveOrUpdateOrDelete(convertedData);
+        }),
+      )
+      .subscribe({
+        /* do something after form submit*/
+        next: (res: any) => {
+          if (res.response && res.response.data) {
+            // if error
+            scRef.snackbarRef().showUnknownError(res.response.data.message);
+          } else {
+            // success
+            scRef.snackbarRef().showUpdateSuccess();
+            // useView.checkDeletedRecord(false);
+          }
+          saveRunning$.next(false);
+        },
+        error: (error) => {
+          Debug.errorSection('Locale Resource - doSaveOrUpdate', error);
+          saveRunning$.next(false);
+        },
+      });
+  };
+
+  const useSaveOrUpdateAction = {
+    register(component: HTMLElement, param: any) {
+      doSaveOrUpdate(fromEvent(component, 'click'));
+    },
+  };
 </script>
 
 <style lang="scss">
@@ -466,7 +710,7 @@
 
 <!--Invisible Element-->
 <SC bind:this={scRef} {view} {menuPath} />
-
+<InputModal bind:this={inputModalRef} modalType={ModalType.InputNumber} beforeOK={inputValidate} />
 <ProgressBar loading$={view.loading$} />
 <ViewWrapperModal
   menuInfo={$menuInfo$}
@@ -490,7 +734,20 @@
 <!--//Invisible Element-->
 
 <section class="view-content-controller">
-  <Button btnType={ButtonType.AddNew} title={T('COMMON.BUTTON.ADD_NEW_LANGUAGE')} on:click={onAddNewLanguage} />
+  <Button btnType={ButtonType.AddNew} title={T('COMMON.BUTTON.ADD_NEW_RESOURCE_KEY')} on:click={onAddNewResourceKey} />
+
+  {#if view.isRendered(ButtonId.Edit, $isReadOnlyMode$ && $isUpdateMode$)}
+    <Button btnType={ButtonType.Edit} on:click={onEdit} disabled={view.isDisabled(ButtonId.Edit)} />
+  {/if}
+
+  {#if view.isRendered(ButtonId.Update, !$isReadOnlyMode$ && $isUpdateMode$)}
+    <Button
+      action={useSaveOrUpdateAction}
+      btnType={ButtonType.Update}
+      disabled={view.isDisabled(ButtonId.Update)}
+      running={$saveRunning$} />
+  {/if}
+
   {#if view.isRendered(ButtonId.Config)}
     <Button btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
   {/if}
@@ -506,18 +763,17 @@
 <section class="view-content-main">
   <!-- Change language -->
   <div class="row">
-    <div class="col-xs-24 col-md-12 col-lg-7">
+    <div class="col-xs-24 col-md-12 col-lg-6">
       <FloatSelect
+        on:clickLabel={onAddNewLanguage}
+        on:change={onApplyLanguage}
         autoLoad={true}
         saveState={true}
         {menuPath}
-        id={view.getViewName() + 'UsedLanguageSelectId'}
+        id="localeResourceUsedLanguageSelectId"
         bind:this={languageDropdownRef}
         data={$usedLanguages$}
         placeholder={T('COMMON.LABEL.LANGUAGE')} />
-    </div>
-    <div class="col-xs-24 col-md-12 col-lg-3">
-      <Button btnType={ButtonType.Apply} on:click={onApplyLanguage} />
     </div>
   </div>
   <!-- //Change language -->
@@ -573,17 +829,16 @@
     <!-- //Search or Filter-->
   </div>
 
-  <div style="margin-top: 10px;">
-    <Pagination
-      {menuPath}
-      totalRecords={$fullCount$}
-      on:loadPage={onLoadPage}
-      on:init={onPaginationInit}
-      bind:this={pageRef} />
-
-  </div>
+<!--  <div style="margin-top: 10px;">-->
+<!--    <Pagination-->
+<!--      {menuPath}-->
+<!--      totalRecords={$fullCount$}-->
+<!--      on:loadPage={onLoadPage}-->
+<!--      on:init={onPaginationInit}-->
+<!--      bind:this={pageRef} />-->
+<!--  </div>-->
   <!--  Language Grid-->
-  <div id="languageGridContainer" class="row {$fullCount$ > 0 ? 'language-grid' : 'full-language-grid'} ">
+  <div id="languageGridContainer" class="row {$fullCount$ > 0 ? 'language-grid' : 'full-language-grid'} " style="margin-top: 6px;">
     <div class="col-24">
       <svelte:component
         this={ExcelGrid}

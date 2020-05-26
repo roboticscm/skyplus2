@@ -91,7 +91,12 @@ export class Http {
 
     let paramsString = '?';
     for (let key in paramObj) {
-      paramsString += `${key}=${encodeURIComponent(StringUtil.replaceAll(paramObj[key], '%', ''))}&`;
+      let value = paramObj[key];
+      if (typeof value === 'string') {
+        value = encodeURIComponent(StringUtil.replaceAll(value, '%', ''));
+      }
+
+      paramsString += `${key}=${value}&`;
     }
     // remove last &
     return paramsString.substring(0, paramsString.length - 1);

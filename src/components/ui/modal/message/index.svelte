@@ -1,10 +1,9 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
-  import Button from '@/components/ui/button/index.svelte';
   import { ButtonType, ButtonPressed } from '@/components/ui/button/types';
   import { dragElement } from '../use-modal';
   import { StringUtil } from '@/lib/js/string-util';
-
+  import CloseIcon from '@/components/layout/icons/common/cancel-submit.svelte';
   export let title: string = 'title';
   export let content: string = 'content';
   export let right = 0;
@@ -42,9 +41,12 @@
     </div>
 
     <div class="message-modal__title__close">
-      <Button on:click={onCLose} btnType={ButtonType.CloseModal} />
+      <span on:click={onCLose}>
+        <CloseIcon />
+      </span>
     </div>
   </div>
+  <div class="horizontal-separator" />
   <div on:click|stopPropagation={onClick} class="message-modal__body">
     <div
       class="message-modal__body__content {lineThrough ? 'line-through' : ''}

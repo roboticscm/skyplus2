@@ -1,5 +1,5 @@
 import { T } from '@/lib/js/locale/locale';
-import {StringUtil} from "@/lib/js/string-util";
+import { StringUtil } from '@/lib/js/string-util';
 
 export const filterColumns = [
   {
@@ -44,16 +44,15 @@ export const filterColumns = [
   },
 ];
 
-
-export  const convertArrayObjectToObject = (arrayObj: any[]) => {
+export const convertArrayObjectToObject = (arrayObj: any[]) => {
   const objResult: any = {};
-  for(let obj of arrayObj) {
-    for(let field in obj) {
-      if(!StringUtil.isEmpty(obj[field])) {
+  for (let obj of arrayObj) {
+    for (let field in obj) {
+      if (!StringUtil.isEmpty(obj[field])) {
         objResult[field] = obj[field];
       }
     }
   }
 
   return objResult;
-}
+};

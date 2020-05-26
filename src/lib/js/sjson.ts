@@ -1,5 +1,8 @@
 // @ts-ignore
-const JSONbig = require('json-bigint');
+// const JSONbig = require('json-bigint');
+
+// @ts-ignore
+const JSONbigString = require('json-bigint-x')({ storeAsString: true });
 
 export class SJSON {
   // public static stringify = (obj: any) => {
@@ -12,7 +15,7 @@ export class SJSON {
   //   });
   // };
   public static stringify = (obj: any) => {
-    return JSONbig.stringify(obj);
+    return JSONbigString.stringify(obj);
   };
 
   // public static parse = (json: string) => {
@@ -31,23 +34,24 @@ export class SJSON {
   // }
 
   public static parse = (json: string) => {
-    return JSONbig.parse(json, (key, value) => {
-      if (
-        (value && value.constructor && value.constructor.name === 'BigNumber') ||
-        (value && value.constructor && value.constructor.name.trim() === '$')
-      ) {
-        return value.toString();
-      }
-      return value;
-    });
+    // return JSONbigString.parse(json, (key, value) => {
+    //     //   if (
+    //     //     (value && value.constructor && value.constructor.name === 'BigNumber') ||
+    //     //     (value && value.constructor && value.constructor.name.trim() === '$')
+    //     //   ) {
+    //     //     return value.toString();
+    //     //   }
+    //     //   return value;
+    //     // });
 
-    // return JSONbig.parse(json);
+    return JSONbigString.parse(json);
   };
 
   public static isJson = (str: string) => {
     try {
       JSON.parse(str);
     } catch (e) {
+      console.log('e ', e);
       return false;
     }
     return true;

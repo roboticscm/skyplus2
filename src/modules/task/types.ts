@@ -29,9 +29,9 @@ export class Task {
   removeAssignees?: any[] = [];
   insertAssignees?: any[] = [];
   assigneeStartConfirm? = false;
-  assigneeStartTime? = null;
+  assigneeStartTime?: number = null;
   assigneeEndConfirm? = false;
-  assigneeEndTime? = null;
+  assigneeEndTime?: number = null;
 
   // Assigner
   assigners?: any[] = [];
@@ -42,10 +42,12 @@ export class Task {
   evaluators?: any[] = [];
   removeEvaluators?: any[] = [];
   insertEvaluators?: any[] = [];
-  evaluateTime? = null;
+  evaluateTime?: number = null;
   evaluateComment? = '';
   evaluateQualificationId? = null;
   evaluateVerificationId? = null;
+  evaluateQualificationName? = null;
+  evaluateVerificationName? = null;
   evaluateStatusId? = null;
   evaluateComplete? = false;
 

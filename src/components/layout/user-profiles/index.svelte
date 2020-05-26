@@ -4,10 +4,11 @@
   import { API } from '@/lib/js/constants';
   import { T } from '@/lib/js/locale/locale';
   import { AppStore, appStore } from '@/store/app';
-  // import ThemeConfigModal from '@/components/modal/theme-config-modal/index.vue';
-  const { user$ } = appStore;
+  import UserProfilesModal from './components/user-profiles-modal/index.svelte';
   import { User } from '@/model/user';
   import { Subscription } from 'rxjs';
+
+  const { user$ } = appStore;
 
   // @ts-ignore
   const { isLogged$ } = AppStore;
@@ -17,13 +18,15 @@
 
   let user: User = undefined;
 
+  let userProfilesModalRef: any;
+
   const onLogout = (event) => {
     logout();
   };
 
   const showUserProfiles = () => {
     hidePopup();
-    // themeConfigModalRef.value.show();
+    userProfilesModalRef.show();
   };
   const showPopup = () => {
     // @ts-ignore
@@ -53,12 +56,9 @@
   });
 </script>
 
-<style lang="scss">
-
-</style>
+<UserProfilesModal bind:this={userProfilesModalRef} />
 
 <div class="user-profiles-wrapper" on:mouseover|stopPropagation={showPopup} on:mouseout={hidePopup}>
-  <!--        <theme-config-modal ref="themeConfigModalRef" id="themeConfigModalId"> </theme-config-modal>-->
   {#if $isLogged$ && user}
     <div class="user-profiles">
       {#if user.useFontIcon}

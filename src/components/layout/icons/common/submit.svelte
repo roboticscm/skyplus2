@@ -8,11 +8,15 @@
   viewBox="0 0 85.039 85.039"
   enable-background="new 0 0 85.039 85.039"
   xml:space="preserve">
+  <style type="text/css">
+    .fore-color {
+      fill: var(--primary);
+    }
+  </style>
   <g>
     <g>
-
       <line
-        fill="none"
+        class="fore-color"
         stroke="#000000"
         stroke-width="10"
         stroke-linecap="round"
@@ -23,7 +27,7 @@
         y2="9.353" />
 
       <line
-        fill="none"
+        class="fore-color"
         stroke="#000000"
         stroke-width="10"
         stroke-linecap="round"
@@ -35,7 +39,7 @@
     </g>
 
     <line
-      fill="none"
+      class="fore-color"
       stroke="#000000"
       stroke-width="12"
       stroke-linecap="round"
@@ -46,7 +50,7 @@
       y2="67.52" />
   </g>
   <line
-    fill="none"
+    class="fore-color"
     stroke="#000000"
     stroke-width="2"
     stroke-linecap="round"

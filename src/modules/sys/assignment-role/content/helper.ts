@@ -8,7 +8,7 @@ export const userColumns: TableColumn[] = [
   { name: 'lastName', title: T('COMMON.LABEL.LAST_NAME') },
   { name: 'firstName', title: T('COMMON.LABEL.FIRST_NAME') },
   { name: 'username', title: T('COMMON.LABEL.USERNAME') },
-  { name: 'departmentName', title: T('COMMON.LABEL.DEPARTMENT_NAME') },
+  { name: 'departmentName', title: T('COMMON.LABEL.DEPARTMENT') },
 ];
 export const roleColumns = [
   { name: 'id', type: 'hidden' },
@@ -18,12 +18,16 @@ export const roleColumns = [
   { name: 'disabled', title: T('COMMON.LABEL.DISABLED'), type: 'checkbox' },
 ];
 
-const isAllUsersTheSameRoles = (assignedRoles: any[]) => {
-  return [...new Set(assignedRoles.map((it) => SJSON.stringify(it.roleIds)))].length === 1;
+const isAllUsersTheSameRoles = (assignedRoles: any[], itemCount: number) => {
+  if(assignedRoles.length !== itemCount) {
+    return false;
+  }
+
+  return  [...new Set(assignedRoles.map((it) => SJSON.stringify(it.roleIds)))].length === 1;
 };
 
-export const applyAssignedRole = (roles: any[], assignedRoles: any[]) => {
-  if (isAllUsersTheSameRoles(assignedRoles)) {
+export const applyAssignedRole = (roles: any[], assignedRoles: any[], itemCount: number) => {
+  if (isAllUsersTheSameRoles(assignedRoles, itemCount)) {
     return roles.map((item) => {
       let filter =
         assignedRoles &&

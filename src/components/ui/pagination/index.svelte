@@ -13,7 +13,6 @@
   export let showDisabledButton = true;
   export let showFirstLastButton = true;
   export let showNextPrev = false;
-  7;
   export let menuPath: string;
   export let viewablePage = 7;
 
@@ -220,7 +219,7 @@
         title={T('SYS.LABEL.PAGE_SIZE')}
         on:change={onPageSizeChange}
         bind:value={pageSize}
-        class={smallSize ? 'small-control-dropdown' : 'control-dropdown'}>
+        class="bg-primary primary {smallSize ? 'small-control-dropdown' : 'control-dropdown'}">
         {#each sizes as size}
           <option value={size}>{size !== -1 ? size : T('SYS.LABEL.ALL')}</option>
         {/each}

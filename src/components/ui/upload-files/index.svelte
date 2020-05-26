@@ -133,6 +133,8 @@
   on:drop={onDrop}>
   <CloseableList
     {disabled}
+    download={true}
+    {savePath}
     directClose={true}
     bind:this={filenameRef}
     {menuPath}

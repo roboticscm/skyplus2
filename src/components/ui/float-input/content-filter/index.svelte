@@ -4,7 +4,8 @@
   import { T } from '@/lib/js/locale/locale';
   import { SObject } from '@/lib/js/sobject';
   import SelectableTable from '@/components/ui/selectable-table';
-  import { StringUtil } from '../../../../lib/js/string-util';
+  import { StringUtil } from '@/lib/js/string-util';
+  import DatePicker from '@/components/ui/input/date-picker';
 
   export let disabled = false;
   export let className = '';
@@ -15,6 +16,7 @@
   export let fullWidth = true;
   export let selected: any = undefined;
   export let showAllItem = false;
+  export let id: string = undefined;
 
   let inputRef: any;
   let dropdownContentRef: any;
@@ -25,6 +27,7 @@
   let dropdownFocused = false;
   let inputWrapperRef: any;
   let autoDropdownRef: any;
+  let renderType = 'text';
 
   const isSmartPhone = (window as any).isSmartPhone;
 
@@ -39,6 +42,9 @@
   ];
 
   const dispatch = createEventDispatcher();
+
+  // @ts-ignore
+  $: selectedItem = selected;
 
   // @ts-ignore
   $: {
@@ -65,9 +71,7 @@
   }
 
   export const focus = () => {
-    if (inputRef) {
-      inputRef.focus();
-    }
+     inputRef && inputRef.focus();
   };
 
   const showPopup = () => {
@@ -83,8 +87,9 @@
   };
 
   const onClickItem = (item: any) => {
+    renderType = item.type;
     hidePopup();
-    dispatch('itemChange', { before: selectedItem.id, current: item.id });
+    dispatch('itemChange', item);
     selectedItem = item;
   };
 
@@ -104,7 +109,7 @@
 
     if (!isSmartPhone && !dropdownFocused && event.code === 'Enter') {
       if (!dropdownFocused) {
-        dispatch('search', inputRef.value);
+        dispatch('search', inputRef && inputRef.value);
       }
       hideAutoDropdown();
       return false;
@@ -119,19 +124,35 @@
     }
 
     if (inputRef.value.trim().length > 0) {
-      dispatch('search', inputRef.value.trim());
+      dispatch('search', inputRef && inputRef.value.trim());
     } else {
       hideAutoDropdown();
     }
   };
 
+  const onChangeCheckbox = (event: any) => {
+    dispatch('search', event.target.checked);
+  }
+
   const onClickInput = () => {
-    if (inputRef.value.trim().length > 0) {
+    if (inputRef && inputRef.value.trim().length > 0) {
       showAutoDropdown();
     }
   };
 
+  let emptyCount = 0;
+  const onFocus = () => {
+    emptyCount = 0;
+  }
+
   const onKeyupInput = (event: any) => {
+    if(event.target.value === '') {
+      emptyCount++;
+      dispatch('emptyCount', emptyCount);
+    } else {
+      emptyCount = 0;
+    }
+
     if (!preSearch(event)) {
       return;
     }
@@ -140,7 +161,7 @@
       .map((it: any) => {
         return {
           id: it.id,
-          name: `<mark>${inputRef.value}</mark> in [${it.name}]`,
+          name: `<mark>${(inputRef && inputRef.value)}</mark> in [${it.name}]`,
         };
       });
     showAutoDropdown();
@@ -178,7 +199,7 @@
   const hideOnLostFocus = () => {
     setTimeout(() => {
       if (document.activeElement !== inputRef) {
-        if (StringUtil.isEmpty(inputRef.value)) {
+        if (StringUtil.isEmpty((inputRef && inputRef.value)||'')) {
           selectItem([
             {
               id: '',
@@ -201,36 +222,40 @@
 </style>
 
 <div class="floating-filter-wrapper" bind:this={inputWrapperRef}>
-  <input
-    on:keyup={onKeyupInput}
-    on:click={onClickInput}
-    on:search={onSearchInput}
-    required
-    type="search"
-    {disabled}
-    class="floating-filter__input {className}"
-    bind:value
-    {autocomplete}
-    bind:this={inputRef}
-    placeholder={T('QTT.LABEL.' + selectedItem.name
-          .toUpperCase()
-          .replace('#', '')
-          .replace(' ', '_')) + ' ' + T('COMMON.LABEL.SEARCH')} />
-
-  <label class="floating-filter__label" data-content={selectedItem.name} />
+  {#if renderType === 'text'}
+    <input
+      {id}
+      on:focus = {onFocus}
+      on:keyup={onKeyupInput}
+      on:click={onClickInput}
+      on:search={onSearchInput}
+      required
+      type="search"
+      {disabled}
+      class="floating-filter__input {className}"
+      bind:value
+      {autocomplete}
+      bind:this={inputRef}
+      placeholder={T('SYS.LABEL.SEARCH_WITH') + ': ' + selectedItem.name} />
+    {:else if renderType === 'boolean'}
+      <input type="checkbox" class="floating-filter__input {className}" on:change={onChangeCheckbox}>
+    {:else if renderType === 'date'}
+      <DatePicker className="floating-filter__input"></DatePicker>
+    {/if}
+  <label class="primary floating-filter__label" data-content={selectedItem.name} />
   <div class="floating-filter__select" on:mouseover|stopPropagation={showPopup} on:mouseout={hidePopup}>
-    <span class="w-100" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+    <span class="primary w-100" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
       {selectedItem.name}
     </span>
     <i
-      class="fa fa-angle-down"
+      class="primary fa fa-angle-down"
       style="border-right: 1px solid rgba(0, 0, 0, 0.2); min-width: 15px; display: flex; flex-direction: column;
       justify-content: flex-end;" />
-    <div bind:this={dropdownContentRef} class="{fullWidth ? '' : 'w-100'} filter-dropdown-content">
+    <div bind:this={dropdownContentRef} class=" {fullWidth ? '' : 'w-100'} filter-dropdown-content">
       {#each _list as item}
         <div
           on:click={() => onClickItem(item)}
-          class="filter-dropdown-item {item.id.toString() === selectedItem.id.toString() ? 'filter-active-item' : ''}">
+          class="primary filter-dropdown-item {item.id.toString() === selectedItem.id.toString() ? 'filter-active-item' : ''}">
           {@html item.name}
         </div>
       {/each}

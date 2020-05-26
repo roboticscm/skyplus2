@@ -1,6 +1,3 @@
-import {T} from '@/lib/js/locale/locale';
-
-
 export class Token {
   static TOKEN_KEY = 'sessionId';
   static BLOWFISH_ENCRYPTION_KEY = '12345678910';
@@ -26,7 +23,7 @@ export class API {
   static BASE_URL = `${API.API_SERVER}/api/`;
 }
 
-export const GUTTER_WIDTH = 8; //pixel
+export const GUTTER_WIDTH = 5; //pixel
 
 export class Hasura {
   static HTTP_URL = `${Protocol.HTTP}://${API.API_DOMAIN}:7580/v1/graphql`;
@@ -42,17 +39,12 @@ export class App {
   static AUTO_COMPLETE = 'off';
   static SNACKBAR_TIMEOUT = 3000;
   static PROGRESS_BAR = '<i class="fa fa-spinner fa-spin" />';
-  static MIN_PASSWORD_LENGTH = 6;
+  static MIN_PASSWORD_LENGTH = 4;
   static MAX_HEADER_HEIGHT = 100;
   static MIN_HEADER_HEIGHT = 30;
   static UUID_LEN = 36;
   static DELAY_ON_INPUT = 50; //ms
-  static FTS_OPTION = `
-    ${T('COMMON.LABEL.FULL_TEXT_SEARCH_OPTION')}:
-    1. ${T('COMMON.LABEL.EXACT')}: ${T('COMMON.LABEL.START_WITH')} " -> ${T('COMMON.LABEL.EX')}: "some text
-    2. ${T('COMMON.LABEL.SEARCH_OR')}: | -> ${T('COMMON.LABEL.EX')}: some | text
-    3. ${T('COMMON.LABEL.ADVANCED')}: ${T('COMMON.LABEL.START_WITH')} \` -> ${T('COMMON.LABEL.EX')}: \`Word<n>OtherWord (n: number)
-  `
+
   static MIN_SEARCH_LENGTH = 2;
 }
 

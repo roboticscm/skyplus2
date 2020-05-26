@@ -166,6 +166,24 @@ export class SObject {
     return obj;
   }
 
+  static removeHtmlTagArrayObject(arrObj) {
+    if(!arrObj) {
+      return arrObj;
+    }
+    const copyArrObj = this.clone(arrObj);
+    for(let row of copyArrObj) {
+      console.log(row);
+      for(let field in row) {
+        if(typeof row[field] === 'string') {
+          row[field] = StringUtil.removeHtmlTag(row[field]);
+          console.log(row[field]);
+        }
+      }
+    }
+
+    return copyArrObj;
+  }
+
   // static itemInArray(array, item) {
   //   for (let i = 0; i < array.length; i++) {
   //     // if (SObject.simpleObjEqual(array[i], item)) {
@@ -217,8 +235,8 @@ export const getDiffFieldsObject = (obj1, obj2) => {
   // Variables
   //
 
-  var diffs = {};
-  var key;
+  let diffs = {};
+  let key;
 
   //
   // Methods
@@ -230,15 +248,19 @@ export const getDiffFieldsObject = (obj1, obj2) => {
    * @param  {Array}   arr2 The second array
    * @return {Boolean}      If true, both arrays are equal
    */
-  var arraysMatch = function(arr1, arr2) {
+  const arraysMatch = function(arr1, arr2) {
     // Check if the arrays are the same length
     if (arr1.length !== arr2.length) return false;
 
     // Check if all items exist and are in the same order
-    for (var i = 0; i < arr1.length; i++) {
-      // if (arr1[i] !== arr2[i] && ((arr1[i] !== null && arr2[i] !== '') || (arr1[i] !== '' && arr2[i] !== null)))
-      if (typeof arr1[i] === 'object' || typeof arr2[i] === 'object') {
-        var objDiff = getDiffFieldsObject(arr1[i], arr2[i]);
+    for (let i = 0; i < arr1.length; i++) {
+      if (
+        (arr1[i] !== arr2[i] && ((arr1[i] !== null && arr2[i] !== '') || (arr1[i] !== '' && arr2[i] !== null))) ||
+        typeof arr1[i] === 'object' ||
+        typeof arr2[i] === 'object'
+      ) {
+        // if (typeof arr1[i] === 'object' || typeof arr2[i] === 'object') {
+        const objDiff = getDiffFieldsObject(arr1[i], arr2[i]);
         if (objDiff && Object.keys(objDiff).length > 1) {
           diffs[key] = objDiff;
         }

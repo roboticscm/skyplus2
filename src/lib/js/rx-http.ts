@@ -7,9 +7,7 @@ import { SJSON } from '@/lib/js/sjson';
 import { Method } from 'axios';
 import { getToken, getUserId } from '@/lib/js/security';
 import { StringUtil } from '@/lib/js/string-util';
-import {Http} from "@/lib/js/http";
-// @ts-ignore
-const JSONbig = require('json-bigint');
+import { Http } from '@/lib/js/http';
 
 export class RxHttp {
   public static callApi(method: Method, url: string, params: any, jsonData: any) {

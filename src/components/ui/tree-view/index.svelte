@@ -20,7 +20,7 @@
   const setFontCss = (treeId, treeNode) => {
     const body = document.querySelector('body[class^="theme-"]');
     let highlightColor = getComputedStyle(body as any)
-      .getPropertyValue('--highlight-text-color')
+      .getPropertyValue('--my-active-color')
       .trim();
     return treeNode.done === true ? { color: highlightColor } : {};
   };

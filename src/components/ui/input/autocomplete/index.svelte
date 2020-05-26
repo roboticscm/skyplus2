@@ -405,6 +405,7 @@
 <div class="w-100 auto-dropdown-wrapper" {id} bind:this={inputWrapperRef}>
   {#if isSafari}
     <input
+      style="font-size: 1rem"
       on:input={onInput}
       required
       on:keyup={onKeyup}
@@ -418,6 +419,7 @@
       {disabled} />
   {:else}
     <input
+      style="font-size: 1rem"
       on:input={onInput}
       required
       on:keyup={onKeyup}

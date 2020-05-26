@@ -7,6 +7,9 @@
   import { settingsStore } from '@/store/settings';
   import { T } from '@/lib/js/locale/locale';
   import { genUUID } from '@/lib/js/util';
+  import {SObject} from "../../../lib/js/sobject";
+  import {markStringSearch} from "../../../lib/js/util";
+  import {StringUtil} from "../../../lib/js/string-util";
 
   const dispatch = createEventDispatcher();
   // import { SObject } from '@/lib/js/sobject';
@@ -25,6 +28,8 @@
   let startRow: any = null;
   let selectedRows: number[] = [];
   let tableRef: any;
+  let filteredData: any[] = data;
+
 
   onMount(() => {
     if (saveState && menuPath) {
@@ -34,7 +39,7 @@
 
   const onSelectedRow = () => {
     // @ts-ignore
-    let selectedRowsData = selectedRows.map((index) => data[index]);
+    let selectedRowsData = selectedRows.map((index) => filteredData[index]);
 
     dispatch('selection', selectedRowsData);
   };
@@ -92,9 +97,30 @@
     });
   };
 
+  const filter = (textSearch: string) => {
+    if(StringUtil.isEmpty(textSearch)) {
+      filteredData = data;
+      return;
+    }
+    const _data = SObject.clone(data);
+
+    filteredData = _data.map((it: any) => {
+      for(let field in it) {
+        if(field !== 'id' && typeof it[field] === 'string') {
+          const marked = markStringSearch(it[field], textSearch, true);
+          if(marked !== it[field]) {
+            it[field] = marked;
+            it.found = true;
+          }
+        }
+      }
+      return it;
+    }).filter((it: any) => it.found);
+  };
+
   const findRowById = (id: any) => {
-    for (let i = 0; i < data.length; i++) {
-      if (id && data[i].id && id.toString() === data[i].id.toString()) {
+    for (let i = 0; i < filteredData.length; i++) {
+      if (id && filteredData[i].id && id.toString() === filteredData[i].id.toString()) {
         return i;
       }
     }
@@ -122,9 +148,13 @@
   };
 
   export const getSelectedData = () => {
-    const result = selectedRows.map((index) => data[index]);
+    const result = selectedRows.map((index) => filteredData[index]);
     return result;
   };
+
+  export const getSelectedRowCount = () => {
+    return selectedRows.length;
+  }
 
   function dotheneedful(sibling, row) {
     if (sibling != null) {
@@ -160,7 +190,7 @@
       if (nextrow != null) {
         let sibling = nextrow.cells[idx];
         let row = Number(sibling.id.split('_')[1]);
-        if (row < data.length) {
+        if (row < filteredData.length) {
           dotheneedful(sibling, row);
           // startingY += 200;
           // window.scrollTo(0, startingY);
@@ -197,12 +227,10 @@
 
   // @ts-ignore
   $: if (data) {
+    filteredData = data;
     tick().then(() => {
       applyTable();
     });
-    // setTimeout(()=> {
-    //   applyTable();
-    // }, 500);
   }
 
   const saveSettings = () => {
@@ -255,16 +283,9 @@
 
 <div style="height: 100%; overflow: auto;">
   <slot />
-  <span title={T('COMMON.LABEL.SELECT_ALL')}>
-    <slot name="selectAll" {selectAll} />
-  </span>
 
-  <span title={T('COMMON.LABEL.UN_SELECT_ALL')}>
-    <slot name="unSelectAll" {unSelectAll} />
-  </span>
-
-  <span title={T('COMMON.LABEL.TOGGLE_SELECTION')}>
-    <slot name="toggleSelection" {toggleSelection} />
+  <span >
+    <slot name="header" {selectAll} {unSelectAll} {toggleSelection} {filter} ></slot>
   </span>
 
   <table bind:this={tableRef} on:click|stopPropagation={onClick} {id} class="table">
@@ -285,7 +306,7 @@
       </thead>
     {/if}
     <tbody>
-      {#each data as row, rowIndex}
+      {#each filteredData as row, rowIndex}
         <tr id={'row_' + rowIndex + '_Id'}>
           {#if showRowNumber}
             <th id={`cell_${rowIndex}_${0}_${id}`} class="freeze row-number">{startRowCount + rowIndex}</th>

@@ -10,6 +10,7 @@
   export let saveState = true;
   export let menuPath: string;
   export let id: string;
+  export let titleClass = '';
 
   let open = true;
 
@@ -34,16 +35,32 @@
       });
     }
   });
+
+  export const openSection = () => {
+    open = true;
+  };
 </script>
 
 <div class="section {showBorder ? 'border' : ''} {roundedBorder ? 'border-radius' : ''}">
   {#if title && title.length > 0}
-    <div on:click={onToggle} class="section__title {collapse ? 'link' : ''}">
-      {title}
-      {#if open}
-        <i class="fa fa-minus" />
-      {:else}
-        <i class="fa fa-angle-down" />
+    <div
+      on:click={onToggle}
+      class="section__title {collapse ? 'link' : ''}
+      {titleClass}"
+      style="display: flex; flex-wrap: wrap;">
+      <div style="width: 12%; white-space: nowrap">
+        {@html title}
+        &nbsp;
+        {#if open}
+          <i class="fa fa-minus" />
+        {:else}
+          <i class="fa fa-angle-down" />
+        {/if}
+      </div>
+      {#if !open}
+        <div style="width: 88%;">
+          <slot name="subTitle" />
+        </div>
       {/if}
     </div>
   {/if}

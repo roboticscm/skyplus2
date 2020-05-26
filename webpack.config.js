@@ -16,7 +16,8 @@ const Dotenv = require('dotenv-webpack');
 const alias = {
       svelte: path.resolve('node_modules', 'svelte'),
       '@': path.resolve(__dirname, 'src'),
-      'd': path.resolve(__dirname, 'src/lib/js/debug')
+      'd': path.resolve(__dirname, 'src/lib/js/debug'),
+      // 'bignumber.js$': 'bignumber.js/bignumber.js',
     };
 
 module.exports = {

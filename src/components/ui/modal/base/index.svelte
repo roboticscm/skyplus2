@@ -1,13 +1,14 @@
 <script lang="ts">
-  import Button from '@/components/ui/button/index.svelte';
+  import Button from '@/components/ui/flat-button';
   import { ButtonType, ButtonPressed } from '@/components/ui/button/types';
   import { ModalType, ModalId } from '@/components/ui/modal/types';
   import { createModal } from '../use-modal';
   import { onMount, createEventDispatcher, onDestroy } from 'svelte';
   import { StringUtil } from '@/lib/js/string-util';
   import { T } from '@/lib/js/locale/locale';
-  import CustomPasswordInput from '@/components/ui/input/custom-password-input/index.svelte';
-  import TextInput from '@/components/ui/input/text-input/index.svelte';
+  import CustomPasswordInput from '@/components/ui/input/custom-password-input';
+  import TextInput from '@/components/ui/input/text-input';
+  import NumberInput from '@/components/ui/float-input/number-input';
   import { appStore } from '@/store/app';
   import Form from '@/lib/js/form/form';
   import { toSnackCase } from '@/lib/js/util';
@@ -16,6 +17,8 @@
   import { App } from '@/lib/js/constants';
   import { passwordChar } from '@/components/ui/input/autocomplete/helper';
   import { Browser } from '@/lib/js/browser';
+  import CloseIcon from '@/components/layout/icons/common/cancel-submit.svelte';
+  import Error from '@/components/ui/error';
 
   const dispatch = createEventDispatcher();
   export let id: string;
@@ -39,10 +42,11 @@
 
   let modalWrapperRef: any;
   let modalRef: any;
-  let passwordRef: any;
+  let passwordRef, inputNumberRef: any;
   let displayPasswordChar = passwordChar();
   let disabled = false;
-
+  let minValue = 1,
+    maxValue: number = undefined;
   const useModal = createModal(menuPath, defaultWidth, defaultHeight);
 
   const onResize = (event: any) => {
@@ -56,16 +60,28 @@
     }
   };
 
+  const debounceTime = (ms, fn) => {
+    let timer;
+    return function() {
+      clearTimeout(timer);
+      let args = Array.prototype.slice.call(arguments);
+      // @ts-ignore
+      args.unshift(this);
+      timer = setTimeout(fn.bind.apply(fn, args), ms);
+    };
+  };
+
   // @ts-ignore
   let resizeObserver: any;
 
   if (Browser.getBrowser() !== 'Safari') {
     // @ts-ignore
-    resizeObserver = new ResizeObserver(onResize);
+    resizeObserver = new ResizeObserver(debounceTime(100, onResize));
   }
   let form: any = new Form({
-    username: appStore.user.username,
+    username: appStore.user && appStore.user.username,
     password: '',
+    inputNumber: 1,
   });
 
   const onMouseUp = (event) => {
@@ -73,7 +89,11 @@
     dispatch('mouseUp', undefined);
   };
 
-  export const show = (content: string = '', _disabled = false) => {
+  export const show = (content: string = '', _disabled = false, min = 0, max = undefined, defaultValue = undefined) => {
+    minValue = min;
+    maxValue = max;
+    form.errors.errors = {};
+
     disabled = _disabled;
     return new Promise((resolve, reject) => {
       useModal.state.content = content;
@@ -82,12 +102,18 @@
       form = new Form({
         username: appStore.user.username,
         password: '',
+        inputNumber: defaultValue || 1,
       });
-      if (passwordRef) {
-        setTimeout(() => {
-          passwordRef && passwordRef.focus();
-        }, 200);
-      }
+
+      setTimeout(() => {
+        passwordRef && passwordRef.focus();
+        passwordRef && passwordRef.clear();
+      }, 200);
+
+      setTimeout(() => {
+        inputNumberRef && inputNumberRef.focus();
+      }, 200);
+
       modalWrapperRef.classList.add('show-modal');
     });
   };
@@ -125,25 +151,32 @@
   });
 
   function loginWithoutGenToken() {
-    form.password = passwordRef.getPassword();
-    form
-      .post(`sys/auth/${toSnackCase('loginWithoutGenToken')}`)
-      .pipe(
-        catchError((error) => {
-          return of(error);
-        }),
-      )
-      .subscribe((res: any) => {
-        if (res.response && res.response.data) {
-          // error
-          form.errors.errors = form.recordErrors(res.response.data);
-        } else {
-          if (useModal.state.resolve) {
-            modalWrapperRef.classList.remove('show-modal');
-            useModal.state.resolve(ButtonPressed.OK);
+    if (passwordRef) {
+      form.password = passwordRef && passwordRef.getPassword();
+
+      form
+        .post(`sys/auth/${toSnackCase('loginWithoutGenToken')}`)
+        .pipe(
+          catchError((error) => {
+            return of(error);
+          }),
+        )
+        .subscribe((res: any) => {
+          if (res.response && res.response.data) {
+            // error
+            form.errors.errors = form.recordErrors(res.response.data);
+          } else {
+            if (useModal.state.resolve) {
+              modalWrapperRef.classList.remove('show-modal');
+              useModal.state.resolve(ButtonPressed.OK);
+            }
           }
-        }
-      });
+        });
+    }
+
+    if (inputNumberRef) {
+      onOK();
+    }
   }
 
   export const getHeight = () => {
@@ -209,6 +242,16 @@
         break;
     }
   }
+
+  export const getInputNumber = () => {
+    return form.inputNumber;
+  };
+
+  export const raiseError = (err: string) => {
+    form.errors.errors = form.recordErrors({
+      inputNumber: err,
+    });
+  };
 </script>
 
 <style lang="scss">
@@ -233,7 +276,9 @@
         </div>
         <div>
           {#if showCloseButton}
-            <Button on:click={onCLose} btnType={ButtonType.CloseModal} />
+            <div class="modal-header__close" on:click={onCLose}>
+              <CloseIcon />
+            </div>
           {/if}
         </div>
       </div>
@@ -262,20 +307,32 @@
             </div>
           </div>
         {/if}
+
+        {#if modalType === ModalType.InputNumber}
+          <NumberInput
+            bind:this={inputNumberRef}
+            name="inputNumber"
+            placeholder={T('COMMON.LABEL.INPUT_NUMBER')}
+            min={minValue}
+            max={maxValue}
+            bind:value={form.inputNumber} />
+          <Error {form} field="inputNumber" />
+        {/if}
+
         <slot />
       </div>
 
       {#if showControlButton}
-        <div class="modal-controller" style={'text-align: ' + (showCancelButton ? 'right' : 'center')}>
+        <div class="modal-controller">
           {#if showOkButton}
             {#if modalType === ModalType.ConfirmPassword}
-              <Button type="submit" btnType={ButtonType.OkModal} title={okButtonTitle} {disabled} />
+              <Button showIcon={true} type="submit" btnType={ButtonType.OkModal} title={okButtonTitle} {disabled} />
             {:else}
-              <Button on:click={onOK} btnType={ButtonType.OkModal} title={okButtonTitle} {disabled} />
+              <Button showIcon={true} on:click={onOK} btnType={ButtonType.OkModal} title={okButtonTitle} {disabled} />
             {/if}
           {/if}
           {#if showCancelButton}
-            <Button on:click={onCancel} btnType={ButtonType.CancelModal} title={cancelButtonTitle} />
+            <Button showIcon={true} on:click={onCancel} btnType={ButtonType.CancelModal} title={cancelButtonTitle} />
           {/if}
         </div>
       {/if}

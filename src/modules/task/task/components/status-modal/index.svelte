@@ -165,7 +165,7 @@
             bind:this={statusRef}
             bind:value={form.statusId}
             id={id + 'Status'}
-            placeholder={T('TASK.LABEL.STATUS')}
+            placeholder={T('COMMON.LABEL.STATUS')}
             {menuPath}
             data$={taskStatus$} />
         {:else}

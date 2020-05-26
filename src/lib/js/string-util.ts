@@ -27,8 +27,8 @@ export class StringUtil {
   }
 
   public static isEmpty(source: string) {
-    if(typeof source !== 'string') {
-      return  source === null || source === undefined;
+    if (typeof source !== 'string') {
+      return source === null || source === undefined;
     }
     return source === null || source === undefined || source.trim().length === 0;
   }
@@ -87,6 +87,10 @@ export class StringUtil {
     return str.replace(/<mark>/g, '').replace(/<\/mark>/g, '');
   };
 
+  public static removeHtmlTag = (source: string) => {
+    return source.replace(/<\/?[^>]+(>|$)/g, '');
+  }
+
   public static removeExtraSpace = (source: string) => {
     return source;
   };
@@ -109,18 +113,31 @@ export class StringUtil {
   }
 
   public static formatFTSParam(value: string) {
-    if(StringUtil.isEmpty(value)) {
+    if (StringUtil.isEmpty(value)) {
       return '';
     }
 
-    if(value.startsWith('"')) {
-      return StringUtil.replaceAll(value, ' ', '<->') ;
+    if (value.startsWith('"')) {
+      return StringUtil.replaceAll(value, ' ', '<->');
     }
 
-    if(value.startsWith('`')) {
+    if (value.startsWith('`')) {
       return StringUtil.replaceAll(value, '`', '');
     }
 
     return StringUtil.replaceAll(value, ' ', ':*&') + ':*';
   }
+
+  static getFirstWord = (source: string) => {
+    if (StringUtil.isEmpty(source)) {
+      return source;
+    }
+
+    const split = source.split(' ');
+    if (split.length > 0) {
+      return split[0];
+    }
+
+    return source;
+  };
 }

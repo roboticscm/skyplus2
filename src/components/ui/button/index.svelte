@@ -7,6 +7,7 @@
   export let id: string = undefined;
   export let type = 'button';
   export let title = '';
+  export let text = '';
   export let btnType = ButtonType.Custom;
   export let icon = '';
   export let className = '';
@@ -24,8 +25,8 @@
     if (StringUtil.isEmpty(id) && !StringUtil.isEmpty(_id)) {
       id = _id;
     }
-    if (StringUtil.isEmpty(title) && !StringUtil.isEmpty(_title)) {
-      title = T(`COMMON.BUTTON.${_title}`);
+    if (StringUtil.isEmpty(text) && !StringUtil.isEmpty(_title)) {
+      text = T(`COMMON.BUTTON.${_title}`);
     }
     if (StringUtil.isEmpty(icon) && !StringUtil.isEmpty(_icon)) {
       icon = _icon;
@@ -95,7 +96,7 @@
   };
 </script>
 
-<button
+<button {title}
   use:useAction
   bind:this={btnRef}
   {id}
@@ -109,5 +110,5 @@
   {:else}
     {@html icon}
   {/if}
-  {title}
+  {text}
 </button>

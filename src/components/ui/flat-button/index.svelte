@@ -9,7 +9,8 @@
 
   export let id: string = undefined;
   export let type = 'button';
-  export let title = '';
+  export let text = '';
+  export let title= '';
   export let btnType = ButtonType.Custom;
   export let icon = '';
   export let className = 'btn-flat';
@@ -35,8 +36,8 @@
     if (StringUtil.isEmpty(id) && !StringUtil.isEmpty(_id)) {
       id = _id;
     }
-    if (StringUtil.isEmpty(title) && !StringUtil.isEmpty(_title)) {
-      title = T(`COMMON.BUTTON.${_title}`);
+    if (StringUtil.isEmpty(text) && !StringUtil.isEmpty(_title)) {
+      text = T(`COMMON.BUTTON.${_title}`);
     }
     if (StringUtil.isEmpty(icon) && !StringUtil.isEmpty(_icon)) {
       icon = _icon;
@@ -51,7 +52,7 @@
   $: {
     switch (+btnType) {
       case ButtonType.Reset:
-        preset(undefined, 'Reset', '<i class="fa fa-redo-alt"></i>', 'btn-flat');
+        preset(undefined, 'RESET', '<i class="fa fa-redo-alt"></i>', 'btn-flat');
         break;
       case ButtonType.AddNew:
         preset(ButtonId.AddNew, 'ADD_NEW', '<i class="fa fa-plus"></i>', 'btn-flat');
@@ -75,13 +76,13 @@
         preset(ButtonId.TrashRestore, 'TRASH_RESTORE', '<i class="fa fa-trash-restore-alt"></i>', 'btn-flat');
         break;
       case ButtonType.CloseModal:
-        preset(undefined, undefined, '<i class="fa fa-times"></i>', 'btn-small-normal');
+        preset(undefined, undefined, '<i class="fa fa-times"></i>', 'btn-flat');
         break;
       case ButtonType.OkModal:
-        preset(undefined, 'OK', '<i class="fa fa-check"></i>', 'btn-success');
+        preset(undefined, 'OK', '<i style="color:#20b04b;" class="fa fa-check"></i>', 'btn-success');
         break;
       case ButtonType.CancelModal:
-        preset(undefined, 'CANCEL', '<i class="fa fa-times"></i>', 'btn-danger');
+        preset(undefined, 'CANCEL', '<i style="color:red;" class="fa fa-times"></i>', 'btn-danger');
         break;
       case ButtonType.Apply:
         preset(undefined, 'APPLY', '<i class="fa fa-check"></i>', 'btn-flat');
@@ -96,7 +97,7 @@
         preset(undefined, undefined, '<i class="fa fa-toggle-on"></i>', 'btn-small-primary');
         break;
       case ButtonType.Submit:
-        preset(undefined, 'SUBMIT', '<i class="fa fa-check"></i>', 'btn-flat');
+        preset(undefined, 'SUBMIT', '<i  class="fa fa-check"></i>', 'btn-flat');
         break;
       case ButtonType.CancelSubmit:
         preset(undefined, 'CANCEL_SUBMIT', '', 'btn-flat');
@@ -106,6 +107,12 @@
         break;
       case ButtonType.CancelApprove:
         preset(undefined, 'CANCEL_APPROVE', '', 'btn-flat');
+        break;
+      case ButtonType.Assign:
+        preset(undefined, 'ASSIGN', '', 'btn-flat');
+        break;
+      case ButtonType.HoldAssign:
+        preset(undefined, 'HOLD_ASSIGN', '', 'btn-flat');
         break;
       default:
     }
@@ -133,6 +140,7 @@
 </script>
 
 <button
+        {title}
   use:useAction
   bind:this={btnRef}
   {id}
@@ -146,7 +154,7 @@
   {:else if showIcon}
     {@html icon}
   {/if}
-  {title}
+  {text}
   {#if dropdownList && dropdownList.length > 0}
     <i on:mouseover={onMouseover} on:mouseout={onMouseout} class="dropdown-mark-icon fa fa-angle-down">
       <div id={`dropdown${id}`} class="dropdown-content">

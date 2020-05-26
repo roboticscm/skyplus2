@@ -164,9 +164,7 @@
 </script>
 
 <Snackbar bind:this={snackbarRef} />
-<div
-  class="search-bar-wrapper search-bar-wrapper-rounded-border"
-  bind:this={searchWrapperRef}>
+<div class="search-bar-wrapper search-bar-wrapper-rounded-border" bind:this={searchWrapperRef}>
 
   <Autocomplete
     container={searchWrapperRef}

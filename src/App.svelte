@@ -12,6 +12,8 @@
   import RouterView from '@/components/ui/router-view';
   import { ModalType } from '@/components/ui/modal/types';
   import { unlockScreen } from '@/lib/js/security';
+  import Nickname from '@/components/layout/nickname';
+  import { getUserFullName } from '@/lib/js/security';
 
   let routerView: any;
   let confirmPasswordModalRef: any;
@@ -88,6 +90,7 @@
       <RouterView bind:this={routerView} />
     </div>
   </MainLayout>
+  <Nickname />
 {:else}
   <div style="height: 100%; background: var(--bg-tertiary); overflow: auto;">
     <RouterView bind:this={routerView} />

@@ -134,7 +134,7 @@ export class ViewStore {
       return {
         type: ['id', 'sort', 'code'].indexOf(it) >= 0 ? 'hidden' : 'text',
         name: it,
-        title: T(`COMMON.LABEL.${it}`),
+        title: T(`COMMON.LABEL.${it.toUpperCase()}`),
       };
     });
   };
@@ -270,7 +270,13 @@ export class ViewStore {
     return this.checkControlProperty(event, 'confirm');
   };
 
-  verifyAction = (id: string, confirmCallback: Function, passwordConfirmModal: any) => {
+  verifyAction = (id: string, confirmCallback: Function, passwordConfirmModal: any, disabled = false) => {
+    if(disabled) {
+      return new Promise(((resolve, reject) => {
+        reject('fail');
+      }));
+    }
+
     return new Promise((resolve, reject) => {
       if (StringUtil.isEmpty(id)) {
         Debug.errorSection('Verify Action', 'ID not defined');
@@ -325,81 +331,83 @@ export class ViewStore {
     confirmPasswordModalRef: any,
     msg: string,
     extraMessage: string = '',
+    disabled = false
   ) => {
     return this.verifyAction(
       buttonId,
       () => confirmModalRef.show(`${T(`COMMON.MSG.${msg}`)} <b>${extraMessage}</b>. ${T('COMMON.MSG.ARE_YOU_SURE')}?`),
-      confirmPasswordModalRef,
+      confirmPasswordModalRef, disabled
     );
   };
 
-  verifyAddNewAction = (buttonId: string, scRef: any, extraMessage: string = '') => {
+  verifyAddNewAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
     return this.verifySimpleAction(
       buttonId,
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'ADD_NEW',
-      extraMessage,
+      extraMessage, disabled
     );
   };
 
-  verifySaveAction = (buttonId: string, scRef: any, extraMessage: string = '') => {
+  verifySaveAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
     return this.verifySimpleAction(
       buttonId,
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'SAVE',
-      extraMessage,
+      extraMessage, disabled
     );
   };
 
-  verifyEditAction = (buttonId: string, scRef: any, extraMessage: string = '') => {
+  verifyEditAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
     return this.verifySimpleAction(
       buttonId,
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'EDIT',
-      extraMessage,
+      extraMessage, disabled
     );
   };
 
-  verifyUpdateAction = (buttonId: string, scRef: any, extraMessage: string = '') => {
+  verifyUpdateAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
     return this.verifySimpleAction(
       buttonId,
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'UPDATE',
       extraMessage,
+        disabled
     );
   };
 
-  verifyDeleteAction = (buttonId: string, scRef: any, extraMessage: string = '') => {
+  verifyDeleteAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
     return this.verifySimpleAction(
       buttonId,
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'DELETE',
-      extraMessage,
+      extraMessage, disabled
     );
   };
 
-  verifySubmitAction = (buttonId: string, scRef: any, extraMessage: string = '') => {
+  verifySubmitAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
     return this.verifySimpleAction(
       buttonId,
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'SUBMIT',
-      extraMessage,
+      extraMessage, disabled
     );
   };
 
-  verifyCancelSubmitAction = (buttonId: string, scRef: any, extraMessage: string = '') => {
+  verifyCancelSubmitAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
     return this.verifySimpleAction(
       buttonId,
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'CANCEL_SUBMIT',
-      extraMessage,
+      extraMessage, disabled
     );
   };
 
@@ -425,6 +433,17 @@ export class ViewStore {
       }
       return null;
     }
+    return changedObject;
+  };
+
+  checkObjectArrayChange2 = (beforeData: any[], currentData: any[], keyFields: any[], snackbar: any = undefined) => {
+    let changedObject = SObject.getDiffRowObjectArray2(beforeData, currentData, keyFields);
+
+    if (SObject.isEmptyField(changedObject)) {
+      snackbar && snackbar.showNoDataChange();
+      return null;
+    }
+
     return changedObject;
   };
 

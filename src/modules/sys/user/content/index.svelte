@@ -288,7 +288,7 @@
         next: (res: any) => {
           if (res.response && res.response.data) {
             // if error
-            if (!SJSON.isJson(res.response.data) || res.response.data.message) {
+            if (res.response.data.message) {
               scRef.snackbarRef().showUnknownError(res.response.data.message || res.response.data);
             } else {
               form.errors.errors = form.recordErrors(res.response.data);

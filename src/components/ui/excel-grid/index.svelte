@@ -280,6 +280,7 @@
   export const createCheckboxHeader = (col: number, onlyOneCheckbox = true) => {
     const checkboxTag = document.createElement('input');
     checkboxTag.type = 'checkbox';
+    checkboxTag.title = T('COMMON.LABEL.SELECT_UNSELECT_ALL');
     checkboxTag.onchange = (event: any) => {
       const checked = event.target.checked;
       const checkColumn = new Array(data.length).fill(checked);
@@ -298,7 +299,7 @@
 
   export const createToggleCheckHeader = (col: number) => {
     const buttonTag: any = document.createElement('button');
-    buttonTag.title = T('COMMON.LABEL.TOGGLE_SELECTION');
+    buttonTag.title = T('COMMON.BUTTON.TOGGLE_SELECTION');
     buttonTag.className = 'btn-small-primary';
     buttonTag.innerHTML = '<i class="fa fa-toggle-on"></i>';
     buttonTag.style = 'padding: 0; font-size: 0.8rem;';
@@ -323,10 +324,12 @@
 </script>
 
 <style lang="scss">
+  @import '../sass/sass/helpers/variables.scss';
   .grid-content {
     display: flex;
     flex-direction: column;
     align-items: start;
+    border: $default-border;
   }
 </style>
 

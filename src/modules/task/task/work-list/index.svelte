@@ -15,7 +15,7 @@
   import Button from '@/components/ui/flat-button';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import ContentFilter from '@/components/ui/float-input/content-filter';
-  import {convertArrayObjectToObject, filterColumns} from './helper';
+  import { convertArrayObjectToObject, filterColumns } from './helper';
   import CloseableList from '@/components/ui/closeable-list';
   import { StringUtil } from '@/lib/js/string-util';
   import { SObject } from '@/lib/js/sobject';
@@ -23,21 +23,21 @@
   import { App } from '@/lib/js/constants';
   import { appStore } from '@/store/app';
   import Pagination from '@/components/ui/pagination';
-  import {markStringSearch} from "../../../../lib/js/util";
+  import { markStringSearch } from '../../../../lib/js/util';
 
   export let menuPath: string;
   export let view: ViewStore;
   export let store: Store;
   export let selectedId: string = undefined;
 
-  const { fullCount$, needSelectId$} = view;
+  const { fullCount$, needSelectId$ } = view;
   const { taskList$, projectList$, showDashboard$ } = store;
   let quickSearchRef: any;
   let searchWrapperRef: any;
   let viewBy = 'task';
   let selectedTask: Task = undefined;
 
-  let filterList: any[] = [{ id: '', name: '' }];
+  let filterList: any[] = [{ id: '', name: '', value: '' }];
   let mappedFilterList: any[] = [];
 
   let usedFilterColumns: any[] = [];
@@ -49,8 +49,10 @@
   const searchProgress$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   let markedData: any[] = undefined;
   let textSearch: string = '';
+  let searchKeyword: string = '';
 
   const dispatch = createEventDispatcher();
+
   const doFilter = (ob$: Observable<any>) => {
     let start = Date.now();
     ob$
@@ -63,13 +65,7 @@
           searchProgress$.next(true);
           textSearch = e.value;
         }),
-        switchMap((e: any) => {
-          if(StringUtil.isEmpty(e.value)) {
-            return store.tskFindTasks({menuPath, departmentId: appStore.org.departmentId, isCompleted: false});
-          } else {
-            return store.tskFindTasks({menuPath, departmentId: appStore.org.departmentId, textSearch: StringUtil.formatFTSParam(e.value)});
-          }
-        }),
+        switchMap((_) => makeSearch$()),
       )
       .subscribe((res) => {
         const end = Date.now();
@@ -77,6 +73,19 @@
         searchProgress$.next(false);
         didSearch(res, textSearch);
       });
+  };
+
+  const makeSearch$ = () => {
+    if (StringUtil.isEmpty(textSearch) && SObject.isEmptyField(getAdvSearchParam())) {
+      return store.tskFindTasks({ menuPath, departmentId: appStore.org.departmentId, isCompleted: false });
+    } else {
+      return store.tskFindTasks({
+        menuPath,
+        departmentId: appStore.org.departmentId,
+        textSearch: StringUtil.formatFTSParam(textSearch),
+        ...getAdvSearchParam(),
+      });
+    }
   };
 
   const useSearchAction = {
@@ -99,7 +108,7 @@
     const ele: any = document.querySelector(`#searchTaskWorkListId`);
     ele.style.left = inputLeft + 'px';
     ele.style.width = inputWidth + 'px';
-    ele.style.height = '300px';
+    // ele.style.height = '400px';
     Dropdown.show('searchTaskWorkListId');
   };
 
@@ -108,38 +117,106 @@
   };
 
   const onItemChangeFilter = (event: any, item: any) => {
-    item.id = event.detail.current;
+    item.id = event.detail.id;
+    item.name = event.detail.name;
+    item.type = event.detail.type;
 
-    console.log( event.detail.before);
-
-    if (event.detail.before == '') {
+    // item.name = e
+    const index = usedFilterColumns.indexOf(event.detail.current);
+    if (index < 0) {
       usedFilterColumns.push(event.detail.current);
-    } else {
-      const index = usedFilterColumns.indexOf(event.detail.before);
-      if (index >= 0) {
-        usedFilterColumns[index] = event.detail.current;
-      }
+      usedFilterColumns = [...usedFilterColumns];
     }
-    usedFilterColumns = [...usedFilterColumns];
-
-    console.log(usedFilterColumns);
   };
 
-  const onSearch = (event: any, item: any) => {
-    if (filterList.length >= filterColumns.length - 1 || event.detail.length === 0) {
+  const onEmptyCountSearchAdv = (event: any) => {
+    if(event.detail > 1) {
+      onSelectSearchField();
+    }
+  }
+
+  const onSearch = (event: any, item: any, idx: number) => {
+    if (filterList.length >= filterColumns.length - 1) {
+      onSelectSearchField();
       return;
     }
 
-    // item.name = event.detail;
+    // render checkbox
+    if(typeof event.detail === 'boolean') {
+      const index = usedFilterColumns.indexOf(item.id);
+      if (index < 0) {
+        usedFilterColumns.push(item.id);
+        usedFilterColumns = [...usedFilterColumns];
+      }
 
+      if (index < 0 || (filterList.length > 0 && filterList[filterList.length - 1].type === 'boolean' )) {
+        filterList = [
+          ...filterList,
+          {
+            id: '',
+            name: '',
+            value: '',
+          },
+        ];
+      }
+
+      return;
+    }
+
+
+
+    const index = usedFilterColumns.indexOf(item.id);
+    if (index < 0) {
+      usedFilterColumns.push(item.id);
+      usedFilterColumns = [...usedFilterColumns];
+    }
+
+    if (filterList.length > 0 && filterList[filterList.length - 1].value !== '') {
+      filterList = [
+        ...filterList,
+        {
+          id: '',
+          name: '',
+          value: '',
+        },
+      ];
+    }
+
+    if (((event.detail && event.detail.length > 0) || (item.value && item.value.length > 0) ) &&  idx < filterColumns.length - 1) {
+      setTimeout(() => {
+        const nextEle: any = document.querySelector('#' + filterColumns[idx + 1].id);
+        nextEle && nextEle.focus();
+      }, 200);
+    }
+  };
+
+  const removeFilterItem = (itemId: string) => {
+    const index = filterList.findIndex((it: any) => it.id === itemId);
+    if (index >= 0) {
+      filterList.splice(index, 1);
+      filterList = [...filterList];
+    }
+
+    if (filterList.length === 0) {
+      filterList = [{ id: filterColumns[0].id, name: filterColumns[0].name, value: '' }];
+    }
+
+    const usedIndex = usedFilterColumns.indexOf(itemId);
+    if (usedIndex >= 0) {
+      usedFilterColumns.splice(usedIndex, 1);
+      usedFilterColumns = [...usedFilterColumns];
+    }
+  };
+
+  const removeAllFilterItems = () => {
+    usedFilterColumns = [];
     filterList = [
-      ...filterList,
       {
-        id: '',
-        name: '',
+        id: filterColumns[0].id,
+        name: filterColumns[0].name,
+        value: '',
       },
     ];
-
   };
 
   const onRemoveFilter = (event: any) => {
@@ -147,11 +224,8 @@
     if (filterList.length === 1) {
       return;
     }
-    const index = filterList.findIndex((it: any) => it.id === event.id);
-    if (index >= 0) {
-      filterList.splice(index, 1);
-      filterList = [...filterList];
-    }
+
+    removeFilterItem(event.id);
   };
 
   const onToggleDashboard = () => {
@@ -161,95 +235,74 @@
 
   const onSelectSearchField = () => {
     mappedFilterList = filterList
-      .filter((it: any) => !StringUtil.isEmpty(it.name))
+      .filter((it: any) => !StringUtil.isEmpty(it.value))
       .map((it: any) => {
         return {
           id: it.id,
-          name: T('TASK.LABEL.' + StringUtil.toUpperCaseWithUnderscore(it.id)) + ': ' + it.name,
+          name: it.name + ': ' + it.value,
         };
       });
 
-    // TODO
-
-    const param = convertArrayObjectToObject(filterList.map((it: any) => {
-      return {
-        [it.id]: it.name
-      }
-    }));
-
-
-    doAdvSearch(param);
+    doAdvSearch();
     onCloseSearch();
   };
 
-  const doAdvSearch = (param: any = {
-    taskName: '',
-    projectName: '',
-    assigneeName: '',
-    assignerName: '',
-    evaluatorName: '',
-    isCompleted: '',
-    isDelayDeadline: '',
-    createdDateFrom: '',
-    createdDateTo: ''
-  } ) => {
+  const getAdvSearchParam = () => {
+    let param = convertArrayObjectToObject(
+      filterList.map((it: any) => {
+        return {
+          [it.id]: it.value,
+        };
+      }),
+    );
+
+    if (SObject.isEmptyField(param) && StringUtil.isEmpty(textSearch)) {
+      param = { isCompleted: false };
+    }
+
+    return param;
+  };
+
+  const doAdvSearch = () => {
     const start = Date.now();
-    store.tskFindTasks({
-      menuPath,
-      departmentId: appStore.org.departmentId,
-      textSearch,
-      ...param
-    }).subscribe((res) => {
+    searchProgress$.next(true);
+    makeSearch$().subscribe((res) => {
       console.log(res);
       const end = Date.now();
       console.log('Took ', end - start);
       searchProgress$.next(false);
       didSearch(res, textSearch);
     });
-
-  }
+  };
   const onCloseFilter = (event: any) => {
-    const _filterList = SObject.clone(filterList);
-
-    const index = _filterList.findIndex((it: any) => it.id === event.detail.id);
-
-    if (index >= 0) {
-      _filterList.splice(index, 1);
-      filterList = [..._filterList];
-    }
-
-    if (filterList.length === 0) {
-      filterList = [{ id: '', name: '' }];
-    }
+    removeFilterItem(event.detail.id);
     onSelectSearchField();
   };
 
   const onCloseAllFilter = () => {
-    filterList = [{ id: '', name: '' }];
+    removeAllFilterItems();
     onSelectSearchField();
-  }
+  };
 
   let firstTimes = true;
   const registerSubscription = () => {
     taskSub = ViewStore.loadTableMetaData$('tsk_task').subscribe((res) => {
       const query = ViewStore.createReloadSubscription('tsk_task');
-
-      taskApolloClient$ = apolloClient.subscribe({
-        query,
-      });
-      taskApolloClient$.subscribe((res: any) => {
-        if (!firstTimes) {
-          reload();
-        }
-        firstTimes = false;
-      });
+      taskApolloClient$ = apolloClient
+        .subscribe({
+          query,
+        })
+        .subscribe((res: any) => {
+          if (!firstTimes) {
+            reload();
+          }
+          firstTimes = false;
+        });
     });
   };
 
-
-
   const didSearch = (res: any, textSearch = '') => {
-    if(!res.data) {
+    if (!res.data) {
       store.taskList$.next([]);
       view.fullCount$.next(0);
       return;
@@ -257,18 +310,35 @@
 
     if (res.data.payload.length === 0 && view.page > 1) {
       view.page--;
-      store.tskFindTasks({menuPath, departmentId: appStore.org.departmentId});
+      store.tskFindTasks({ menuPath, departmentId: appStore.org.departmentId });
     } else {
       store.taskList$.next(res.data.payload);
       view.fullCount$.next(res.data.fullCount);
-      mark(textSearch, res.data.payload);
+
+      mark(getKeyword(filterList, textSearch), res.data.payload);
     }
   };
 
+  const getKeyword = (filterList: any[], textSearch: string) => {
+    const keywordFilterList = filterList
+      .filter((it: any) => it.value !== '')
+      .map((it: any) => it.value)
+      .join('|');
 
+    let searchKeyword = textSearch;
+    if (!StringUtil.isEmpty(textSearch) && !StringUtil.isEmpty(keywordFilterList)) {
+      searchKeyword = textSearch + '|' + keywordFilterList;
+    } else if (!StringUtil.isEmpty(keywordFilterList)) {
+      searchKeyword = keywordFilterList;
+    }
+
+    return searchKeyword;
+  };
+
+  // TODO
   const reload = () => {
     const start = Date.now();
-    store.tskFindTasks({menuPath, departmentId: appStore.org.departmentId, isCompleted: false}).subscribe((res: any) => {
+    makeSearch$().subscribe((res: any) => {
       const end = Date.now();
       console.log('Reload Took ', end - start);
       didSearch(res);
@@ -303,16 +373,23 @@
     pageRef.loadSettings().then(() => {
       reload();
     });
+
+    needSelectId$.subscribe((id: string) => {
+      console.log('id: ', id);
+      if (id) {
+        selectedTask = {
+          id,
+        };
+        doSelect(of(1));
+      }
+    });
   });
 
   onDestroy(() => {
-    if (taskSub) {
-      taskSub.unsubscribe();
-    }
+    taskSub && taskSub.unsubscribe();
+    selectSub && selectSub.unsubscribe();
 
-    if (selectSub) {
-      selectSub.unsubscribe();
-    }
+    taskApolloClient$ && taskApolloClient$.unsubscribe();
   });
 
   const onAddNew = () => {
@@ -340,18 +417,21 @@
     }
   }
 
-  // @ts-ignore
-  $: {
-    // @ts-ignore
-    const needSelectId = $needSelectId$;
-    if (needSelectId) {
-      selectedTask = {
-        id: needSelectId,
-      };
-      doSelect(of(1));
-    }
-  }
+  //
+  // // @ts-ignore
+  // $: {
+  //   // @ts-ignore
+  //   const needSelectId = $needSelectId$;
+  //   if (needSelectId) {
+  //     selectedTask = {
+  //       id: needSelectId,
+  //     };
+  //     doSelect(of(1));
+  //   }
+  // }
 
+  // @ts-ignore
+  $: searchKeyword = getKeyword(filterList, textSearch);
 
   const mark = (textSearch: string, source: any) => {
     if (StringUtil.isEmpty(textSearch)) {
@@ -372,7 +452,6 @@
       return item;
     });
   };
-
 </script>
 
 <style lang="scss">
@@ -420,6 +499,52 @@
       }
     }
   }
+
+  .advanced-search {
+    height: 400px;
+    &__header {
+      display: flex;
+      justify-content: flex-end;
+      /*&:hover {*/
+      /*  .advanced-search__header__search {*/
+      /*    display: flex;*/
+      /*  }*/
+      /*}*/
+      &__search {
+        width: 70%;
+        display: none;
+        justify-content: flex-end;
+      }
+      &__close {
+        width: 30%;
+        display: flex;
+        justify-content: flex-end;
+        height: 5px;
+      }
+    }
+
+    &__body {
+      height: 360px;
+      overflow: auto;
+      &__content {
+        padding-bottom: 60px;
+        &__close-item {
+          font-size: 0.7rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          margin-right: 20px;
+          margin-left: 10px;
+          margin-bottom: 5px;
+        }
+      }
+    }
+
+    &__footer {
+      height: 25px;
+      text-align: center;
+    }
+  }
 </style>
 
 <section class="view-left-main" style="padding-top: 0px;">
@@ -431,7 +556,7 @@
     <Button
       on:click={onToggleDashboard}
       btnType={ButtonType.Custom}
-      title={$showDashboard$ ? T('COMMON.BUTTON.HIDE_DASHBOARD') : T('COMMON.BUTTON.SHOW_DASHBOARD')} />
+      text={$showDashboard$ ? T('COMMON.BUTTON.HIDE_DASHBOARD') : T('COMMON.BUTTON.SHOW_DASHBOARD')} />
   </div>
   <!--   // Add new-->
   <div class="horizontal-separator" style="margin-top: 5px;" />
@@ -447,30 +572,41 @@
       <div
         id="searchTaskWorkListId"
         class="left-dropdown-content"
-        style="color: black; font-weight: 400; overflow: auto; padding: 6px;">
-        <div style="display: flex; justify-content: flex-end;">
-          <i style="font-size: 1rem;" on:click|stopPropagation={onCloseSearch} class="fa fa-times" />
-        </div>
-
-        {#each filterList as item}
-          <div style="display: flex;">
-            <ContentFilter
-              on:search={(e) => onSearch(e, item)}
-              on:itemChange={(e) => onItemChangeFilter(e, item)}
-              list={filterColumns}
-              excludeList={usedFilterColumns}
-              selected={item}
-              bind:value={item.name} />
-            <i
-              on:click={() => onRemoveFilter(item)}
-              class="fa fa-times"
-              style="font-size: 0.7rem; display: flex; flex-direction: column; justify-content: flex-end; padding-left:
-              5px; margin-bottom: 5px;" />
+        style="color: black; font-weight: 400; padding: 6px;">
+        <div class="advanced-search">
+          <div class="advanced-search__header">
+            <div class="advanced-search__header__search">
+              <Button on:click={onSelectSearchField} btnType={ButtonType.Custom} text={T('COMMON.BUTTON.SEARCH')} />
+            </div>
+            <div class="advanced-search__header__close">
+              <i style="font-size: 1rem;" on:click|stopPropagation={onCloseSearch} class="primary fa fa-times" />
+            </div>
           </div>
-        {/each}
 
-        <div style="position: absolute; bottom: 6px; left: calc(50% - 60px);">
-          <Button on:click={onSelectSearchField} btnType={ButtonType.Custom} title="SEARCH" />
+          <div class="advanced-search__body">
+            <div class="advanced-search__body__content">
+              {#each filterList as item, index}
+                <div style="display: flex;">
+                  <ContentFilter
+                          on:emptyCount = {onEmptyCountSearchAdv}
+                    id={item.id}
+                    on:search={(e) => onSearch(e, item, index)}
+                    on:itemChange={(e) => onItemChangeFilter(e, item)}
+                    list={filterColumns}
+                    excludeList={usedFilterColumns}
+                    selected={item}
+                    bind:value={item.value} />
+                  <i
+                    on:click={() => onRemoveFilter(item)}
+                    class="primary advanced-search__body__content__close-item fa fa-times" />
+                </div>
+              {/each}
+            </div>
+          </div>
+
+          <div class="advanced-search__footer">
+            <Button on:click={onSelectSearchField} btnType={ButtonType.Custom} text={T('COMMON.BUTTON.SEARCH')} />
+          </div>
         </div>
       </div>
     </QuickSearch>
@@ -482,7 +618,7 @@
     <div style="margin-top: 6px;">
       <CloseableList
         directClose={true}
-        className="closeable-list__floating-controller"
+        className="closeable-list__floating-controller closeable-list-auto-height"
         on:close={onCloseFilter}
         on:closeAll={onCloseAllFilter}
         bind:list={mappedFilterList}
@@ -512,7 +648,11 @@
       {#if markedData}
         {#if markedData.length > 0}
           {#each markedData as task}
-            <TaskView task={SObject.convertFieldsToCamelCase(task)} {selectedTask} on:click={onClickTask} />
+            <TaskView
+              keyword={searchKeyword}
+              task={SObject.convertFieldsToCamelCase(task)}
+              {selectedTask}
+              on:click={onClickTask} />
           {/each}
         {:else}{T('TASK.MSG.NO_TASK_FOUND')}{/if}
       {:else}

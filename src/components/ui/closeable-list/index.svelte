@@ -5,14 +5,18 @@
   import Modal from '@/components/ui/modal/base';
   import { ModalType } from '@/components/ui/modal/types';
   import { ButtonPressed } from '../button/types';
-  import {T} from '@/lib/js/locale/locale';
+  import { T } from '@/lib/js/locale/locale';
+  import { API } from '@/lib/js/constants';
 
   export let confirmDelete = false;
   export let menuPath: string;
   export let id: string;
   export let directClose = false;
   export let className = '';
+  export let linkClass = '';
   export let disabled = false;
+  export let download = false;
+  export let savePath = '';
 
   export let customRender: string = undefined;
   export let list: any[] = [];
@@ -22,6 +26,8 @@
   let modalRef: any;
   let _data: any[] = [];
   let CustomRender: any;
+
+  const downloadUrl = API.BASE_URL + 'sys/download?filePath=';
 
   // @ts-ignore
   $: if (list && list.length > 0 && list[0].id) {
@@ -74,7 +80,6 @@
     list = _data;
   };
 
-
   const onCloseAll = () => {
     if (disabled) {
       return;
@@ -115,7 +120,7 @@
 <Modal id={'confirmModal' + id} {menuPath} modalType={ModalType.Confirm} bind:this={modalRef} />
 <div class="closeable-list {className} {disabled ? '' : 'closeable-list__hover'}">
   {#if _data && _data.length > 1}
-    <span title={T('COMMON.LABEL.CLOSE_ALL')} class="close-all"on:click={onCloseAll} >&times;</span>
+    <span title={T('COMMON.LABEL.CLOSE_ALL')} class="close-all" on:click={onCloseAll}>&times;</span>
   {/if}
   <div class="closeable-list__content ">
     <ul>
@@ -133,7 +138,9 @@
       {:else}
         {#each _data as row}
           <li on:click={() => onClickItem(row)}>
-            {row ? row.name : ''}
+            {#if download}
+              <a download href={downloadUrl + savePath + '/' + row.id + row.name}>{row ? row.name : ''}</a>
+            {:else}{row ? row.name : ''}{/if}
             <span class="close" on:click={(e) => onClose(e, row)}>&times;</span>
           </li>
         {/each}
@@ -141,11 +148,11 @@
     </ul>
   </div>
 
-  <div class="closeable-list__controller label-link">
+  <div class="closeable-list__controller {linkClass}">
     <slot />
   </div>
 
-  <div class="closeable-list__floating-controller label-link">
+  <div class="closeable-list__floating-controller {linkClass}">
     <slot name="floatingController" />
   </div>
 

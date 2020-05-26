@@ -16,6 +16,11 @@
   import { SObject } from '@/lib/js/sobject';
   import { fromPromise } from 'rxjs/internal-compatibility';
   import { Debug } from '@/lib/js/debug';
+  import Split from 'split-grid';
+  import { GUTTER_WIDTH } from '@/lib/js/constants';
+  import { settingsStore } from '@/store/settings';
+  import { Settings } from '@/model/settings';
+  import QuickSearch from '@/components/ui/input/quick-search';
 
   export let view: ViewStore;
   export let store: Store;
@@ -25,6 +30,8 @@
   const { orgData$, userData$, roleData$, selectedUserRole$ } = store;
 
   const completeSelecting$ = zip(userData$, roleData$);
+
+  let filterUserColumns: any[] = userColumns;
 
   let orgTreeViewRef: any;
   let userTableRef: any;
@@ -40,12 +47,20 @@
   const onOrgTreeClick = (event: any) => {
     const orgId = event.detail.treeNode.id;
     doOrgTreeClick(orgId.toString());
+
+    if(event.detail.treeNode.isParent) {
+      filterUserColumns = userColumns;
+    } else {
+      filterUserColumns = userColumns.filter((it: any) => it.name !== 'departmentName');
+    }
   };
 
   const doOrgTreeClick = (orgId: string) => {
     view.loading$.next(true);
+
     store.loadUserList(orgId);
     store.loadRoleList(orgId);
+
     selectedUser = null;
   };
 
@@ -65,10 +80,10 @@
         (res: any) => {
           if (res.data) {
             // @ts-ignore
-            roleData$.next(applyAssignedRole($roleData$, res.data));
+            roleData$.next(applyAssignedRole($roleData$, res.data, userTableRef.getSelectedRowCount()));
           } else {
             // @ts-ignore
-            roleData$.next(applyAssignedRole($roleData$, []));
+            roleData$.next(applyAssignedRole($roleData$, [], userTableRef.getSelectedRowCount()));
           }
 
           tick().then(() => {
@@ -220,14 +235,70 @@
   };
   // ============================== //CLIENT VALIDATION ==========================
 
+  const createSplit = () => {
+    // loadSettings
+    settingsStore.getUserSettings(`leftInsideFormAssignmentRole`, menuPath).then((res: any[]) => {
+      const found = res.find((it) => it.key === 'lastLeftWidth');
+
+      let leftWidth = '260px';
+      if (found) {
+        leftWidth = found.value;
+      }
+
+      let containerEle: any = document.querySelector('.view-container-inside-form-2-col');
+
+      containerEle.style['grid-template-columns'] = `${leftWidth} ${GUTTER_WIDTH}px auto`;
+    });
+
+    return Split({
+      columnGutters: [
+        {
+          track: 1,
+          element: document.querySelector('.left-grid-vertical-gutter-inside-form'),
+        },
+      ],
+      onDragEnd: (direction: any, track: number) => {
+        let gridEle: any = document.querySelector('.view-container-inside-form-2-col');
+
+        const [leftWidth] = gridEle.style['grid-template-columns'].split(' ');
+
+        settingsStore.saveUserSettings(
+          new Settings({
+            menuPath: menuPath,
+            controlId: `leftInsideFormAssignmentRole`,
+            keys: ['left'],
+            values: [leftWidth],
+          }),
+        );
+      },
+    });
+  };
+
   onMount(() => {
+    const splitter = createSplit();
     setTimeout(() => {
       // create check and button header
-      roleGridRef.createToggleCheckHeader(1);
-      roleGridRef.createToggleCheckHeader(4);
-      roleGridRef.createCheckboxHeader(1);
-      roleGridRef.createCheckboxHeader(4);
+      roleGridRef && roleGridRef.createToggleCheckHeader(1);
+      roleGridRef && roleGridRef.createToggleCheckHeader(4);
+      roleGridRef && roleGridRef.createCheckboxHeader(1);
+      roleGridRef && roleGridRef.createCheckboxHeader(4);
     }, 1000);
+
+    const completeSub = completeSelecting$.subscribe((res) => {
+      view.loading$.next(false);
+      // @ts-ignore
+      const selectedUserRole = $selectedUserRole$;
+      setTimeout(() => {
+        if (userTableRef && selectedUserRole) {
+          userTableRef.selectRowById(selectedUserRole.id);
+        }
+      });
+    });
+
+    return () => {
+      completeSub.unsubscribe();
+      splitter.destroy();
+    };
   });
 
   onDestroy(() => {
@@ -242,16 +313,7 @@
     const selectedUserRole = $selectedUserRole$;
     if (selectedUserRole) {
       orgTreeViewRef.selectNodeById(selectedUserRole.defaultOwnerOrgId, true);
-
-      setTimeout(() => {
-        userTableRef.selectRowById(selectedUserRole.id);
-      }, 100);
     }
-  }
-
-  // @ts-ignore
-  $: if ($completeSelecting$) {
-    view.loading$.next(false);
   }
 
   /**
@@ -293,8 +355,8 @@
   {/if}
 </section>
 <section class="view-content-main">
-  <div class="row">
-    <div class="default-border col-sm-24 col-md-8">
+  <main class="view-container-inside-form-2-col">
+    <div class="bg-primary default-border">
       <TreeView
         data={$orgData$}
         bind:this={orgTreeViewRef}
@@ -303,38 +365,44 @@
         <div slot="label">{T('COMMON.LABEL.ORG')}:</div>
       </TreeView>
     </div>
+    <div class="left-grid-vertical-gutter-inside-form" />
+    <div class="bg-primary">
+      <div class="row">
+        <div class="default-border col-sm-24 col-md-12">
+          <SelectableTable
+            columns={filterUserColumns}
+            data={$userData$}
+            {menuPath}
+            bind:this={userTableRef}
+            on:selection={onSelectionUser}
+            id={'userTable' + view.getViewName() + 'Id'}>
+            <span>{T('COMMON.LABEL.USER_LIST')}:</span>
 
-    <div class="default-border col-sm-24 col-md-8 px-sm-0 px-md-1 py-sm-1 py-md-0">
-      <SelectableTable
-        columns={userColumns}
-        data={$userData$}
-        {menuPath}
-        bind:this={userTableRef}
-        on:selection={onSelectionUser}
-        id={'userTable' + view.getViewName() + 'Id'}>
-        <span>{T('COMMON.LABEL.USER_LIST')}:</span>
-        <span slot="selectAll" let:selectAll>
-          <Button btnType={ButtonType.SelectAll} on:click={selectAll} />
-        </span>
+            <span style="display: flex; padding-bottom: 6px;" slot="header" let:selectAll let:unSelectAll let:toggleSelection let:filter>
+              <div style="width: 100%;">
+                <QuickSearch on:input={(e)=>filter(e.target.value)}></QuickSearch>
+              </div>
+              <div style="height: 20px; white-space: nowrap; margin-top: 10px; margin-left: 5px;" class="bg-green">
+                <Button title={T('COMMON.BUTTON.SELECT_ALL')} btnType={ButtonType.SelectAll} on:click={selectAll}></Button>
+                <Button title={T('COMMON.BUTTON.UNSELECT_ALL')} btnType={ButtonType.UnSelectAll} on:click={unSelectAll} />
+                <Button title={T('COMMON.BUTTON.TOGGLE_SELECTION')} btnType={ButtonType.ToggleSelection} on:click={toggleSelection} />
+              </div>
 
-        <span slot="unSelectAll" let:unSelectAll>
-          <Button btnType={ButtonType.UnSelectAll} on:click={unSelectAll} />
-        </span>
+            </span>
+          </SelectableTable>
+        </div>
 
-        <span slot="toggleSelection" let:toggleSelection>
-          <Button btnType={ButtonType.ToggleSelection} on:click={toggleSelection} />
-        </span>
-      </SelectableTable>
+        <div class="default-border col-sm-24 col-md-12">
+          <ExcelGrid
+            columns={roleColumns}
+            data={$roleData$}
+            {menuPath}
+            bind:this={roleGridRef}
+            id={'roleGrid' + view.getViewName() + 'Id'}>
+            <div slot="label">{T('COMMON.LABEL.ROLE_LIST')}:</div>
+          </ExcelGrid>
+        </div>
+      </div>
     </div>
-    <div class="default-border col-sm-24 col-md-8 ">
-      <ExcelGrid
-        columns={roleColumns}
-        data={$roleData$}
-        {menuPath}
-        bind:this={roleGridRef}
-        id={'roleGrid' + view.getViewName() + 'Id'}>
-        <div slot="label">{T('COMMON.LABEL.ROLE_LIST')}:</div>
-      </ExcelGrid>
-    </div>
-  </div>
+  </main>
 </section>

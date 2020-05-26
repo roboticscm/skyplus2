@@ -4,13 +4,12 @@
   import { applyLayout } from './helper';
   import { appStore } from '@/store/app';
   // import { settingsStore } from '@/store/settings';
-  import { App } from '@/lib/js/constants';
+  import { App, GUTTER_WIDTH } from '@/lib/js/constants';
   import { AppStore } from '@/store/app';
 
   const { isLogged$ } = AppStore;
 
   const defaultHeaderHeight = '96px';
-  const gutterHeight = '7px';
 
   onMount(async () => {
     Split({
@@ -33,7 +32,7 @@
           // headerHeight = $isLogged$ ? defaultHeaderHeight : '46px';
           headerHeight = defaultHeaderHeight;
           const gridEle: any = document.querySelector('.layout-container');
-          gridEle.style['grid-template-rows'] = `${headerHeight} ${gutterHeight} auto`;
+          gridEle.style['grid-template-rows'] = `${headerHeight} ${GUTTER_WIDTH}px auto`;
           // applyLayout();
         }
         // settingsStore.saveUserSettings({
@@ -48,7 +47,7 @@
     // apply main layout - header height
     const gridEle: any = document.querySelector('.layout-container');
     appStore.theme$.subscribe((theme) => {
-      gridEle.style['grid-template-rows'] = `${defaultHeaderHeight} 10px auto`;
+      gridEle.style['grid-template-rows'] = `${defaultHeaderHeight} ${GUTTER_WIDTH}px auto`;
 
       // if (theme) {
       //   gridEle.style['grid-template-rows'] = `${defaultHeaderHeight} 10px auto`;

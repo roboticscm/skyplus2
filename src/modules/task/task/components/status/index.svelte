@@ -72,11 +72,13 @@
     <div style="width: 50%;">{T('COMMON.LABEL.END')}: {SDate.convertMillisecondToDateTimeString(data.endTime)}</div>
   </div>
 
+  <div style="overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px; margin-top: 5px;" title={data.note}>
+    {@html data.note}
+  </div>
+
   {#if data.status}
     <div>{data.status}</div>
   {:else}{T('TASK.MSG.NO_STATUS')}{/if}
-
-  <div>{data.note}</div>
 
   <div style="display:flex; justify-content: space-between;">
     <div>
@@ -89,7 +91,8 @@
       {#if data.submitStatus === 1}
         <CancelSubmitIcon />
       {:else}
-        <SubmitIcon />
+        <!--        <SubmitIcon />-->
+        <i class="primary fa fa-arrow-up" style="font-size: 1.3rem;" />
       {/if}
     </div>
     <div class="label-link status-wrapper__edit" on:click|stopPropagation={() => onEdit(data)}>

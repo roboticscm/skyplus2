@@ -19,7 +19,7 @@
   export let defaultStartDate = new Date();
   export let defaultEndDate = new Date();
   export let timePicker = true;
-  export let value: number;
+  export let value: number | null = null;
 
   const dispatch = createEventDispatcher();
 
@@ -144,7 +144,7 @@
   export const clearDate = () => {
     window['$'](inputRef).val('');
     currentStartDate = null;
-    value = undefined;
+    value = null;
     dispatch('change', value);
   };
 

@@ -31,11 +31,11 @@
     {disabled}
     class="{checked !== undefined ? 'check' : ''}
     {rightCheck ? 'right' : ''}
-    {className} floating__input"
+     floating__input {className}"
     bind:value
     {autocomplete}
     bind:this={inputRef}
-    {placeholder} />
+    {placeholder} required/>
   <label class="floating__label" data-content={placeholder} />
   {#if checked !== undefined}
     <input

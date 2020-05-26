@@ -16,6 +16,7 @@ export class AppStore {
   org: any = {};
 
   theme$ = new BehaviorSubject<any>(null);
+  theme: any = {};
 
   navBarConfig$ = new BehaviorSubject<NavBarConfig>(new NavBarConfig());
 

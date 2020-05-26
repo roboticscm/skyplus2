@@ -35,6 +35,7 @@
   let newestNotificationList: Notification[] = [];
   const messageTone = require('../../../../public/audio/message-tone.ogg').default;
   let firstTimes = true;
+  let prevTotalMessagesCount = 0;
 
   const drawingList: string[] = [];
 
@@ -100,6 +101,7 @@
     dataSub = notificationStore.data$.subscribe((res: Notification[]) => {
       if (beforeList && !firstTimes) {
         const { addArray } = SObject.getDiffRowObjectArray2(beforeList, res, ['id']);
+
         newestNotificationList = [...newestNotificationList, ...addArray];
         calcPosition();
       } else {
@@ -118,11 +120,16 @@
       countChat = countUnreadMessage(chat);
       countFunctional = countUnfinishedMessage(functional);
 
-      if (countAlarm + countChat + countFunctional > 0) {
-        if (!firstTimes) {
-          // messageToneRef.play();
+      const totalMessagesCount = countAlarm + countChat + countFunctional;
+      if (totalMessagesCount > 0) {
+        if (!firstTimes && totalMessagesCount > prevTotalMessagesCount) {
+          messageToneRef && messageToneRef.play();
         }
       }
+
+      console.log(totalMessagesCount, prevTotalMessagesCount);
+
+      prevTotalMessagesCount = totalMessagesCount;
     });
   };
 

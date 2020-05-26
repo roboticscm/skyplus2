@@ -1,5 +1,6 @@
 // @ts-ignore
 import { Http } from '@/lib/js/http';
+import { isDebugMode } from '@/lib/js/debug';
 
 let I18N: any[] = [];
 
@@ -127,12 +128,11 @@ const defaultValue = (key: string) => {
 };
 
 export const T = (fullKey: string) => {
-  // return fullKey;
   if (fullKey.includes('.') && !fullKey.includes(' ')) {
     const split = fullKey.split('.');
     if (split.length === 3) {
       const [cate, type, key] = split;
-      return CATEGORIES_MAP.get(cate)[type][key] || `#${defaultValue(key)}`;
+      return CATEGORIES_MAP.get(cate)[type][key] || (isDebugMode() ? fullKey : `#${defaultValue(key)}`);
     } else {
       return 'Invalid Key Format';
     }

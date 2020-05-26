@@ -21,10 +21,20 @@
   let needSelectIdSub, needHighlightIdSub, selectDataSub: Subscription;
 
   // =========================SUBSCRIPTION===========================
+  let firstTimes = true;
   const subscription = () => {
-    apolloClientList$ = apolloClient.subscribe({
-      query: ViewStore.createReloadSubscription(view.tableName),
-    });
+    apolloClientList$ = apolloClient
+      .subscribe({
+        query: ViewStore.createReloadSubscription(view.tableName),
+      })
+      .subscribe((dataList) => {
+        if (dataList) {
+          if (!firstTimes) {
+            reload();
+          }
+          firstTimes = false;
+        }
+      });
 
     needSelectIdSub = view.needSelectId$.subscribe((id: string) => {
       if (tableRef && id) {
@@ -61,21 +71,6 @@
 
   // =========================HELPER FUNCTION===========================
 
-  // =========================REACTIVE===========================
-  let firstTimes = true;
-  // @ts-ignore
-  $: {
-    // @ts-ignore
-    const dataList = $apolloClientList$;
-    if (dataList) {
-      if (!firstTimes) {
-        reload();
-      }
-      firstTimes = false;
-    }
-  }
-  // =========================//REACTIVE===========================
-
   // =========================EVENT HANDLE===========================
   // const onSelection = (event) => {
   //   if (event.detail && event.detail.length > 0) {
@@ -104,9 +99,10 @@
   });
 
   onDestroy(() => {
-    needSelectIdSub.unsubscribe();
-    needHighlightIdSub.unsubscribe();
-    selectDataSub.unsubscribe();
+    needSelectIdSub && needSelectIdSub.unsubscribe();
+    needHighlightIdSub && needHighlightIdSub.unsubscribe();
+    selectDataSub && selectDataSub.unsubscribe();
+    apolloClientList$ && apolloClientList$.unsubscribe();
   });
   // =========================//HOOK===========================
 </script>

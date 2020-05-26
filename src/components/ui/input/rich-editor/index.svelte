@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { T } from '@/lib/js/locale/locale';
+  import { getThemeColors } from '@/lib/js/color';
 
   export let className = 'rich-editor';
   export let height = '100px';
@@ -66,6 +67,12 @@
     if (iframeRef) {
       iframeRef.height = height;
       iframeRef.contentWindow.document.addEventListener('input', onEdit);
+      const body: any = iframeRef.contentWindow.document.getElementsByTagName('body')[0];
+      body.style.fontFamily = 'Roboto';
+      body.style.fontSize = '15px';
+
+      const themeColors = getThemeColors();
+      body.style.color = themeColors[3]['--primary'];
     }
 
     window.addEventListener('focus', windowFocussed, true);

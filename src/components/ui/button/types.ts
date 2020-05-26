@@ -22,6 +22,8 @@ export enum ButtonType {
   CancelSubmit,
   Approve,
   CancelApprove,
+  Assign,
+  HoldAssign
 }
 
 export enum ButtonPressed {
@@ -46,4 +48,6 @@ export enum ButtonId {
   CancelSubmit = 'btnCancelSubmit',
   Approve = 'btnApprove',
   CancelApprove = 'btnCancelApprove',
+  Assign='btnAssign',
+  HoldAssign='btnHoldAssign'
 }

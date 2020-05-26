@@ -6,9 +6,11 @@
   import { SObject } from '@/lib/js/sobject';
   import { appStore } from '@/store/app';
   import { User } from '@/model/user';
+  import { markStringSearch } from '../../../../../lib/js/util';
 
   export let task: Task;
   export let selectedTask: Task = undefined;
+  export let keyword = '';
 
   const { user$ } = appStore;
   const user = user$.value;
@@ -59,7 +61,9 @@
     }
     const tmp = SObject.clone(humanNames);
     tmp.splice(index, 1);
-    return [humanNames[index], tmp];
+
+    const markName = markStringSearch(humanNames[index], keyword, true);
+    return [markName, tmp];
   };
 
   let moreAssignees: string[] = [];
@@ -97,7 +101,7 @@
     border-radius: $default-border-radius;
     width: 100%;
     &:hover {
-      color: var(--my-active-color);
+      border: 1px solid var(--hover-border-color);
       cursor: pointer;
     }
     &__task {
@@ -150,8 +154,8 @@
     }
 
     &.selected {
+      border: 1px solid var(--active-border-color);
       background: var(--selection-bgcolor);
-      border: 1px solid var(--my-active-color);
     }
 
     .horizontal-separator {
@@ -165,14 +169,16 @@
   class="task-wrapper {selectedTask && task.id.toString() === selectedTask.id.toString() ? 'selected' : ''}"
   on:click={onClick}>
   <div class="task-wrapper__task">
-    <div title={T('TASK.LABEL.TASK_NAME') + ': ' + task.name} class="task-wrapper__task__name">{@html task.name}</div>
-    <div title={T('TASK.LABEL.PROJECT')} class="task-wrapper__project">
-      ({task.projectName || T('TASK.LABEL.NO_PROJECT')})
+    <div title={T('TASK.LABEL.TASK_NAME') + ': ' + task.name} class="task-wrapper__task__name">
+      {@html task.name}
+    </div>
+    <div title={T('TASK.LABEL.PROJECT')} class="task-wrapper__project" style="margin-bottom: 5px;">
+      ({@html task.projectName || T('TASK.LABEL.NO_PROJECT')})
     </div>
 
     <div class="task-wrapper__task__item">
-      <span class="task-wrapper__task__item__assignee" title={T('TASK.LABEL.ASSIGNEE')}>
-        {firstAssignee ? firstAssignee : T('TASK.MSG.NO_ASSIGNEE')}
+      <span class="task-assignee task-wrapper__task__item__assignee" title={T('TASK.LABEL.ASSIGNEE')}>
+        {@html firstAssignee ? firstAssignee : T('TASK.MSG.NO_ASSIGNEE')}
         {#if moreAssignees && moreAssignees.length > 0}
           <span title={moreAssignees.join(', ')}>(+{moreAssignees.length})</span>
         {/if}
@@ -183,26 +189,27 @@
     <div class="horizontal-separator" />
 
     <div class="task-wrapper__task__item">
-      <span title={T('TASK.LABEL.EVALUATOR')}>
-        {firstAssigner ? firstAssigner : T('TASK.MSG.NO_ASSIGNER')}
+      <span class="task-assigner" title={T('TASK.LABEL.ASSIGNER')}>
+        {@html firstAssigner ? firstAssigner : T('TASK.MSG.NO_ASSIGNER')}
         {#if moreAssigners && moreAssigners.length > 0}
           <span title={moreAssigners.join(', ')}>(+{moreAssigners.length})</span>
         {/if}
       </span>
-      <span title={T('TASK.LABEL.LAST_STATUS')} class="task-wrapper__task__status">
-        {task.lastStatusName[0] || T('TASK.LABEL.NO_STATUS')}
-      </span>
+      <span title={T('TASK.LABEL.PRIORITY')}>{task.priorityName ? task.priorityName : T('TASK.MSG.NO_PRIORITY')}</span>
     </div>
 
     <div class="task-wrapper__task__item">
-      <span title={T('TASK.LABEL.ASSIGNER')}>
-        {firstEvaluator ? firstEvaluator : T('TASK.MSG.NO_EVALUATOR')}
+      <span class="task-evaluator" title={T('TASK.LABEL.EVALUATOR')}>
+        {@html firstEvaluator ? firstEvaluator : T('TASK.MSG.NO_EVALUATOR')}
         {#if moreEvaluators && moreEvaluators.length > 0}
           <span title={moreEvaluators.join(', ')}>(+{moreEvaluators.length})</span>
         {/if}
       </span>
 
-      <span title={T('TASK.LABEL.PRIORITY')}>{task.priorityName ? task.priorityName : T('TASK.MSG.NO_PRIORITY')}</span>
+      <span title={T('TASK.LABEL.LAST_STATUS')} class="task-wrapper__task__status">
+        {task.lastStatusName[0] || T('TASK.LABEL.NO_STATUS')}
+      </span>
+
     </div>
 
     <div style="min-height: 10px; height: 10px;" />

@@ -7,16 +7,18 @@ import { Language } from '@/modules/sys/language/model';
 import OwnerOrgStore from '@/modules/sys/owner-org/store';
 import { OwnerOrg } from '@/modules/sys/owner-org/model';
 import { Http } from '@/lib/js/http';
+import { SJSON } from '@/lib/js/sjson';
+import {StringUtil} from "@/lib/js/string-util";
 
 const BASE_URL = 'sys/locale-resource/';
 
-export class Store {
-  usedLanguages$ = new BehaviorSubject<Language[]>([]);
-  companies$ = new BehaviorSubject<OwnerOrg[]>([]);
+export default class Store {
+  static usedLanguages$ = new BehaviorSubject<Language[]>([]);
+  static companies$ = new BehaviorSubject<OwnerOrg[]>([]);
 
   constructor(public viewStore: ViewStore) {}
 
-  sysGetUsedLanguages() {
+  static sysGetUsedLanguages() {
     RxHttp.get(`${BASE_URL}${toSnackCase('sysGetUsedLanguages')}`)
       .pipe(take(1))
       .subscribe((res) => {
@@ -36,13 +38,13 @@ export class Store {
     });
   }
 
-  getCompaniesList = () => {
+  static getCompaniesList() {
     OwnerOrgStore.sysGetCompanyList()
       .pipe(take(1))
       .subscribe((res) => {
         this.companies$.next(res.data);
       });
-  };
+  }
 
   static sysGetAllLanguages(includeDeleted: boolean, includeDisabled: boolean) {
     return Http.get(`${BASE_URL}${toSnackCase('sysGetAllLanguages')}`, {
@@ -67,5 +69,9 @@ export class Store {
       page,
       pageSize,
     });
+  }
+
+  static saveOrUpdateOrDelete(obj: any) {
+    return RxHttp.post(`${BASE_URL}${toSnackCase('saveOrUpdateOrDelete')}`, StringUtil.removeHtmlTag( SJSON.stringify(obj)));
   }
 }

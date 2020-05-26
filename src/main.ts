@@ -18,7 +18,7 @@ import { OrgStore } from '@/store/org';
 import { SObject } from '@/lib/js/sobject';
 import { AppStore, appStore } from '@/store/app';
 import { menuStore } from '@/store/menu';
-import Color, { getThemeColors } from '@/lib/js/color';
+import { Color, getThemeColors } from '@/lib/js/color';
 import {
   getCompanyId,
   getLanguage,
@@ -68,7 +68,7 @@ const startApp = () => {
 };
 
 export const applyAlphaColor = (alpha: number) => {
-  Color.applyApha(getThemeColors(), alpha);
+  Color.applyAlpha(getThemeColors(), alpha);
 };
 
 export const loadMenuAndUserSettings = (companyId) => {
