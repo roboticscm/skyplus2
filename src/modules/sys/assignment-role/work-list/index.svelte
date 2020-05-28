@@ -9,6 +9,7 @@
   import { skip } from 'rxjs/operators';
   import { T } from '@/lib/js/locale/locale';
   import { Store } from '../store';
+  import QuickSearch from '@/components/ui/input/quick-search';
 
   export let view: ViewStore;
   export let store: Store;
@@ -144,7 +145,13 @@
       {menuPath}
       showRowNumber={false}
       data={$dataList$}
-      id={'userTableWorkList' + view.getViewName() + 'Id'} />
+      id={'userTableWorkList' + view.getViewName() + 'Id'}>
+      <span style="display: flex; padding-bottom: 6px;" slot="header" let:filter>
+        <div style="width: 100%;">
+          <QuickSearch on:input={(e) => filter(e.target.value)} />
+        </div>
+      </span>
+    </SelectableTable>
   </div>
   <div style="margin-top: 1px;">
     <Pagination

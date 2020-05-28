@@ -49,7 +49,15 @@
 </script>
 
 <div class="quick-search-wrapper">
-  <input {title} on:input required use:useAction type="search" class="quick-search-input" bind:this={inputRef} {placeholder} />
+  <input
+    {title}
+    on:input
+    required
+    use:useAction
+    type="search"
+    class="quick-search-input"
+    bind:this={inputRef}
+    {placeholder} />
   <!--  <i class="search-icon fa fa-search" />-->
   <div class="search-icon">
     <SearchIcon />

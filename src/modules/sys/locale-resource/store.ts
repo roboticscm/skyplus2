@@ -8,7 +8,7 @@ import OwnerOrgStore from '@/modules/sys/owner-org/store';
 import { OwnerOrg } from '@/modules/sys/owner-org/model';
 import { Http } from '@/lib/js/http';
 import { SJSON } from '@/lib/js/sjson';
-import {StringUtil} from "@/lib/js/string-util";
+import { StringUtil } from '@/lib/js/string-util';
 
 const BASE_URL = 'sys/locale-resource/';
 
@@ -72,6 +72,9 @@ export default class Store {
   }
 
   static saveOrUpdateOrDelete(obj: any) {
-    return RxHttp.post(`${BASE_URL}${toSnackCase('saveOrUpdateOrDelete')}`, StringUtil.removeHtmlTag( SJSON.stringify(obj)));
+    return RxHttp.post(
+      `${BASE_URL}${toSnackCase('saveOrUpdateOrDelete')}`,
+      StringUtil.removeHtmlTag(SJSON.stringify(obj)),
+    );
   }
 }

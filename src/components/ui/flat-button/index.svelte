@@ -10,14 +10,14 @@
   export let id: string = undefined;
   export let type = 'button';
   export let text = '';
-  export let title= '';
+  export let title = '';
   export let btnType = ButtonType.Custom;
   export let icon = '';
   export let className = 'btn-flat';
   export let disabled = false;
   export let running = false;
   export let action: any = undefined;
-  export let showIcon = false;
+  export let showIcon = true;
   export let dropdownList: ButtonDropdown[] = [];
   export let uppercase = true;
   // export let dropdownList: ButtonDropdown[] = [
@@ -25,6 +25,8 @@
   //   { id: 'ITEM2', name: 'Demo Item2', useFontIcon: true, fontIcon: '<i class="fa fa-adjust"></i>' },
   //   { id: 'ITEM3', name: 'Demo Item3', useFontIcon: true, fontIcon: '<i class="fa fa-allergies"></i>' },
   // ];
+
+  let IconComponent: any = undefined;
 
   const dispatch = createEventDispatcher();
   let btnRef: any;
@@ -55,22 +57,22 @@
         preset(undefined, 'RESET', '<i class="fa fa-redo-alt"></i>', 'btn-flat');
         break;
       case ButtonType.AddNew:
-        preset(ButtonId.AddNew, 'ADD_NEW', '<i class="fa fa-plus"></i>', 'btn-flat');
+        preset(ButtonId.AddNew, 'ADD_NEW', 'add-new', 'btn-flat');
         break;
       case ButtonType.Save:
-        preset(ButtonId.Save, 'SAVE', '<i class="fa fa-save"></i>', 'btn-flat');
+        preset(ButtonId.Save, 'SAVE', 'save', 'btn-flat');
         break;
       case ButtonType.Delete:
-        preset(ButtonId.Delete, 'DELETE', '<i class="fa fa-trash-alt"></i>', 'btn-flat');
+        preset(ButtonId.Delete, 'DELETE', 'delete', 'btn-flat');
         break;
       case ButtonType.Edit:
-        preset(ButtonId.Edit, 'EDIT', '<i class="fa fa-edit"></i>', 'btn-flat');
+        preset(ButtonId.Edit, 'EDIT', 'edit', 'btn-flat');
         break;
       case ButtonType.Update:
-        preset(ButtonId.Update, 'UPDATE', '<i class="fa fa-save"></i>', 'btn-flat');
+        preset(ButtonId.Update, 'UPDATE', 'update', 'btn-flat');
         break;
       case ButtonType.Config:
-        preset(ButtonId.Config, 'CONFIG', '<i class="fa fa-cog"></i>', 'btn-flat');
+        preset(ButtonId.Config, 'CONFIG', 'config', 'btn-flat');
         break;
       case ButtonType.TrashRestore:
         preset(ButtonId.TrashRestore, 'TRASH_RESTORE', '<i class="fa fa-trash-restore-alt"></i>', 'btn-flat');
@@ -97,24 +99,41 @@
         preset(undefined, undefined, '<i class="fa fa-toggle-on"></i>', 'btn-small-primary');
         break;
       case ButtonType.Submit:
-        preset(undefined, 'SUBMIT', '<i  class="fa fa-check"></i>', 'btn-flat');
+        preset(ButtonId.Submit, 'SUBMIT', 'submit', 'btn-flat');
         break;
       case ButtonType.CancelSubmit:
-        preset(undefined, 'CANCEL_SUBMIT', '', 'btn-flat');
+        preset(ButtonId.CancelSubmit, 'CANCEL_SUBMIT', 'cancel-submit', 'btn-flat');
         break;
       case ButtonType.Approve:
-        preset(undefined, 'APPROVE', '<i class="fa fa-check"></i>', 'btn-flat');
+        preset(ButtonId.Approve, 'APPROVE', '<i class="fa fa-check"></i>', 'btn-flat');
         break;
       case ButtonType.CancelApprove:
-        preset(undefined, 'CANCEL_APPROVE', '', 'btn-flat');
+        preset(ButtonId.CancelApprove, 'CANCEL_APPROVE', '', 'btn-flat');
         break;
       case ButtonType.Assign:
-        preset(undefined, 'ASSIGN', '', 'btn-flat');
+        preset(ButtonId.Assign, 'ASSIGN', 'assign', 'btn-flat');
         break;
-      case ButtonType.HoldAssign:
-        preset(undefined, 'HOLD_ASSIGN', '', 'btn-flat');
+      case ButtonType.UnAssign:
+        preset(ButtonId.UnAssign, 'UN_ASSIGN', 'un-assign', 'btn-flat');
+        break;
+
+      case ButtonType.Hold:
+        preset(ButtonId.Hold, 'HOLD', 'hold', 'btn-flat');
+        break;
+      case ButtonType.UnHold:
+        preset(ButtonId.UnHold, 'UN_HOLD', 'un-hold', 'btn-flat');
+        break;
+
+      case ButtonType.Dashboard:
+        preset(ButtonId.Dashboard, 'DASHBOARD', 'dashboard', 'btn-flat');
         break;
       default:
+    }
+
+    if (icon && !icon.includes('<')) {
+      import(`@/icons/${icon}.svelte`).then((res: any) => {
+        IconComponent = res.default;
+      });
     }
   }
 
@@ -140,7 +159,7 @@
 </script>
 
 <button
-        {title}
+  {title}
   use:useAction
   bind:this={btnRef}
   {id}
@@ -152,7 +171,12 @@
   {#if running}
     <i class="fa fa-spinner fa-spin" />
   {:else if showIcon}
-    {@html icon}
+    {#if icon && icon.includes('<')}
+      {@html icon}
+    {:else}
+      <svelte:component this={IconComponent} className={disabled ? 'readonly-svg-color' : ''} />
+      &nbsp; &nbsp;
+    {/if}
   {/if}
   {text}
   {#if dropdownList && dropdownList.length > 0}

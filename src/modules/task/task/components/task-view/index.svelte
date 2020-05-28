@@ -7,6 +7,7 @@
   import { appStore } from '@/store/app';
   import { User } from '@/model/user';
   import { markStringSearch } from '../../../../../lib/js/util';
+  import WorkerIcon from '@/icons/worker.svelte';
 
   export let task: Task;
   export let selectedTask: Task = undefined;
@@ -123,7 +124,7 @@
         left: 0;
         bottom: 0px;
         height: 4px;
-        background: rgba(0, 0, 0, 0.3);
+        background: var(--process-color1);
       }
 
       &__assignee-time {
@@ -131,7 +132,7 @@
         left: 0px;
         bottom: 0px;
         height: 4px;
-        background: rgba(255, 0, 0, 0.5);
+        background: var(--process-color2);
       }
 
       &__item {
@@ -173,11 +174,15 @@
       {@html task.name}
     </div>
     <div title={T('TASK.LABEL.PROJECT')} class="task-wrapper__project" style="margin-bottom: 5px;">
-      ({@html task.projectName || T('TASK.LABEL.NO_PROJECT')})
+      (
+      {@html task.projectName || T('TASK.LABEL.NO_PROJECT')}
+      )
     </div>
 
     <div class="task-wrapper__task__item">
-      <span class="task-assignee task-wrapper__task__item__assignee" title={T('TASK.LABEL.ASSIGNEE')}>
+      <span class="task-wrapper__task__item__assignee" title={T('TASK.LABEL.ASSIGNEE')}>
+
+        <WorkerIcon />
         {@html firstAssignee ? firstAssignee : T('TASK.MSG.NO_ASSIGNEE')}
         {#if moreAssignees && moreAssignees.length > 0}
           <span title={moreAssignees.join(', ')}>(+{moreAssignees.length})</span>
@@ -189,7 +194,8 @@
     <div class="horizontal-separator" />
 
     <div class="task-wrapper__task__item">
-      <span class="task-assigner" title={T('TASK.LABEL.ASSIGNER')}>
+      <span title={T('TASK.LABEL.ASSIGNER')}>
+        <i class="fa fa-user-edit" />
         {@html firstAssigner ? firstAssigner : T('TASK.MSG.NO_ASSIGNER')}
         {#if moreAssigners && moreAssigners.length > 0}
           <span title={moreAssigners.join(', ')}>(+{moreAssigners.length})</span>
@@ -199,7 +205,8 @@
     </div>
 
     <div class="task-wrapper__task__item">
-      <span class="task-evaluator" title={T('TASK.LABEL.EVALUATOR')}>
+      <span title={T('TASK.LABEL.EVALUATOR')}>
+        <i class="fa fa-user-check" />
         {@html firstEvaluator ? firstEvaluator : T('TASK.MSG.NO_EVALUATOR')}
         {#if moreEvaluators && moreEvaluators.length > 0}
           <span title={moreEvaluators.join(', ')}>(+{moreEvaluators.length})</span>

@@ -19,11 +19,11 @@ export const roleColumns = [
 ];
 
 const isAllUsersTheSameRoles = (assignedRoles: any[], itemCount: number) => {
-  if(assignedRoles.length !== itemCount) {
+  if (assignedRoles.length !== itemCount) {
     return false;
   }
 
-  return  [...new Set(assignedRoles.map((it) => SJSON.stringify(it.roleIds)))].length === 1;
+  return [...new Set(assignedRoles.map((it) => SJSON.stringify(it.roleIds)))].length === 1;
 };
 
 export const applyAssignedRole = (roles: any[], assignedRoles: any[], itemCount: number) => {

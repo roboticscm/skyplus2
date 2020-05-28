@@ -52,4 +52,10 @@ export class TableUtilStore {
       restoreIds,
     });
   }
+
+  static jsonQuery(query: string) {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('jsonQuery')}`, {
+      query,
+    });
+  }
 }

@@ -167,14 +167,14 @@ export class SObject {
   }
 
   static removeHtmlTagArrayObject(arrObj) {
-    if(!arrObj) {
+    if (!arrObj) {
       return arrObj;
     }
     const copyArrObj = this.clone(arrObj);
-    for(let row of copyArrObj) {
+    for (let row of copyArrObj) {
       console.log(row);
-      for(let field in row) {
-        if(typeof row[field] === 'string') {
+      for (let field in row) {
+        if (typeof row[field] === 'string') {
           row[field] = StringUtil.removeHtmlTag(row[field]);
           console.log(row[field]);
         }

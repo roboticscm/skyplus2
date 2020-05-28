@@ -2,10 +2,10 @@
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { ViewStore } from '@/store/view';
   import QuickSearch from '@/components/ui/input/quick-search';
-  import { switchMap, map, tap, filter, delay, debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
+  import { switchMap, map, tap, filter, delay, debounceTime, distinctUntilChanged } from 'rxjs/operators';
   import { fromEvents } from '@/lib/js/rx';
   import { T } from '@/lib/js/locale/locale';
-  import { forkJoin, fromEvent, Observable, Subscription, of, BehaviorSubject } from 'rxjs';
+  import { forkJoin, fromEvent, Observable, Subscription, of, BehaviorSubject, EMPTY } from 'rxjs';
   import { Dropdown } from '@/lib/js/dropdown';
   import Radio from '@/components/ui/float-input/radio';
   import Store from '../store';
@@ -15,7 +15,7 @@
   import Button from '@/components/ui/flat-button';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import ContentFilter from '@/components/ui/float-input/content-filter';
-  import { convertArrayObjectToObject, filterColumns } from './helper';
+  import { convertArrayObjectToObject } from './helper';
   import CloseableList from '@/components/ui/closeable-list';
   import { StringUtil } from '@/lib/js/string-util';
   import { SObject } from '@/lib/js/sobject';
@@ -23,7 +23,9 @@
   import { App } from '@/lib/js/constants';
   import { appStore } from '@/store/app';
   import Pagination from '@/components/ui/pagination';
-  import { markStringSearch } from '../../../../lib/js/util';
+  import { markStringSearch } from '@/lib/js/util';
+  import { SDate } from '@/lib/js/sdate';
+  import { TableUtilStore } from '@/store/table-util';
 
   export let menuPath: string;
   export let view: ViewStore;
@@ -37,7 +39,6 @@
   let viewBy = 'task';
   let selectedTask: Task = undefined;
 
-  let filterList: any[] = [{ id: '', name: '', value: '' }];
   let mappedFilterList: any[] = [];
 
   let usedFilterColumns: any[] = [];
@@ -51,8 +52,22 @@
   let textSearch: string = '';
   let searchKeyword: string = '';
 
+  const filterColumns = view.searchFields.map((it: any) => {
+    it.name = T('TASK.LABEL.' + it.name);
+    return it;
+  });
+
   const dispatch = createEventDispatcher();
 
+  const getDefaultValueForItem = (item: any) => {
+    return {
+      id: item.id,
+      name: item.name,
+      type: item.type,
+      value: null,
+    };
+  };
+  let filteredList: any[] = [getDefaultValueForItem(filterColumns[0])];
   const doFilter = (ob$: Observable<any>) => {
     let start = Date.now();
     ob$
@@ -76,14 +91,15 @@
   };
 
   const makeSearch$ = () => {
-    if (StringUtil.isEmpty(textSearch) && SObject.isEmptyField(getAdvSearchParam())) {
+    const searchParam = getAdvSearchParam();
+    if (StringUtil.isEmpty(textSearch) && SObject.isEmptyField(searchParam)) {
       return store.tskFindTasks({ menuPath, departmentId: appStore.org.departmentId, isCompleted: false });
     } else {
       return store.tskFindTasks({
         menuPath,
         departmentId: appStore.org.departmentId,
         textSearch: StringUtil.formatFTSParam(textSearch),
-        ...getAdvSearchParam(),
+        ...searchParam,
       });
     }
   };
@@ -130,40 +146,36 @@
   };
 
   const onEmptyCountSearchAdv = (event: any) => {
-    if(event.detail > 1) {
+    if (event.detail > 1) {
       onSelectSearchField();
     }
-  }
+  };
+
+  const findNextItemIndex = () => {
+    for (let i = 0; i < filterColumns.length; i++) {
+      if (filteredList.findIndex((item: any) => item.id === filterColumns[i].id) < 0) {
+        return i;
+      }
+    }
+    return -1;
+  };
+
+  const getNextItem = (defaultValue: any) => {
+    const nextIndex = findNextItemIndex();
+    if (nextIndex > -1) {
+      return {
+        ...filterColumns[nextIndex],
+        value: defaultValue,
+      };
+    }
+    return {};
+  };
 
   const onSearch = (event: any, item: any, idx: number) => {
-    if (filterList.length >= filterColumns.length - 1) {
+    if (filteredList.length > filterColumns.length - 1) {
       onSelectSearchField();
       return;
     }
-
-    // render checkbox
-    if(typeof event.detail === 'boolean') {
-      const index = usedFilterColumns.indexOf(item.id);
-      if (index < 0) {
-        usedFilterColumns.push(item.id);
-        usedFilterColumns = [...usedFilterColumns];
-      }
-
-      if (index < 0 || (filterList.length > 0 && filterList[filterList.length - 1].type === 'boolean' )) {
-        filterList = [
-          ...filterList,
-          {
-            id: '',
-            name: '',
-            value: '',
-          },
-        ];
-      }
-
-      return;
-    }
-
-
 
     const index = usedFilterColumns.indexOf(item.id);
     if (index < 0) {
@@ -171,34 +183,46 @@
       usedFilterColumns = [...usedFilterColumns];
     }
 
-    if (filterList.length > 0 && filterList[filterList.length - 1].value !== '') {
-      filterList = [
-        ...filterList,
-        {
-          id: '',
-          name: '',
-          value: '',
-        },
-      ];
-    }
+    // render checkbox
+    if (typeof event.detail === 'boolean') {
+      if (index < 0 || (filteredList.length > 0 && filteredList[filteredList.length - 1].type === 'boolean')) {
+        filteredList = [...filteredList, getNextItem(null)];
+      }
+      // render datepicker
+    } else if (typeof event.detail === 'number') {
+      if (
+        event.detail &&
+        (index < 0 || (filteredList.length > 0 && filteredList[filteredList.length - 1].type === 'date'))
+      ) {
+        filteredList = [...filteredList, getNextItem(Date.now())];
+      }
+    } else {
+      // render text
+      if (filteredList.length > 0 && filteredList[filteredList.length - 1].value !== '') {
+        filteredList = [...filteredList, getNextItem('')];
+      }
 
-    if (((event.detail && event.detail.length > 0) || (item.value && item.value.length > 0) ) &&  idx < filterColumns.length - 1) {
-      setTimeout(() => {
-        const nextEle: any = document.querySelector('#' + filterColumns[idx + 1].id);
-        nextEle && nextEle.focus();
-      }, 200);
+      if (
+        ((event.detail && event.detail.length > 0) || (item.value && item.value.length > 0)) &&
+        idx < filterColumns.length - 1
+      ) {
+        setTimeout(() => {
+          const nextEle: any = document.querySelector('#' + filterColumns[idx + 1].id);
+          nextEle && nextEle.focus();
+        }, 200);
+      }
     }
   };
 
-  const removeFilterItem = (itemId: string) => {
-    const index = filterList.findIndex((it: any) => it.id === itemId);
+  const removeFilterItem = (itemId: string, type: string) => {
+    const index = filteredList.findIndex((it: any) => it.id === itemId);
     if (index >= 0) {
-      filterList.splice(index, 1);
-      filterList = [...filterList];
+      filteredList.splice(index, 1);
+      filteredList = [...filteredList];
     }
 
-    if (filterList.length === 0) {
-      filterList = [{ id: filterColumns[0].id, name: filterColumns[0].name, value: '' }];
+    if (filteredList.length === 0) {
+      filteredList = [getDefaultValueForItem(filterColumns[0])];
     }
 
     const usedIndex = usedFilterColumns.indexOf(itemId);
@@ -210,22 +234,16 @@
 
   const removeAllFilterItems = () => {
     usedFilterColumns = [];
-    filterList = [
-      {
-        id: filterColumns[0].id,
-        name: filterColumns[0].name,
-        value: '',
-      },
-    ];
+    filteredList = [getDefaultValueForItem(filterColumns[0])];
   };
 
   const onRemoveFilter = (event: any) => {
     // do not allow remove last item
-    if (filterList.length === 1) {
+    if (filteredList.length === 1) {
       return;
     }
 
-    removeFilterItem(event.id);
+    removeFilterItem(event.id, event.type);
   };
 
   const onToggleDashboard = () => {
@@ -234,12 +252,19 @@
   };
 
   const onSelectSearchField = () => {
-    mappedFilterList = filterList
+    mappedFilterList = filteredList
       .filter((it: any) => !StringUtil.isEmpty(it.value))
       .map((it: any) => {
         return {
           id: it.id,
-          name: it.name + ': ' + it.value,
+          lineThrough: typeof it.value === 'boolean' ? !it.value : false,
+          name:
+            it.name +
+            (typeof it.value === 'number'
+              ? ': ' + SDate.convertMillisecondToDateTimeString(it.value)
+              : typeof it.value === 'boolean'
+              ? ''
+              : ': ' + it.value),
         };
       });
 
@@ -249,7 +274,7 @@
 
   const getAdvSearchParam = () => {
     let param = convertArrayObjectToObject(
-      filterList.map((it: any) => {
+      filteredList.map((it: any) => {
         return {
           [it.id]: it.value,
         };
@@ -267,7 +292,6 @@
     const start = Date.now();
     searchProgress$.next(true);
     makeSearch$().subscribe((res) => {
-      console.log(res);
       const end = Date.now();
       console.log('Took ', end - start);
       searchProgress$.next(false);
@@ -275,7 +299,7 @@
     });
   };
   const onCloseFilter = (event: any) => {
-    removeFilterItem(event.detail.id);
+    removeFilterItem(event.detail.id, event.detail.type);
     onSelectSearchField();
   };
 
@@ -315,13 +339,13 @@
       store.taskList$.next(res.data.payload);
       view.fullCount$.next(res.data.fullCount);
 
-      mark(getKeyword(filterList, textSearch), res.data.payload);
+      mark(getKeyword(filteredList, textSearch), res.data.payload);
     }
   };
 
-  const getKeyword = (filterList: any[], textSearch: string) => {
-    const keywordFilterList = filterList
-      .filter((it: any) => it.value !== '')
+  const getKeyword = (filteredList: any[], textSearch: string) => {
+    const keywordFilterList = filteredList
+      .filter((it: any) => typeof it.value === 'string' && it.value !== '')
       .map((it: any) => it.value)
       .join('|');
 
@@ -335,7 +359,6 @@
     return searchKeyword;
   };
 
-  // TODO
   const reload = () => {
     const start = Date.now();
     makeSearch$().subscribe((res: any) => {
@@ -353,9 +376,11 @@
   const doSelect = (ob$: Observable<any>) => {
     return ob$
       .pipe(
-        delay(10),
+        delay(100),
         filter((_) => selectedTask !== undefined),
-        tap((_) => view.loading$.next(true)),
+        tap((_) => {
+          view.loading$.next(true);
+        }),
         switchMap((_) => forkJoin([store.tskGetTaskById(selectedTask.id)])),
       )
       .subscribe((res: any[]) => {
@@ -375,7 +400,7 @@
     });
 
     needSelectId$.subscribe((id: string) => {
-      console.log('id: ', id);
+      console.log('need selected id: ', id);
       if (id) {
         selectedTask = {
           id,
@@ -417,25 +442,13 @@
     }
   }
 
-  //
-  // // @ts-ignore
-  // $: {
-  //   // @ts-ignore
-  //   const needSelectId = $needSelectId$;
-  //   if (needSelectId) {
-  //     selectedTask = {
-  //       id: needSelectId,
-  //     };
-  //     doSelect(of(1));
-  //   }
-  // }
-
   // @ts-ignore
-  $: searchKeyword = getKeyword(filterList, textSearch);
+  $: searchKeyword = getKeyword(filteredList, textSearch);
 
   const mark = (textSearch: string, source: any) => {
     if (StringUtil.isEmpty(textSearch)) {
       markedData = source;
+      return;
     }
 
     markedData = SObject.clone(source).map((item: Task) => {
@@ -451,6 +464,70 @@
 
       return item;
     });
+  };
+
+  const doAutocompleteSearch = (field: string, textSearch: string) => {
+    let query: string = undefined;
+    textSearch = StringUtil.formatSearchParam(textSearch);
+    switch (field) {
+      case 'taskName':
+        query = `
+          SELECT DISTINCT name AS id, name AS name, access_date
+          FROM tsk_task
+          WHERE F_UNACCENT(name) ~* '${textSearch}'
+          ORDER BY access_date
+        `;
+        break;
+
+      case 'projectName':
+        query = `
+          SELECT DISTINCT p.name AS id, p.name AS name, p.access_date
+          FROM tsk_task t
+          LEFT JOIN tsk_project p ON p.id = t.project_id
+          WHERE F_UNACCENT(p.name) ~* '${textSearch}'
+          ORDER BY p.access_date, p.name
+        `;
+        break;
+      case 'assigneeName':
+        query = `
+          SELECT DISTINCT assignee.last_name || ' ' || assignee.first_name AS id, assignee.last_name || ' ' || assignee.first_name AS name
+          FROM tsk_task t
+          LEFT JOIN tsk_assign_human_or_org assign ON assign.task_id = t.id
+          LEFT JOIN human_or_org assignee ON assignee.id = assign.human_or_org_id
+          WHERE assign.assign_position='ASSIGNEE' AND F_UNACCENT(assignee.last_name || ' ' || assignee.first_name) ~* '${textSearch}'
+          ORDER BY name
+        `;
+        break;
+      case 'assignerName':
+        query = `
+          SELECT DISTINCT assignee.last_name || ' ' || assignee.first_name AS id, assignee.last_name || ' ' || assignee.first_name AS name
+          FROM tsk_task t
+          LEFT JOIN tsk_assign_human_or_org assign ON assign.task_id = t.id
+          LEFT JOIN human_or_org assignee ON assignee.id = assign.human_or_org_id
+          WHERE assign.assign_position='ASSIGNER' AND F_UNACCENT(assignee.last_name || ' ' || assignee.first_name) ~* '${textSearch}'
+          ORDER BY name
+        `;
+        break;
+
+      case 'evaluatorName':
+        query = `
+          SELECT DISTINCT assignee.last_name || ' ' || assignee.first_name AS id, assignee.last_name || ' ' || assignee.first_name AS name
+          FROM tsk_task t
+          LEFT JOIN tsk_assign_human_or_org assign ON assign.task_id = t.id
+          LEFT JOIN human_or_org assignee ON assignee.id = assign.human_or_org_id
+          WHERE assign.assign_position='EVALUATOR' AND F_UNACCENT(assignee.last_name || ' ' || assignee.first_name) ~* '${textSearch}'
+          ORDER BY name
+        `;
+        break;
+      default:
+        break;
+    }
+
+    if (query) {
+      return TableUtilStore.jsonQuery(query);
+    } else {
+      return EMPTY;
+    }
   };
 </script>
 
@@ -501,7 +578,7 @@
   }
 
   .advanced-search {
-    height: 400px;
+    height: 60vh;
     &__header {
       display: flex;
       justify-content: flex-end;
@@ -524,10 +601,10 @@
     }
 
     &__body {
-      height: 360px;
+      height: calc(60vh - 40px);
       overflow: auto;
       &__content {
-        padding-bottom: 60px;
+        padding-bottom: 100px;
         &__close-item {
           font-size: 0.7rem;
           display: flex;
@@ -555,7 +632,7 @@
     {/if}
     <Button
       on:click={onToggleDashboard}
-      btnType={ButtonType.Custom}
+      btnType={ButtonType.Dashboard}
       text={$showDashboard$ ? T('COMMON.BUTTON.HIDE_DASHBOARD') : T('COMMON.BUTTON.SHOW_DASHBOARD')} />
   </div>
   <!--   // Add new-->
@@ -585,10 +662,12 @@
 
           <div class="advanced-search__body">
             <div class="advanced-search__body__content">
-              {#each filterList as item, index}
+              {#each filteredList as item, index}
                 <div style="display: flex;">
                   <ContentFilter
-                          on:emptyCount = {onEmptyCountSearchAdv}
+                    {menuPath}
+                    searchFunc={doAutocompleteSearch}
+                    on:emptyCount={onEmptyCountSearchAdv}
                     id={item.id}
                     on:search={(e) => onSearch(e, item, index)}
                     on:itemChange={(e) => onItemChangeFilter(e, item)}

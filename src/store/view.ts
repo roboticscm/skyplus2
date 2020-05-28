@@ -44,6 +44,7 @@ export class ViewStore {
   hasAnyDeletedRecord$ = new BehaviorSubject<boolean>(false);
   roleControls: RoleControl[];
   fullControl: boolean;
+  searchFields: any[];
 
   needSelectId$ = new BehaviorSubject<string>(null);
   needHighlightId$ = new BehaviorSubject<string>(null);
@@ -271,10 +272,10 @@ export class ViewStore {
   };
 
   verifyAction = (id: string, confirmCallback: Function, passwordConfirmModal: any, disabled = false) => {
-    if(disabled) {
-      return new Promise(((resolve, reject) => {
+    if (disabled) {
+      return new Promise((resolve, reject) => {
         reject('fail');
-      }));
+      });
     }
 
     return new Promise((resolve, reject) => {
@@ -331,12 +332,13 @@ export class ViewStore {
     confirmPasswordModalRef: any,
     msg: string,
     extraMessage: string = '',
-    disabled = false
+    disabled = false,
   ) => {
     return this.verifyAction(
       buttonId,
       () => confirmModalRef.show(`${T(`COMMON.MSG.${msg}`)} <b>${extraMessage}</b>. ${T('COMMON.MSG.ARE_YOU_SURE')}?`),
-      confirmPasswordModalRef, disabled
+      confirmPasswordModalRef,
+      disabled,
     );
   };
 
@@ -346,7 +348,8 @@ export class ViewStore {
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'ADD_NEW',
-      extraMessage, disabled
+      extraMessage,
+      disabled,
     );
   };
 
@@ -356,7 +359,8 @@ export class ViewStore {
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'SAVE',
-      extraMessage, disabled
+      extraMessage,
+      disabled,
     );
   };
 
@@ -366,7 +370,8 @@ export class ViewStore {
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'EDIT',
-      extraMessage, disabled
+      extraMessage,
+      disabled,
     );
   };
 
@@ -377,7 +382,7 @@ export class ViewStore {
       scRef.confirmPasswordModalRef(),
       'UPDATE',
       extraMessage,
-        disabled
+      disabled,
     );
   };
 
@@ -387,7 +392,8 @@ export class ViewStore {
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'DELETE',
-      extraMessage, disabled
+      extraMessage,
+      disabled,
     );
   };
 
@@ -397,7 +403,8 @@ export class ViewStore {
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'SUBMIT',
-      extraMessage, disabled
+      extraMessage,
+      disabled,
     );
   };
 
@@ -407,7 +414,8 @@ export class ViewStore {
       scRef.confirmModalRef(),
       scRef.confirmPasswordModalRef(),
       'CANCEL_SUBMIT',
-      extraMessage, disabled
+      extraMessage,
+      disabled,
     );
   };
 

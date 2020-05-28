@@ -50,6 +50,7 @@
       searching$.next(false);
     }
   };
+
   const preSearch = (event) => {
     if (event.code === 'Escape') {
       hideAutoDropdown();
@@ -67,6 +68,7 @@
     }
     return true;
   };
+
   const doSearch = () => {
     const events$ = fromEvents(inputRef, 'keyup', 'click').pipe(
       filter((event) => preSearch(event)),
@@ -97,6 +99,7 @@
         },
       });
   };
+
   const hideOnLostFocus = () => {
     const inputEle: any = document.querySelector(`#${'dropdownInput' + id}`);
     setTimeout(() => {

@@ -30,12 +30,12 @@
     type="search"
     {disabled}
     class="{checked !== undefined ? 'check' : ''}
-    {rightCheck ? 'right' : ''}
-     floating__input {className}"
+    {rightCheck ? 'right' : ''} floating__input {className}"
     bind:value
     {autocomplete}
     bind:this={inputRef}
-    {placeholder} required/>
+    {placeholder}
+    required />
   <label class="floating__label" data-content={placeholder} />
   {#if checked !== undefined}
     <input

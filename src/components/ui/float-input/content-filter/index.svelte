@@ -6,6 +6,11 @@
   import SelectableTable from '@/components/ui/selectable-table';
   import { StringUtil } from '@/lib/js/string-util';
   import DatePicker from '@/components/ui/input/date-picker';
+  import { fromEvents } from '@/lib/js/rx';
+  import { distinctUntilChanged, switchMap, tap, map, filter } from 'rxjs/operators';
+  import { BehaviorSubject, Observable } from 'rxjs';
+  import { markStringSearch } from '@/lib/js/util';
+  import { SearchUtilStore } from '@/store/search-util';
 
   export let disabled = false;
   export let className = '';
@@ -17,17 +22,21 @@
   export let selected: any = undefined;
   export let showAllItem = false;
   export let id: string = undefined;
+  export let searchFunc: Function;
+  export let menuPath: string;
 
-  let inputRef: any;
+  let inputRef, datePickerRef, checkboxRef: any;
   let dropdownContentRef: any;
   let selectedItem: any = selected;
-  let _list: any[];
+  let _list: any[] = [];
   let markData: any[] = [];
   let tableRef: any;
   let dropdownFocused = false;
   let inputWrapperRef: any;
   let autoDropdownRef: any;
-  let renderType = 'text';
+
+  let textSearch = '';
+  const searching$ = new BehaviorSubject<boolean>(false);
 
   const isSmartPhone = (window as any).isSmartPhone;
 
@@ -71,7 +80,8 @@
   }
 
   export const focus = () => {
-     inputRef && inputRef.focus();
+    inputRef && inputRef.focus();
+    datePickerRef && datePickerRef.focus();
   };
 
   const showPopup = () => {
@@ -87,10 +97,22 @@
   };
 
   const onClickItem = (item: any) => {
-    renderType = item.type;
     hidePopup();
     dispatch('itemChange', item);
     selectedItem = item;
+
+    inputRef && inputRef.focus();
+
+    setTimeout(() => {
+      datePickerRef && datePickerRef.focus();
+      if (checkboxRef) {
+        checkboxRef.focus();
+        value = true;
+      }
+    });
+
+    // update counter
+    SearchUtilStore.updateCounter(item.id, menuPath).subscribe();
   };
 
   const preSearch = (event) => {
@@ -123,16 +145,12 @@
       return;
     }
 
-    if (inputRef.value.trim().length > 0) {
-      dispatch('search', inputRef && inputRef.value.trim());
+    if (!StringUtil.isEmpty(inputRef.value)) {
+      dispatch('search', inputRef.value.trim());
     } else {
       hideAutoDropdown();
     }
   };
-
-  const onChangeCheckbox = (event: any) => {
-    dispatch('search', event.target.checked);
-  }
 
   const onClickInput = () => {
     if (inputRef && inputRef.value.trim().length > 0) {
@@ -143,39 +161,46 @@
   let emptyCount = 0;
   const onFocus = () => {
     emptyCount = 0;
-  }
+  };
 
   const onKeyupInput = (event: any) => {
-    if(event.target.value === '') {
+    if (event.code === 'Enter' && event.target.value === '') {
       emptyCount++;
       dispatch('emptyCount', emptyCount);
     } else {
       emptyCount = 0;
     }
+  };
 
-    if (!preSearch(event)) {
-      return;
-    }
-    markData = _list
-      .filter((it: any) => it.id.toString() !== selectedItem.id.toString())
-      .map((it: any) => {
-        return {
-          id: it.id,
-          name: `<mark>${(inputRef && inputRef.value)}</mark> in [${it.name}]`,
-        };
+  const didSearch = (data: any[]) => {
+    console.log('data ', data);
+    if (data.length > 0) {
+      //highligth text search
+      const temp = SObject.clone(data);
+      markData = temp.map((item) => {
+        const markedName = markStringSearch(item.name, textSearch, true);
+        item.name = markedName;
+        return item;
       });
-    showAutoDropdown();
+      showAutoDropdown();
+      searching$.next(false);
+    } else {
+      hideAutoDropdown();
+      searching$.next(false);
+    }
   };
 
   const selectItem = (data: any) => {
     if (data.length >= 0 && data[0]) {
+      selectedItem.value = StringUtil.removeHtmlTag(data[0].name);
+      value = selectedItem.value;
       dispatch('search', data[0].id);
     }
   };
 
   const hideAutoDropdown = () => {
     dropdownFocused = false;
-    autoDropdownRef.classList.remove('simple-show-auto-dropdown');
+    autoDropdownRef && autoDropdownRef.classList.remove('simple-show-auto-dropdown');
   };
 
   const onTableClick = (event) => {
@@ -185,21 +210,27 @@
 
   const onTableKeyup = (event: any) => {
     if (dropdownFocused && event.detail.event.code === 'Enter') {
-      // selectItem(event.detail.data);
+      selectItem(event.detail.data);
     }
   };
 
   const showAutoDropdown = () => {
     tableRef.unSelectAll();
-    const containerWidth = window['$'](inputWrapperRef).width();
-    autoDropdownRef.style.width = containerWidth + 'px';
-    autoDropdownRef.classList.add('simple-show-auto-dropdown');
+    if (autoDropdownRef) {
+      const containerWidth = window['$'](inputWrapperRef).width();
+      autoDropdownRef.style.width = containerWidth + 'px';
+      autoDropdownRef.classList.add('simple-show-auto-dropdown');
+    }
   };
 
   const hideOnLostFocus = () => {
     setTimeout(() => {
-      if (document.activeElement !== inputRef) {
-        if (StringUtil.isEmpty((inputRef && inputRef.value)||'')) {
+      if (
+        document.activeElement !== inputRef &&
+        document.activeElement !== datePickerRef &&
+        document.activeElement !== checkboxRef
+      ) {
+        if (!datePickerRef && !checkboxRef && StringUtil.isEmpty((inputRef && inputRef.value) || '')) {
           selectItem([
             {
               id: '',
@@ -212,9 +243,51 @@
     }, 300);
   };
 
+  const doSearch = (ob$: Observable<any>) => {
+    ob$
+      .pipe(
+        filter((event) => preSearch(event)),
+        map((event: any) => {
+          return {
+            type: event.type,
+            value: event.target.value,
+          };
+        }),
+        distinctUntilChanged((before: any, after: any) => {
+          return before.value === after.value && after.type !== 'click';
+        }),
+        tap((event: any) => {
+          textSearch = event.value;
+          searching$.next(true);
+        }),
+        switchMap((event: any) => searchFunc(selectedItem.id, event.value)),
+      )
+      .subscribe({
+        next: (res: any) => {
+          didSearch(res.data);
+        },
+        error: (error) => {
+          searching$.next(false);
+        },
+      });
+  };
+
   onMount(() => {
     inputWrapperRef && inputWrapperRef.addEventListener('focusout', hideOnLostFocus);
   });
+
+  const onChangeDatePicker = (event: any) => {
+    dispatch('search', event.detail.start);
+  };
+
+  const onChangeCheckbox = (event: any) => {
+    dispatch('search', event.target.checked);
+  };
+
+  const inputAction = (component, param) => {
+    const events$ = fromEvents(component, 'keyup', 'click');
+    doSearch(events$);
+  };
 </script>
 
 <style lang="scss">
@@ -222,10 +295,11 @@
 </style>
 
 <div class="floating-filter-wrapper" bind:this={inputWrapperRef}>
-  {#if renderType === 'text'}
+  {#if selectedItem.type === 'text'}
     <input
       {id}
-      on:focus = {onFocus}
+      use:inputAction
+      on:focus={onFocus}
       on:keyup={onKeyupInput}
       on:click={onClickInput}
       on:search={onSearchInput}
@@ -237,11 +311,28 @@
       {autocomplete}
       bind:this={inputRef}
       placeholder={T('SYS.LABEL.SEARCH_WITH') + ': ' + selectedItem.name} />
-    {:else if renderType === 'boolean'}
-      <input type="checkbox" class="floating-filter__input {className}" on:change={onChangeCheckbox}>
-    {:else if renderType === 'date'}
-      <DatePicker className="floating-filter__input"></DatePicker>
+    {#if $searching$}
+      <div class="primary search-progress">
+        {@html App.PROGRESS_BAR}
+      </div>
     {/if}
+  {:else if selectedItem.type === 'boolean'}
+    <input
+      bind:this={checkboxRef}
+      class="floating-filter__checkbox {className}"
+      type="checkbox"
+      bind:checked={value}
+      on:change={onChangeCheckbox} />
+  {:else if selectedItem.type === 'date'}
+    <DatePicker
+      {id}
+      className="floating-filter__input {className}"
+      {disabled}
+      bind:this={datePickerRef}
+      placeholder={T('SYS.LABEL.SEARCH_WITH') + ': ' + selectedItem.name}
+      bind:value
+      on:change={onChangeDatePicker} />
+  {/if}
   <label class="primary floating-filter__label" data-content={selectedItem.name} />
   <div class="floating-filter__select" on:mouseover|stopPropagation={showPopup} on:mouseout={hidePopup}>
     <span class="primary w-100" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
@@ -251,7 +342,11 @@
       class="primary fa fa-angle-down"
       style="border-right: 1px solid rgba(0, 0, 0, 0.2); min-width: 15px; display: flex; flex-direction: column;
       justify-content: flex-end;" />
-    <div bind:this={dropdownContentRef} class=" {fullWidth ? '' : 'w-100'} filter-dropdown-content">
+    <div
+      bind:this={dropdownContentRef}
+      class="
+      {fullWidth ? '' : 'w-100'} filter-dropdown-content"
+      style="height: 300px;">
       {#each _list as item}
         <div
           on:click={() => onClickItem(item)}
@@ -262,8 +357,9 @@
     </div>
   </div>
 
-  <div bind:this={autoDropdownRef} style="height: 200px;" class="simple-auto-dropdown">
+  <div bind:this={autoDropdownRef} style="height: 300px;" class="simple-auto-dropdown">
     <SelectableTable
+      className="table-one-column"
       on:click={onTableClick}
       on:keyup={onTableKeyup}
       bind:this={tableRef}

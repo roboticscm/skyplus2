@@ -96,7 +96,8 @@
   };
 </script>
 
-<button {title}
+<button
+  {title}
   use:useAction
   bind:this={btnRef}
   {id}

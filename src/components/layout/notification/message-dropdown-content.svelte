@@ -4,15 +4,17 @@
   import { T } from '@/lib/js/locale/locale';
   import { fromEvent, BehaviorSubject } from 'rxjs';
   import { map, switchMap, tap } from 'rxjs/operators';
-  import { notificationStore, NotifyType } from '@/store/notification';
-  import { Notification } from '@/model/base';
-  import { SObject } from '../../../lib/js/sobject';
+  import { notificationStore } from '@/store/notification';
+  import { SObject } from '@/lib/js/sobject';
+  import { Mark } from '@/lib/js/mark';
 
   export let data: any[];
   export let type: string;
 
   let filteredData: any[] = [];
   let searchProgress$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  let textSearch = '';
+
   // @ts-ignore
   $: filteredData = data;
 
@@ -20,12 +22,17 @@
     register(component: HTMLElement, param: any) {
       fromEvent(component, 'input')
         .pipe(
-          tap(() => searchProgress$.next(true)),
-          map((event: any) => event.target.value),
-          switchMap((value) => doFilter(value)),
+          tap((event: any) => {
+            searchProgress$.next(true);
+            textSearch = event.target.value;
+          }),
+          // map((event: any) => event.target.value),
+          switchMap((_) => doFilter(textSearch)),
         )
         .subscribe((res: any) => {
           filteredData = res.data.map((it: any) => SObject.convertFieldsToCamelCase(it));
+          filteredData = Mark.mark(filteredData, textSearch);
+          textSearch = '';
           searchProgress$.next(false);
         });
     },

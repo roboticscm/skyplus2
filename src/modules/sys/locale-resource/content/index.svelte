@@ -206,29 +206,32 @@
   };
 
   const mark = (textSearch: string, source: any) => {
-    data = SObject.clone(source).map((item: any) => {
-      const markedCategory = markStringSearch(item.category, textSearch, true);
-      const markedTypeGroup = markStringSearch(item.typeGroup, textSearch, true);
-      const markedKey = markStringSearch(item.key, textSearch, true);
-      const markedVi = markStringSearch(item['vi-VN'], textSearch, true);
-      const markedEn = markStringSearch(item['en-EN'], textSearch, true);
-      if (markedCategory !== item.category) {
-        item.category = markedCategory;
-      }
-      if (markedTypeGroup !== item.typeGroup) {
-        item.typeGroup = markedTypeGroup;
-      }
-      if (markedKey !== item.key) {
-        item.key = markedKey;
-      }
-      if (markedVi !== item['vi-VN']) {
-        item['vi-VN'] = markedVi;
-      }
-      if (markedEn !== item['en-EN']) {
-        item['en-EN'] = markedEn;
-      }
-      return item;
-    });
+    data = Mark.mark(source, textSearch);
+
+    // data = SObject.clone(source).map((item: any) => {
+    //   const markedCategory = markStringSearch(item.category, textSearch, true);
+    //   const markedTypeGroup = markStringSearch(item.typeGroup, textSearch, true);
+    //   const markedKey = markStringSearch(item.key, textSearch, true);
+    //   const markedVi = markStringSearch(item['vi-VN'], textSearch, true);
+    //   const markedEn = markStringSearch(item['en-EN'], textSearch, true);
+    //   if (markedCategory !== item.category) {
+    //     item.category = markedCategory;
+    //   }
+    //   if (markedTypeGroup !== item.typeGroup) {
+    //     item.typeGroup = markedTypeGroup;
+    //   }
+    //   if (markedKey !== item.key) {
+    //     item.key = markedKey;
+    //   }
+    //   if (markedVi !== item['vi-VN']) {
+    //     item['vi-VN'] = markedVi;
+    //   }
+    //   if (markedEn !== item['en-EN']) {
+    //     item['en-EN'] = markedEn;
+    //   }
+    //   return item;
+    // });
+    //
   };
 
   onMount(() => {
@@ -456,6 +459,7 @@
 
   import { CommonValidation } from '@/lib/js/common-validation';
   import { fromPromise } from 'rxjs/internal-compatibility';
+  import { Mark } from '../../../../lib/js/mark';
   let minNewRecord = 1,
     maxNewRecord = 100;
 
@@ -597,7 +601,6 @@
         ret.push(newRow);
       }
     }
-
 
     return ret;
   };
@@ -829,16 +832,20 @@
     <!-- //Search or Filter-->
   </div>
 
-<!--  <div style="margin-top: 10px;">-->
-<!--    <Pagination-->
-<!--      {menuPath}-->
-<!--      totalRecords={$fullCount$}-->
-<!--      on:loadPage={onLoadPage}-->
-<!--      on:init={onPaginationInit}-->
-<!--      bind:this={pageRef} />-->
-<!--  </div>-->
+  <!--  <div style="margin-top: 10px;">-->
+  <!--    <Pagination-->
+  <!--      {menuPath}-->
+  <!--      totalRecords={$fullCount$}-->
+  <!--      on:loadPage={onLoadPage}-->
+  <!--      on:init={onPaginationInit}-->
+  <!--      bind:this={pageRef} />-->
+  <!--  </div>-->
   <!--  Language Grid-->
-  <div id="languageGridContainer" class="row {$fullCount$ > 0 ? 'language-grid' : 'full-language-grid'} " style="margin-top: 6px;">
+  <div
+    id="languageGridContainer"
+    class="row {$fullCount$ > 0 ? 'language-grid' : 'full-language-grid'}
+    "
+    style="margin-top: 6px;">
     <div class="col-24">
       <svelte:component
         this={ExcelGrid}

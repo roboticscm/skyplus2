@@ -43,6 +43,7 @@
   import { SDate } from '@/lib/js/sdate';
   import { getUserFullName } from '@/lib/js/security';
   import { getUserId } from '@/lib/js/security';
+  import { SubmitStatus } from '../../types';
 
   // Props
   export let view: ViewStore;
@@ -121,10 +122,9 @@
   // @ts-ignore
   $: readOnlyModeEvaluator = $isReadOnlyMode$ || form.submitStatus !== 1 || !isEvaluatorUser();
 
-
   let disabledSave = false;
   // @ts-ignore
-  $:  disabledSave = view.isDisabled(ButtonId.Save, form.errors.any());
+  $: disabledSave = view.isDisabled(ButtonId.Save, form.errors.any());
 
   let disabledUpdate = true;
   // @ts-ignore
@@ -132,12 +132,11 @@
 
   let disabledEdit = true;
   // @ts-ignore
-  $:  disabledEdit = view.isDisabled(ButtonId.Edit) || !userCanEdit;
+  $: disabledEdit = view.isDisabled(ButtonId.Edit) || !userCanEdit;
 
   let disabledSubmit = false;
   // @ts-ignore
   $: disabledSubmit = view.isDisabled(ButtonId.Submit, form.errors.any() || $isReadOnlyMode$ || !isEditTaskUser());
-
 
   let disabledCancelSubmit = true;
   // @ts-ignore
@@ -147,9 +146,17 @@
   // @ts-ignore
   $: disabledAssign = view.isDisabled(ButtonId.Assign, form.errors.any() || $isReadOnlyMode$ || !isEditTaskUser());
 
-  let disabledHoldAssign = false;
+  let disabledUnAssign = false;
   // @ts-ignore
-  $: disabledHoldAssign = view.isDisabled(ButtonId.HoldAssign, $isReadOnlyMode$ || !isCancelSubmit);
+  $: disabledUnAssign = view.isDisabled(ButtonId.UnAssign, $isReadOnlyMode$ || !isCancelSubmit);
+
+  let disabledHold = true;
+  // @ts-ignore
+  $: disabledHold = view.isDisabled(ButtonId.Hold, form.errors.any() || $isReadOnlyMode$ || !isEditTaskUser());
+
+  let disabledUnHold = false;
+  // @ts-ignore
+  $: disabledUnHold = view.isDisabled(ButtonId.UnHold, $isReadOnlyMode$ || !isCancelSubmit);
 
   let disabledDelete = true;
   // @ts-ignore
@@ -629,14 +636,14 @@
     // Edit Assigner status detail
     postprocessEditAssignerStatusDetail();
 
-    if (submitType === 'submit') {
-      form.submitStatus = 1;
-    } else if (submitType === 'cancelSubmit') {
-      form.submitStatus = 0;
-    } else if (submitType === 'holdAssign') {
-      form.submitStatus = 1;
-    } else if (submitType === 'assign') {
-      form.submitStatus = 2;
+    if (['cancelSubmit'].includes(submitType)) {
+      form.submitStatus = SubmitStatus.Init;
+    } else if (['submit', 'unAssign'].includes(submitType)) {
+      form.submitStatus = SubmitStatus.Submitted;
+    } else if (['assign', 'unHold'].includes(submitType)) {
+      form.submitStatus = SubmitStatus.Assigned;
+    } else if (['hold'].includes(submitType)) {
+      form.submitStatus = SubmitStatus.Help;
     }
   };
 
@@ -714,7 +721,9 @@
       view.verifySaveAction(
         // @ts-ignore
         $isUpdateMode$ ? ButtonId.Update : ButtonId.Save,
-        scRef, undefined, disabledSave || disabledUpdate
+        scRef,
+        undefined,
+        disabledSave || disabledUpdate,
       ),
     ).pipe(
       catchError((error) => {
@@ -750,24 +759,48 @@
   const verifyAssign = () => {
     submitType = 'assign';
     return fromPromise(
-            /* verify permission*/
-            view.verifyCancelSubmitAction(ButtonId.Assign, scRef),
+      /* verify permission*/
+      view.verifyCancelSubmitAction(ButtonId.Assign, scRef, undefined, disabledAssign),
     ).pipe(
-            catchError((error) => {
-              return of(error);
-            }),
+      catchError((error) => {
+        return of(error);
+      }),
     );
   };
 
-  const verifyHoldAssign = () => {
-    submitType = 'holdAssign';
+  const verifyUnAssign = () => {
+    submitType = 'unAssign';
     return fromPromise(
-            /* verify permission*/
-            view.verifyCancelSubmitAction(ButtonId.HoldAssign, scRef, undefined, disabledHoldAssign),
+      /* verify permission*/
+      view.verifyCancelSubmitAction(ButtonId.UnAssign, scRef, undefined, disabledUnAssign),
     ).pipe(
-            catchError((error) => {
-              return of(error);
-            }),
+      catchError((error) => {
+        return of(error);
+      }),
+    );
+  };
+
+  const verifyHold = () => {
+    submitType = 'hold';
+    return fromPromise(
+      /* verify permission*/
+      view.verifyCancelSubmitAction(ButtonId.Hold, scRef, undefined, disabledHold),
+    ).pipe(
+      catchError((error) => {
+        return of(error);
+      }),
+    );
+  };
+
+  const verifyUnHold = () => {
+    submitType = 'unHold';
+    return fromPromise(
+      /* verify permission*/
+      view.verifyCancelSubmitAction(ButtonId.UnHold, scRef, undefined, disabledUnHold),
+    ).pipe(
+      catchError((error) => {
+        return of(error);
+      }),
     );
   };
 
@@ -836,15 +869,6 @@
     });
   };
 
-  const rollbackSubmitState = () => {
-    if (submitType === 'submit') {
-      form.submitStatus = 0;
-    } else if (submitType === 'cancelSubmit' || submitType === 'assign') {
-      form.submitStatus = 1;
-    } else if(submitType === 'holdAssign') {
-      form.submitStatus = 2;
-    }
-  };
   /**
    * Save or update form. Called by onSave and onUpdate event handle
    * @param {ob$} Observable event of the button click or shortcut key(fromEvent)
@@ -863,7 +887,6 @@
           console.log('save data: ', form.data());
           return form.post(saveUpdateUri).pipe(
             catchError((error) => {
-              rollbackSubmitState();
               return of(error);
             }),
           );
@@ -873,8 +896,6 @@
         /* do something after form submit*/
         next: (res: any) => {
           if (res.response && res.response.data) {
-            // TODO
-            rollbackSubmitState();
             // if error
             if (res.response.data.message) {
               scRef.snackbarRef().showUnknownError(res.response.data.message);
@@ -885,10 +906,10 @@
             // success
 
             // save notification on submit or cancel submit
-            if (submitType === 'submit') {
+            if (['submit', 'assign', 'unHold'].includes(submitType)) {
               const title = res.data.name;
               saveNotification(title, res.data.id);
-            } else if (submitType === 'cancelSubmit') {
+            } else if (['cancelSubmit', 'unAssign', 'hold'].includes(submitType)) {
               const title = res.data.name;
               saveNotification(title, res.data.id, true);
             }
@@ -915,8 +936,6 @@
         error: (error) => {
           Debug.errorSection('Task - doSaveOrUpdate', error);
           saveRunning$.next(false);
-          // TODO
-          rollbackSubmitState();
         },
       });
   };
@@ -1031,7 +1050,6 @@
     },
   };
 
-
   const useAssignAction = {
     register(component: HTMLElement, param: any) {
       const ob$ = fromEvent(component, 'click');
@@ -1039,10 +1057,24 @@
     },
   };
 
-  const useHoldAssignAction = {
+  const useUnAssignAction = {
     register(component: HTMLElement, param: any) {
       const ob$ = fromEvent(component, 'click');
-      doSaveOrUpdate(ob$, verifyHoldAssign, validateForSubmitOrCancelSubmit);
+      doSaveOrUpdate(ob$, verifyUnAssign, validateForSubmitOrCancelSubmit);
+    },
+  };
+
+  const useHoldAction = {
+    register(component: HTMLElement, param: any) {
+      const ob$ = fromEvent(component, 'click');
+      doSaveOrUpdate(ob$, verifyHold, validateForSubmitOrCancelSubmit);
+    },
+  };
+
+  const useUnHoldAction = {
+    register(component: HTMLElement, param: any) {
+      const ob$ = fromEvent(component, 'click');
+      doSaveOrUpdate(ob$, verifyUnHold, validateForSubmitOrCancelSubmit);
     },
   };
 
@@ -1219,77 +1251,70 @@
 </ViewWrapperModal>
 <!--//Invisible Element-->
 <!--Form controller-->
-<section class="view-content-controller">
-  <!--    {#if view.isRendered(ButtonId.AddNew)}-->
-  <!--      <Button btnType={ButtonType.AddNew} on:click={onAddNew} disabled={view.isDisabled(ButtonId.AddNew)} />-->
-  <!--    {/if}-->
+<section class="view-content-controller" style="display: flex; justify-content: space-between;">
+  <div>
+    {#if view.isRendered(ButtonId.Save, !$isUpdateMode$)}
+      <Button
+        action={useSaveOrUpdateAction}
+        btnType={ButtonType.Save}
+        disabled={disabledSave}
+        running={$saveRunning$} />
+    {/if}
 
-  {#if view.isRendered(ButtonId.Save, !$isUpdateMode$)}
-    <Button
-      action={useSaveOrUpdateAction}
-      btnType={ButtonType.Save}
-      disabled={disabledSave}
-      running={$saveRunning$} />
-  {/if}
+    {#if view.isRendered(ButtonId.Edit, $isReadOnlyMode$ && $isUpdateMode$)}
+      <Button btnType={ButtonType.Edit} on:click={onEdit} disabled={disabledEdit} />
+    {/if}
 
-  {#if view.isRendered(ButtonId.Edit, $isReadOnlyMode$ && $isUpdateMode$)}
-    <Button btnType={ButtonType.Edit} on:click={onEdit} disabled={disabledEdit} />
-  {/if}
+    {#if view.isRendered(ButtonId.Update, !$isReadOnlyMode$ && $isUpdateMode$)}
+      <Button
+        action={useSaveOrUpdateAction}
+        btnType={ButtonType.Update}
+        disabled={disabledUpdate}
+        running={$saveRunning$} />
+    {/if}
 
-  {#if view.isRendered(ButtonId.Update, !$isReadOnlyMode$ && $isUpdateMode$)}
-    <Button
-      action={useSaveOrUpdateAction}
-      btnType={ButtonType.Update}
-      disabled={disabledUpdate}
-      running={$saveRunning$} />
-  {/if}
+    {#if view.isRendered(ButtonId.Submit, form.submitStatus === SubmitStatus.Init)}
+      <Button action={useSubmitAction} btnType={ButtonType.Submit} disabled={disabledSubmit} />
+    {/if}
 
-  {#if view.isRendered(ButtonId.Submit, form.submitStatus === 0)}
-    <Button
-      action={useSubmitAction}
-      btnType={ButtonType.Submit}
-      disabled={disabledSubmit} />
-  {/if}
+    {#if view.isRendered(ButtonId.CancelSubmit, form.submitStatus === SubmitStatus.Submitted)}
+      <Button action={useCancelSubmitAction} btnType={ButtonType.CancelSubmit} disabled={disabledCancelSubmit} />
+    {/if}
 
-  {#if view.isRendered(ButtonId.CancelSubmit, form.submitStatus === 1)}
-    <Button
-      action={useCancelSubmitAction}
-      btnType={ButtonType.CancelSubmit}
-      disabled={disabledCancelSubmit} />
-  {/if}
+    {#if view.isRendered(ButtonId.Assign, [SubmitStatus.Init, SubmitStatus.Submitted].includes(form.submitStatus))}
+      <Button action={useAssignAction} btnType={ButtonType.Assign} disabled={disabledAssign} />
+    {/if}
 
-  {#if view.isRendered(ButtonId.Assign, form.submitStatus === 1)}
-    <Button
-            action={useAssignAction}
-            btnType={ButtonType.Assign}
-            disabled={disabledAssign} />
-  {/if}
+    {#if view.isRendered(ButtonId.UnAssign, [SubmitStatus.Assigned, SubmitStatus.Help].includes(form.submitStatus))}
+      <Button action={useUnAssignAction} btnType={ButtonType.UnAssign} disabled={disabledUnAssign} />
+    {/if}
 
-  {#if view.isRendered(ButtonId.HoldAssign, form.submitStatus === 2)}
-    <Button
-            action={useHoldAssignAction}
-            btnType={ButtonType.HoldAssign}
-            disabled={disabledHoldAssign} />
-  {/if}
+    {#if view.isRendered(ButtonId.Hold, form.submitStatus === SubmitStatus.Assigned)}
+      <Button action={useHoldAction} btnType={ButtonType.Hold} disabled={disabledHold} />
+    {/if}
 
-  {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
-    <Button
-      btnType={ButtonType.Delete}
-      on:click={onDelete}
-      disabled={disabledDelete}
-      running={$deleteRunning$} />
-  {/if}
+    {#if view.isRendered(ButtonId.UnHold, form.submitStatus === SubmitStatus.Help)}
+      <Button action={useUnHoldAction} btnType={ButtonType.UnHold} disabled={disabledUnHold} />
+    {/if}
 
-  {#if view.isRendered(ButtonId.Config)}
-    <Button btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
-  {/if}
+    {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
+      <Button btnType={ButtonType.Delete} on:click={onDelete} disabled={disabledDelete} running={$deleteRunning$} />
+    {/if}
 
-  {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
-    <Button
-      btnType={ButtonType.TrashRestore}
-      on:click={onTrashRestore}
-      disabled={view.isDisabled(ButtonId.TrashRestore)} />
-  {/if}
+    {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
+      <Button
+        btnType={ButtonType.TrashRestore}
+        on:click={onTrashRestore}
+        disabled={view.isDisabled(ButtonId.TrashRestore)} />
+    {/if}
+
+  </div>
+
+  <div>
+    {#if view.isRendered(ButtonId.Config)}
+      <Button btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
+    {/if}
+  </div>
 </section>
 <!--//Form controller-->
 
@@ -1306,12 +1331,12 @@
       {menuPath}
       id={view.getViewName() + 'TaskSectionId'}>
       <div slot="subTitle" class="section-sub-title w-100">
-        <div class="col1 bold-text">
+        <div class="col1 bold-text large-font-size active-color">
           {@html form.name}
         </div>
 
         <div class="col2">
-          {@html lastAssigneeSubmittedStatus ? lastAssigneeSubmittedStatus : T('COMMON.LABEL.NO_STATUS')}
+          {@html lastAssigneeSubmittedStatus ? lastAssigneeSubmittedStatus : T('TASK.MSG.NO_STATUS')}
         </div>
 
         <div class="col3 active-color">
@@ -1321,7 +1346,8 @@
       <div class="row">
         <!-- Name -->
         <div class="col-xs-24 col-md-12">
-          <FloatTextInput className = "large-font-size"
+          <FloatTextInput
+            className="large-font-size active-color"
             bind:checked={form.isPrivate}
             rightCheck={true}
             checkTitle={T('COMMON.LABEL.PRIVATE_TASK')}

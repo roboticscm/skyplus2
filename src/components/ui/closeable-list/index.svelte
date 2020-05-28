@@ -137,7 +137,7 @@
         {/each}
       {:else}
         {#each _data as row}
-          <li on:click={() => onClickItem(row)}>
+          <li class={row.lineThrough ? 'line-through' : ''} on:click={() => onClickItem(row)}>
             {#if download}
               <a download href={downloadUrl + savePath + '/' + row.id + row.name}>{row ? row.name : ''}</a>
             {:else}{row ? row.name : ''}{/if}

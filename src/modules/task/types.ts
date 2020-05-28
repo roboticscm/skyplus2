@@ -1,6 +1,13 @@
 import { StringUtil } from '@/lib/js/string-util';
 import { genNumberUUID } from '@/lib/js/util';
 
+export enum SubmitStatus {
+  Init = 0,
+  Submitted = 1,
+  Assigned = 2,
+  Help = 3,
+}
+
 export class Task {
   id? = '';
   name? = '';

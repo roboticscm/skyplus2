@@ -73,6 +73,34 @@
 
       const themeColors = getThemeColors();
       body.style.color = themeColors[3]['--primary'];
+
+      const head: any = iframeRef.contentWindow.document.getElementsByTagName('head')[0];
+
+
+      head.innerHTML = `
+        <style>
+            ::-webkit-scrollbar {
+              width: 8px;
+            }
+
+            ::-webkit-scrollbar-track {
+              background: ${themeColors[2]['--bg-primary']};
+            }
+            ::-webkit-scrollbar-track:hover {
+                background: ${themeColors[5]['--bg-tertiary']};
+            }
+
+            ::-webkit-scrollbar-thumb {
+              background: ${themeColors[2]['--bg-primary']};
+              border-radius: 2px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: ${themeColors[8]['--readonly-text-color']};
+            }
+        </style>
+        `;
+
     }
 
     window.addEventListener('focus', windowFocussed, true);

@@ -48,7 +48,7 @@
     const orgId = event.detail.treeNode.id;
     doOrgTreeClick(orgId.toString());
 
-    if(event.detail.treeNode.isParent) {
+    if (event.detail.treeNode.isParent) {
       filterUserColumns = userColumns;
     } else {
       filterUserColumns = userColumns.filter((it: any) => it.name !== 'departmentName');
@@ -378,14 +378,26 @@
             id={'userTable' + view.getViewName() + 'Id'}>
             <span>{T('COMMON.LABEL.USER_LIST')}:</span>
 
-            <span style="display: flex; padding-bottom: 6px;" slot="header" let:selectAll let:unSelectAll let:toggleSelection let:filter>
+            <span
+              style="display: flex; padding-bottom: 6px;"
+              slot="header"
+              let:selectAll
+              let:unSelectAll
+              let:toggleSelection
+              let:filter>
               <div style="width: 100%;">
-                <QuickSearch on:input={(e)=>filter(e.target.value)}></QuickSearch>
+                <QuickSearch on:input={(e) => filter(e.target.value)} />
               </div>
-              <div style="height: 20px; white-space: nowrap; margin-top: 10px; margin-left: 5px;" class="bg-green">
-                <Button title={T('COMMON.BUTTON.SELECT_ALL')} btnType={ButtonType.SelectAll} on:click={selectAll}></Button>
-                <Button title={T('COMMON.BUTTON.UNSELECT_ALL')} btnType={ButtonType.UnSelectAll} on:click={unSelectAll} />
-                <Button title={T('COMMON.BUTTON.TOGGLE_SELECTION')} btnType={ButtonType.ToggleSelection} on:click={toggleSelection} />
+              <div style="height: 20px; white-space: nowrap; margin-top: 10px; margin-left: 5px;">
+                <Button title={T('COMMON.BUTTON.SELECT_ALL')} btnType={ButtonType.SelectAll} on:click={selectAll} />
+                <Button
+                  title={T('COMMON.BUTTON.UNSELECT_ALL')}
+                  btnType={ButtonType.UnSelectAll}
+                  on:click={unSelectAll} />
+                <Button
+                  title={T('COMMON.BUTTON.TOGGLE_SELECTION')}
+                  btnType={ButtonType.ToggleSelection}
+                  on:click={toggleSelection} />
               </div>
 
             </span>

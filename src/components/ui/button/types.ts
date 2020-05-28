@@ -23,7 +23,10 @@ export enum ButtonType {
   Approve,
   CancelApprove,
   Assign,
-  HoldAssign
+  UnAssign,
+  Hold,
+  UnHold,
+  Dashboard
 }
 
 export enum ButtonPressed {
@@ -48,6 +51,9 @@ export enum ButtonId {
   CancelSubmit = 'btnCancelSubmit',
   Approve = 'btnApprove',
   CancelApprove = 'btnCancelApprove',
-  Assign='btnAssign',
-  HoldAssign='btnHoldAssign'
+  Assign = 'btnAssign',
+  UnAssign = 'btnUnAssign',
+  Hold = 'btnHold',
+  UnHold = 'btnUnHold',
+  Dashboard='btnDashboard'
 }

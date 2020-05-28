@@ -4,17 +4,19 @@
   import PageLoading from '@/pages/loading/index.svelte';
   import PageIntro from '@/pages/intro/index.svelte';
   import { roleControlStore } from '@/store/role-control';
+  import { SearchUtilStore } from '@/store/search-util';
   import { take } from 'rxjs/operators';
   import { AppStore, appStore } from '@/store/app';
   import { menuStore } from '@/store/menu';
   import { onMount } from 'svelte';
-  import { Subscription } from 'rxjs';
+  import { Subscription, forkJoin } from 'rxjs';
 
   let TheComponent;
   const { currentComponentUri$ } = routerLinkStore;
   let menuPath: string;
   let fullControl = false;
   let roleControls = [];
+  let searchFields: any[] = [];
 
   const { isLogged$ } = AppStore;
   let selectedId: string;
@@ -32,18 +34,24 @@
     }
   };
 
-  const loadRoleControl = (uri: string) => {
-    roleControlStore
-      .sysGetControlListByDepIdAndUserIdAndMenuPath(appStore.org.departmentId, menuPath)
-      .pipe(take(1))
-      .subscribe((res) => {
-        if (res.data.fullControl) {
-          fullControl = true;
-        } else {
-          roleControls = res.data;
-        }
-        loadComponent(uri);
-      });
+  const loadRoleControlAndSearchField = (uri: string) => {
+    const roleControl$ = roleControlStore.sysGetControlListByDepIdAndUserIdAndMenuPath(
+      appStore.org.departmentId,
+      menuPath,
+    );
+
+    const searchField$ = SearchUtilStore.findSearchFieldListByMenuPath(menuPath);
+
+    forkJoin([roleControl$, searchField$]).subscribe((res) => {
+      if (res[0].data.fullControl) {
+        fullControl = true;
+      } else {
+        roleControls = res[0].data;
+      }
+
+      searchFields = res[1].data;
+      loadComponent(uri);
+    });
   };
 
   export const show = (path: string) => {
@@ -62,7 +70,7 @@
     const componentSub: Subscription = currentComponentUri$.subscribe((res: any) => {
       if (res) {
         menuPath = res.replace('modules/', '').replace('/index.svelte', '');
-        loadRoleControl(res);
+        loadRoleControlAndSearchField(res);
       }
     });
 
@@ -88,7 +96,7 @@
 </script>
 
 {#if $isLogged$}
-  <svelte:component this={TheComponent} {menuPath} {fullControl} {roleControls} {selectedId} />
+  <svelte:component this={TheComponent} {menuPath} {fullControl} {roleControls} {selectedId} {searchFields} />
 {:else}
   <svelte:component this={PageIntro} />
 {/if}

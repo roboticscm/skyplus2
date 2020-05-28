@@ -7,6 +7,7 @@
 
   import Pagination from '@/components/ui/pagination';
   import { skip } from 'rxjs/operators';
+  import QuickSearch from '@/components/ui/input/quick-search';
 
   export let view: ViewStore;
   export let menuPath: string;
@@ -126,5 +127,12 @@
     {menuPath}
     showRowNumber={true}
     data={$dataList$}
-    id={tableId} />
+    id={tableId}>
+
+    <span style="display: flex; padding-bottom: 6px;" slot="header" let:filter>
+      <div style="width: 100%;">
+        <QuickSearch on:input={(e) => filter(e.target.value)} />
+      </div>
+    </span>
+  </SelectableTable>
 </div>

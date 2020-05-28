@@ -1,3 +1,5 @@
+import { unccentVietnamese } from '@/lib/js/util';
+
 export class StringUtil {
   public static toSnackCase(str: string, sep: string) {
     let ret = '';
@@ -89,7 +91,7 @@ export class StringUtil {
 
   public static removeHtmlTag = (source: string) => {
     return source.replace(/<\/?[^>]+(>|$)/g, '');
-  }
+  };
 
   public static removeExtraSpace = (source: string) => {
     return source;
@@ -125,7 +127,15 @@ export class StringUtil {
       return StringUtil.replaceAll(value, '`', '');
     }
 
-    return StringUtil.replaceAll(value, ' ', ':*&') + ':*';
+    return unccentVietnamese(StringUtil.replaceAll(value, ' ', ':*&') + ':*');
+  }
+
+  public static formatSearchParam(value: string) {
+    if (StringUtil.isEmpty(value)) {
+      return '';
+    }
+
+    return unccentVietnamese(value);
   }
 
   static getFirstWord = (source: string) => {

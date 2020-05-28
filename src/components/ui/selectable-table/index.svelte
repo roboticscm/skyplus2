@@ -7,9 +7,9 @@
   import { settingsStore } from '@/store/settings';
   import { T } from '@/lib/js/locale/locale';
   import { genUUID } from '@/lib/js/util';
-  import {SObject} from "../../../lib/js/sobject";
-  import {markStringSearch} from "../../../lib/js/util";
-  import {StringUtil} from "../../../lib/js/string-util";
+  import { SObject } from '../../../lib/js/sobject';
+  import { markStringSearch } from '../../../lib/js/util';
+  import { StringUtil } from '../../../lib/js/string-util';
 
   const dispatch = createEventDispatcher();
   // import { SObject } from '@/lib/js/sobject';
@@ -24,12 +24,12 @@
   export let startRowCount = 1;
   export let menuPath: string = undefined;
   export let saveState = true;
+  export let className: string = undefined;
 
   let startRow: any = null;
   let selectedRows: number[] = [];
   let tableRef: any;
   let filteredData: any[] = data;
-
 
   onMount(() => {
     if (saveState && menuPath) {
@@ -98,24 +98,31 @@
   };
 
   const filter = (textSearch: string) => {
-    if(StringUtil.isEmpty(textSearch)) {
+    if (StringUtil.isEmpty(textSearch)) {
       filteredData = data;
-      return;
-    }
-    const _data = SObject.clone(data);
+    } else {
+      const _data = SObject.clone(data);
 
-    filteredData = _data.map((it: any) => {
-      for(let field in it) {
-        if(field !== 'id' && typeof it[field] === 'string') {
-          const marked = markStringSearch(it[field], textSearch, true);
-          if(marked !== it[field]) {
-            it[field] = marked;
-            it.found = true;
+      filteredData = _data
+        .map((it: any) => {
+          for (let field in it) {
+            if (field !== 'id' && typeof it[field] === 'string') {
+              const marked = markStringSearch(it[field], textSearch, true);
+              if (marked !== it[field]) {
+                it[field] = marked;
+                it.found = true;
+              }
+            }
           }
-        }
-      }
-      return it;
-    }).filter((it: any) => it.found);
+          return it;
+        })
+        .filter((it: any) => it.found);
+    }
+
+    // refresh table
+    tick().then(() => {
+      applyTable();
+    });
   };
 
   const findRowById = (id: any) => {
@@ -154,7 +161,7 @@
 
   export const getSelectedRowCount = () => {
     return selectedRows.length;
-  }
+  };
 
   function dotheneedful(sibling, row) {
     if (sibling != null) {
@@ -284,11 +291,11 @@
 <div style="height: 100%; overflow: auto;">
   <slot />
 
-  <span >
-    <slot name="header" {selectAll} {unSelectAll} {toggleSelection} {filter} ></slot>
+  <span>
+    <slot name="header" {selectAll} {unSelectAll} {toggleSelection} {filter} />
   </span>
 
-  <table bind:this={tableRef} on:click|stopPropagation={onClick} {id} class="table">
+  <table bind:this={tableRef} on:click|stopPropagation={onClick} {id} class="table {className}">
     {#if showHeader}
       <thead>
         <tr on:mouseup={onMouseUpHeader}>

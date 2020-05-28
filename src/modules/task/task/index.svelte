@@ -12,7 +12,8 @@
   // Props
   export let menuPath: string;
   export let fullControl: boolean;
-  export let roleControls: [];
+  export let roleControls: any[];
+  export let searchFields: any[];
   export let showWorkList = true;
   export let selectedId: string; // for notification
 
@@ -20,6 +21,7 @@
   const view = new ViewStore(menuPath);
   view.fullControl = fullControl;
   view.roleControls = roleControls;
+  view.searchFields = searchFields;
   view.tableName = 'tsk_task';
 
   const store = new Store(view);

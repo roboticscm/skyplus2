@@ -52,8 +52,8 @@ export const getThemeColors = () => {
     },
     {
       ['--primary']: getComputedStyle(body as any)
-          .getPropertyValue('--primary')
-          .trim(),
+        .getPropertyValue('--primary')
+        .trim(),
     },
     {
       ['--bg-secondary']: getComputedStyle(body as any)
@@ -73,6 +73,11 @@ export const getThemeColors = () => {
     {
       ['--bg-gradient-to']: getComputedStyle(body as any)
         .getPropertyValue('--bg-gradient-to')
+        .trim(),
+    },
+    {
+      ['--readonly-text-color']: getComputedStyle(body as any)
+        .getPropertyValue('--readonly-text-color')
         .trim(),
     },
   ];

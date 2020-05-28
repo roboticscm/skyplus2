@@ -38,9 +38,49 @@ export const filterColumns = [
     type: 'boolean',
   },
   {
-    id: 'createdDate',
-    name: T('TASK.LABEL.CREATED_DATE'),
+    id: 'createdDateFrom',
+    name: T('TASK.LABEL.CREATED_DATE_FROM'),
     type: 'date',
+  },
+  {
+    id: 'createdDateTo',
+    name: T('TASK.LABEL.CREATED_DATE_TO'),
+    type: 'date',
+  },
+  {
+    id: 'startTimeFrom',
+    name: T('TASK.LABEL.START_TIME_FROM'),
+    type: 'date',
+  },
+  {
+    id: 'startTimeTo',
+    name: T('TASK.LABEL.START_TIME_TO'),
+    type: 'date',
+  },
+  {
+    id: 'deadlineFrom',
+    name: T('TASK.LABEL.DEADLINE_FROM'),
+    type: 'date',
+  },
+  {
+    id: 'deadlineTo',
+    name: T('TASK.LABEL.DEADLINE_TO'),
+    type: 'date',
+  },
+  {
+    id: 'isAssignee',
+    name: T('TASK.LABEL.IAM_ASSIGNEE'),
+    type: 'boolean',
+  },
+  {
+    id: 'isAssigner',
+    name: T('TASK.LABEL.IAM_ASSIGNER'),
+    type: 'boolean',
+  },
+  {
+    id: 'isEvaluator',
+    name: T('TASK.LABEL.IAM_EVALUATOR'),
+    type: 'boolean',
   },
 ];
 
