@@ -1300,17 +1300,16 @@
     {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
       <Button btnType={ButtonType.Delete} on:click={onDelete} disabled={disabledDelete} running={$deleteRunning$} />
     {/if}
-
-    {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
-      <Button
-        btnType={ButtonType.TrashRestore}
-        on:click={onTrashRestore}
-        disabled={view.isDisabled(ButtonId.TrashRestore)} />
-    {/if}
-
   </div>
 
   <div>
+    {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
+      <Button
+              btnType={ButtonType.TrashRestore}
+              on:click={onTrashRestore}
+              disabled={view.isDisabled(ButtonId.TrashRestore)} />
+    {/if}
+
     {#if view.isRendered(ButtonId.Config)}
       <Button btnType={ButtonType.Config} on:click={onConfig} disabled={view.isDisabled(ButtonId.Config)} />
     {/if}
