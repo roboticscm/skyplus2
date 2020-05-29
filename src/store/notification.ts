@@ -13,6 +13,12 @@ export enum NotifyType {
   Alarm = 'ALARM',
 }
 
+export enum MessageType {
+  Submit = 'SUBMIT',
+  Assign = 'ASSIGN',
+  Hold = 'HOLD',
+}
+
 const BASE_URL = 'sys/notification/';
 class NotificationStore {
   data$ = new BehaviorSubject<Notification[]>([]);

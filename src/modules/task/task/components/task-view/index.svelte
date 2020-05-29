@@ -7,8 +7,10 @@
   import { appStore } from '@/store/app';
   import { User } from '@/model/user';
   import { markStringSearch } from '../../../../../lib/js/util';
-  import WorkerIcon from '@/icons/worker.svelte';
 
+  import AssigneeIcon from '@/icons/assignee.svelte';
+  import AssignerIcon from '@/icons/assigner.svelte';
+  import EvaluatorIcon from '@/icons/evaluator.svelte';
   export let task: Task;
   export let selectedTask: Task = undefined;
   export let keyword = '';
@@ -174,19 +176,20 @@
       {@html task.name}
     </div>
     <div title={T('TASK.LABEL.PROJECT')} class="task-wrapper__project" style="margin-bottom: 5px;">
-      (
-      {@html task.projectName || T('TASK.LABEL.NO_PROJECT')}
-      )
+      {@html '(' + (task.projectName || T('TASK.LABEL.PROJECT') + ' ' + T('TASK.LABEL.NO_PROJECT')) + ')'}
     </div>
 
     <div class="task-wrapper__task__item">
-      <span class="task-wrapper__task__item__assignee" title={T('TASK.LABEL.ASSIGNEE')}>
+      <span class="task-wrapper__task__item__assignee" title={T('TASK.LABEL.ASSIGNEE')} style="display: flex">
 
-        <WorkerIcon />
-        {@html firstAssignee ? firstAssignee : T('TASK.MSG.NO_ASSIGNEE')}
-        {#if moreAssignees && moreAssignees.length > 0}
-          <span title={moreAssignees.join(', ')}>(+{moreAssignees.length})</span>
-        {/if}
+        <AssigneeIcon />
+        &nbsp;&nbsp;&nbsp;
+        <div style="padding-bottom: 3px;">
+          {@html firstAssignee ? firstAssignee : T('COMMON.LABEL.ASSIGNEE') + ' ' + T('TASK.MSG.NO_ASSIGNEE')}
+          {#if moreAssignees && moreAssignees.length > 0}
+            <span title={moreAssignees.join(', ')}>(+{moreAssignees.length})</span>
+          {/if}
+        </div>
       </span>
       <span title={T('TASK.LABEL.DEADLINE')}>{SDate.convertMillisecondToDateString(task.deadline)}</span>
     </div>
@@ -194,27 +197,35 @@
     <div class="horizontal-separator" />
 
     <div class="task-wrapper__task__item">
-      <span title={T('TASK.LABEL.ASSIGNER')}>
-        <i class="fa fa-user-edit" />
-        {@html firstAssigner ? firstAssigner : T('TASK.MSG.NO_ASSIGNER')}
-        {#if moreAssigners && moreAssigners.length > 0}
-          <span title={moreAssigners.join(', ')}>(+{moreAssigners.length})</span>
-        {/if}
+      <span title={T('TASK.LABEL.ASSIGNER')} style="display: flex">
+        <AssignerIcon />
+        &nbsp;&nbsp;&nbsp;
+        <div style="padding-bottom: 3px;">
+          {@html firstAssigner ? firstAssigner : T('COMMON.LABEL.ASSIGNER') + ' ' + T('TASK.MSG.NO_ASSIGNER')}
+          {#if moreAssigners && moreAssigners.length > 0}
+            <span title={moreAssigners.join(', ')}>(+{moreAssigners.length})</span>
+          {/if}
+        </div>
       </span>
-      <span title={T('TASK.LABEL.PRIORITY')}>{task.priorityName ? task.priorityName : T('TASK.MSG.NO_PRIORITY')}</span>
+      <span title={T('TASK.LABEL.PRIORITY')}>
+        {task.priorityName ? task.priorityName : T('TASK.LABEL.PRIORITY') + ' ' + T('TASK.MSG.NO_PRIORITY')}
+      </span>
     </div>
 
     <div class="task-wrapper__task__item">
-      <span title={T('TASK.LABEL.EVALUATOR')}>
-        <i class="fa fa-user-check" />
-        {@html firstEvaluator ? firstEvaluator : T('TASK.MSG.NO_EVALUATOR')}
-        {#if moreEvaluators && moreEvaluators.length > 0}
-          <span title={moreEvaluators.join(', ')}>(+{moreEvaluators.length})</span>
-        {/if}
+      <span title={T('TASK.LABEL.EVALUATOR')} style="display: flex">
+        <EvaluatorIcon />
+        &nbsp;&nbsp;&nbsp;
+        <div style="padding-bottom: 3px;">
+          {@html firstEvaluator ? firstEvaluator : T('COMMON.LABEL.EVALUATOR') + ' ' + T('TASK.MSG.NO_EVALUATOR')}
+          {#if moreEvaluators && moreEvaluators.length > 0}
+            <span title={moreEvaluators.join(', ')}>(+{moreEvaluators.length})</span>
+          {/if}
+        </div>
       </span>
 
       <span title={T('TASK.LABEL.LAST_STATUS')} class="task-wrapper__task__status">
-        {task.lastStatusName[0] || T('TASK.LABEL.NO_STATUS')}
+        {task.lastStatusName[0] || T('COMMON.LABEL.STATUS') + ' ' + T('TASK.LABEL.NO_STATUS')}
       </span>
 
     </div>
@@ -222,13 +233,13 @@
     <div style="min-height: 10px; height: 10px;" />
 
     <div
-      title={(progressRatio > 0 ? `EARLY: ${progressRatio}%` : progressRatio === 0 ? `BE ON TIME` : `DELAY: ${-progressRatio}%`) + '\n' + T('COMMON.LABEL.TASK_START_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.startTime) + '\n' + T('COMMON.LABEL.TASK_DEADLINE') + ': ' + SDate.convertMillisecondToDateTimeString(task.deadline)}
+      title={(progressRatio > 0 ? `${T('COMMON.MSG.EARLY')}: ${progressRatio}%` : progressRatio === 0 ? `${T('COMMON.MSG.BE_ON_TIME')}` : `${T('COMMON.MSG.DELAY')}: ${-progressRatio}%`) + '\n' + T('COMMON.LABEL.TASK_START_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.startTime) + '\n' + T('COMMON.LABEL.TASK_DEADLINE') + ': ' + SDate.convertMillisecondToDateTimeString(task.deadline)}
       bind:this={taskTimeRef}
       class="task-wrapper__task__task-time" />
 
     {#if task.assigneeStartTime}
       <div
-        title={(progressRatio > 0 ? `EARLY: ${progressRatio}%` : progressRatio === 0 ? `BE ON TIME` : `DELAY: ${-progressRatio}%`) + '\n' + T('COMMON.LABEL.ASSIGNEE_START_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.assigneeStartTime) + '\n' + (task.assigneeEndTime ? T('COMMON.LABEL.ASSIGNEE_END_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.assigneeEndTime) : T('COMMON.LABEL.CURRENT_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(Date.now()))}
+        title={(progressRatio > 0 ? `${T('COMMON.MSG.EARLY')}: ${progressRatio}%` : progressRatio === 0 ? `${T('COMMON.MSG.BE_ON_TIME')}` : `${T('COMMON.MSG.DELAY')}: ${-progressRatio}%`) + '\n' + T('COMMON.LABEL.ASSIGNEE_START_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.assigneeStartTime) + '\n' + (task.assigneeEndTime ? T('COMMON.LABEL.ASSIGNEE_END_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.assigneeEndTime) : T('COMMON.LABEL.CURRENT_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(Date.now()))}
         bind:this={assigneeTimeRef}
         class="task-wrapper__task__assignee-time" />
     {/if}

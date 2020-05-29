@@ -127,7 +127,7 @@ export class StringUtil {
       return StringUtil.replaceAll(value, '`', '');
     }
 
-    return unccentVietnamese(StringUtil.replaceAll(value, ' ', ':*&') + ':*');
+    return unccentVietnamese(StringUtil.replaceAll(StringUtil.replaceAll(value, ' ', ':*&') + ':*', '#', ''));
   }
 
   public static formatSearchParam(value: string) {
@@ -135,7 +135,15 @@ export class StringUtil {
       return '';
     }
 
-    return unccentVietnamese(value);
+    return StringUtil.replaceAll(unccentVietnamese(value), "'", '');
+  }
+
+  public static formatExactlySearchParam(value: string) {
+    if (StringUtil.isEmpty(value)) {
+      return '';
+    }
+
+    return StringUtil.replaceAll(StringUtil.replaceAll(unccentVietnamese(value), "'", ''), '#', '');
   }
 
   static getFirstWord = (source: string) => {
@@ -149,5 +157,18 @@ export class StringUtil {
     }
 
     return source;
+  };
+
+  static getAvatar = (name: string) => {
+    if (StringUtil.isEmpty(name)) {
+      return name;
+    }
+
+    const split = name.split(' ');
+    if (split.length > 1) {
+      return (split[0].substring(0, 1) + split[split.length - 1].substring(0, 1)).toUpperCase();
+    } else {
+      return split[0].substring(0, 1).toUpperCase();
+    }
   };
 }

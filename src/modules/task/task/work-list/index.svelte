@@ -68,6 +68,7 @@
     };
   };
   let filteredList: any[] = [getDefaultValueForItem(filterColumns[0])];
+
   const doFilter = (ob$: Observable<any>) => {
     let start = Date.now();
     ob$
@@ -84,7 +85,7 @@
       )
       .subscribe((res) => {
         const end = Date.now();
-        console.log('Quick Search Took ', end - start);
+        console.log('Quick Search Took 1 ', end - start);
         searchProgress$.next(false);
         didSearch(res, textSearch);
       });
@@ -94,12 +95,23 @@
     const searchParam = getAdvSearchParam();
     if (StringUtil.isEmpty(textSearch) && SObject.isEmptyField(searchParam)) {
       return store.tskFindTasks({ menuPath, departmentId: appStore.org.departmentId, isCompleted: false });
+    } else if (textSearch.startsWith(App.SEARCH_ALL)) {
+      textSearch = '';
+      return store.tskFindTasks({ menuPath, departmentId: appStore.org.departmentId });
     } else {
+      const isExactly = textSearch.includes(App.SEARCH_EXACTLY) ? true : false;
+      if (isExactly) {
+        textSearch = StringUtil.formatExactlySearchParam(textSearch);
+      } else {
+        textSearch = StringUtil.formatFTSParam(textSearch);
+      }
+
       return store.tskFindTasks({
         menuPath,
         departmentId: appStore.org.departmentId,
-        textSearch: StringUtil.formatFTSParam(textSearch),
+        textSearch,
         ...searchParam,
+        isExactly,
       });
     }
   };

@@ -210,6 +210,7 @@
   <label class="floating__label" data-content={placeholder} />
   <div style={`height: ${height};`} class="simple-auto-dropdown" id={'dropdown' + id}>
     <SelectableTable
+      className="table-one-column"
       on:click={onTableClick}
       on:keyup={onTableKeyup}
       bind:this={tableRef}

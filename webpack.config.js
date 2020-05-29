@@ -13,6 +13,11 @@ const CopyPlugin = require('copy-webpack-plugin');
 const onwarn = (warning, onwarn) => warning.code === 'css-unused-selector' || onwarn(warning);
 const Dotenv = require('dotenv-webpack');
 
+
+const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
+
+const smp = new SpeedMeasurePlugin();
+
 const alias = {
       svelte: path.resolve('node_modules', 'svelte'),
       '@': path.resolve(__dirname, 'src'),
@@ -20,7 +25,7 @@ const alias = {
       // 'bignumber.js$': 'bignumber.js/bignumber.js',
     };
 
-module.exports = {
+module.exports = smp.wrap({
   entry: {
     bundle: ['./src/main.ts'],
   },
@@ -150,4 +155,6 @@ module.exports = {
       'Access-Control-Allow-Origin': '*',
     },
   },
-};
+});
+
+

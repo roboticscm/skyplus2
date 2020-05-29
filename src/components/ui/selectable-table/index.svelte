@@ -25,6 +25,7 @@
   export let menuPath: string = undefined;
   export let saveState = true;
   export let className: string = undefined;
+  export let selectedId: any = undefined;
 
   let startRow: any = null;
   let selectedRows: number[] = [];
@@ -238,6 +239,16 @@
     tick().then(() => {
       applyTable();
     });
+  }
+
+  // @ts-ignore
+  $: {
+    if (selectedId) {
+      console.log(' selected id ', selectedId);
+      setTimeout(() => {
+        selectRowById(selectedId);
+      }, 500);
+    }
   }
 
   const saveSettings = () => {

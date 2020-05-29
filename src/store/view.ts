@@ -686,13 +686,21 @@ export class ViewStore {
     return controlS$;
   };
 
-  saveNotification(type: string, toHumanListIds: string[], title: string, targetId: string, isCancel = false) {
+  saveNotification(
+    type: string,
+    toHumanListIds: string[],
+    messageType: string,
+    title: string,
+    targetId: string,
+    isCancel = false,
+  ) {
     const notification = {
       fromHumanId: getUserId(),
       toHumanListIds,
       menuPath: this.menuPath,
       departmentId: appStore.org.departmentId,
       targetId,
+      messageType,
       title,
       type,
       isCancel,
@@ -700,15 +708,33 @@ export class ViewStore {
     return notificationStore.save(notification);
   }
 
-  saveChatNotification(toHumanListIds: string[], title: string, targetId: string, isCancel = false) {
-    return this.saveNotification(NotifyType.Chat, toHumanListIds, title, targetId, isCancel);
+  saveChatNotification(
+    toHumanListIds: string[],
+    messageType: string,
+    title: string,
+    targetId: string,
+    isCancel = false,
+  ) {
+    return this.saveNotification(NotifyType.Chat, toHumanListIds, messageType, title, targetId, isCancel);
   }
 
-  saveAlarmNotification(toHumanListIds: string[], title: string, targetId: string, isCancel = false) {
-    return this.saveNotification(NotifyType.Alarm, toHumanListIds, title, targetId, isCancel);
+  saveAlarmNotification(
+    toHumanListIds: string[],
+    messageType: string,
+    title: string,
+    targetId: string,
+    isCancel = false,
+  ) {
+    return this.saveNotification(NotifyType.Alarm, toHumanListIds, messageType, title, targetId, isCancel);
   }
 
-  saveFunctionalNotification(toHumanListIds: string[], title: string, targetId: string, isCancel = false) {
-    return this.saveNotification(NotifyType.Functional, toHumanListIds, title, targetId, isCancel);
+  saveFunctionalNotification(
+    toHumanListIds: string[],
+    messageType: string,
+    title: string,
+    targetId: string,
+    isCancel = false,
+  ) {
+    return this.saveNotification(NotifyType.Functional, toHumanListIds, messageType, title, targetId, isCancel);
   }
 }

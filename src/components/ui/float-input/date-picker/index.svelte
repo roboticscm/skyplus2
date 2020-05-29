@@ -181,6 +181,7 @@
 
 <div class="floating-wrapper" style="margin-top: 17px;">
   <input
+    style="color: var(--primary)"
     {title}
     {name}
     type="text"

@@ -44,6 +44,8 @@
   import { getUserFullName } from '@/lib/js/security';
   import { getUserId } from '@/lib/js/security';
   import { SubmitStatus } from '../../types';
+  import CustomSelect from '@/components/ui/float-input/custom-select';
+  import { MessageType } from '@/store/notification';
 
   // Props
   export let view: ViewStore;
@@ -336,9 +338,9 @@
           (status.status ? status.status + '</br>' : '') +
           status.note;
         if (res.data.submitStatus === 1) {
-          saveNotification(title, status.taskId);
+          saveNotification(MessageType.Submit, title, status.taskId);
         } else if (res.data.submitStatus === 0) {
-          saveNotification(title, status.taskId, true);
+          saveNotification(MessageType.Submit, title, status.taskId, true);
         }
       }
     });
@@ -379,9 +381,9 @@
           (status.status ? status.status + '</br>' : '') +
           status.note;
         if (res.data.submitStatus === 1) {
-          saveNotification(title, status.taskId);
+          saveNotification(MessageType.Submit, title, status.taskId);
         } else if (res.data.submitStatus === 0) {
-          saveNotification(title, status.taskId, true);
+          saveNotification(MessageType.Submit, title, status.taskId, true);
         }
       }
     });
@@ -703,13 +705,11 @@
         ...form.evaluators.map((it: any) => it.id),
       ]),
     ].filter((it) => it !== null && it != getUserId());
-
-    console.log(ret);
     return ret;
   };
 
-  const saveNotification = (title: string, targetId: string, isCancel = false) => {
-    view.saveFunctionalNotification(getHumanIds(), title, targetId, isCancel).subscribe();
+  const saveNotification = (messageType: string, title: string, targetId: string, isCancel = false) => {
+    view.saveFunctionalNotification(getHumanIds(), messageType, title, targetId, isCancel).subscribe();
   };
 
   // ============================== // HELPER ==========================
@@ -906,12 +906,13 @@
             // success
 
             // save notification on submit or cancel submit
-            if (['submit', 'assign', 'unHold'].includes(submitType)) {
-              const title = res.data.name;
-              saveNotification(title, res.data.id);
-            } else if (['cancelSubmit', 'unAssign', 'hold'].includes(submitType)) {
-              const title = res.data.name;
-              saveNotification(title, res.data.id, true);
+            const title = res.data.name;
+            if (['submit', 'cancelSubmit'].includes(submitType)) {
+              saveNotification(MessageType.Submit, title, res.data.id, submitType === 'cancelSubmit');
+            } else if (['assign', 'unAssign'].includes(submitType)) {
+              saveNotification(MessageType.Assign, title, res.data.id, submitType === 'unAssign');
+            } else if (['hold', 'unHold'].includes(submitType)) {
+              saveNotification(MessageType.Hold, title, res.data.id, submitType === 'unHold');
             }
 
             // @ts-ignore
@@ -1178,7 +1179,7 @@
     if (filtered.length > 0) {
       lastAssigneeSubmittedStatus = filtered[filtered.length - 1].status;
     } else {
-      lastAssigneeSubmittedStatus = T('TASK.LABEL.NO_STATUS');
+      lastAssigneeSubmittedStatus = T('COMMON.LABEL.STATUS') + ' ' + T('TASK.LABEL.NO_STATUS');
     }
   }
 
@@ -1305,9 +1306,9 @@
   <div>
     {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
       <Button
-              btnType={ButtonType.TrashRestore}
-              on:click={onTrashRestore}
-              disabled={view.isDisabled(ButtonId.TrashRestore)} />
+        btnType={ButtonType.TrashRestore}
+        on:click={onTrashRestore}
+        disabled={view.isDisabled(ButtonId.TrashRestore)} />
     {/if}
 
     {#if view.isRendered(ButtonId.Config)}
@@ -1330,15 +1331,15 @@
       {menuPath}
       id={view.getViewName() + 'TaskSectionId'}>
       <div slot="subTitle" class="section-sub-title w-100">
-        <div class="col1 bold-text large-font-size active-color">
+        <div class="col1 bold-text large-font-sizer text-active-underline">
           {@html form.name}
         </div>
 
         <div class="col2">
-          {@html lastAssigneeSubmittedStatus ? lastAssigneeSubmittedStatus : T('TASK.MSG.NO_STATUS')}
+          {@html lastAssigneeSubmittedStatus}
         </div>
 
-        <div class="col3 active-color">
+        <div class="col3 text-active-underline">
           {@html SDate.convertMillisecondToDateTimeString(form.deadline)}
         </div>
       </div>
@@ -1346,7 +1347,7 @@
         <!-- Name -->
         <div class="col-xs-24 col-md-12">
           <FloatTextInput
-            className="large-font-size active-color"
+            className="large-font-size text-active-underline"
             bind:checked={form.isPrivate}
             rightCheck={true}
             checkTitle={T('COMMON.LABEL.PRIVATE_TASK')}
@@ -1360,18 +1361,27 @@
         <!-- // Name -->
 
         <div class="col-xs-24 col-md-12">
-          <!-- Project -->
-          <FloatSelect
-            className="large-font-size"
-            saveState={true}
-            autoLoad={true}
+          <!--           Project-->
+          <CustomSelect
             bind:value={form.projectId}
-            on:clickLabel={() => onOpenModal('task/project')}
-            id={view.getViewName() + 'ProjectId'}
             placeholder={T('TASK.LABEL.PROJECT') + '(+)'}
+            id={view.getViewName() + 'ProjectId'}
+            on:clickLabel={() => onOpenModal('task/project')}
             {menuPath}
             disabled={readOnlyMode}
-            data$={projects$} />
+            data={$projects$} />
+
+          <!--          <FloatSelect-->
+          <!--            className="large-font-size"-->
+          <!--            saveState={true}-->
+          <!--            autoLoad={true}-->
+          <!--            bind:value={form.projectId}-->
+          <!--            on:clickLabel={() => onOpenModal('task/project')}-->
+          <!--            id={view.getViewName() + 'ProjectId'}-->
+          <!--            placeholder={T('TASK.LABEL.PROJECT') + '(+)'}-->
+          <!--            {menuPath}-->
+          <!--            disabled={readOnlyMode}-->
+          <!--            data$={projects$} />-->
         </div>
         <!-- // Project -->
       </div>
@@ -1414,10 +1424,7 @@
         <!-- // Last status -->
         <!-- Last status -->
         <div class="col-xs-24 col-md-12">
-          <FloatTextInput
-            placeholder={T('COMMON.LABEL.STATUS')}
-            disabled={true}
-            value={lastAssigneeSubmittedStatus ? lastAssigneeSubmittedStatus : T('COMMON.LABEL.NO_STATUS')} />
+          <FloatTextInput placeholder={T('COMMON.LABEL.STATUS')} disabled={true} value={lastAssigneeSubmittedStatus} />
         </div>
         <!-- // Last status -->
       </div>
@@ -1436,7 +1443,7 @@
         <!-- Deadline -->
         <div class="col-xs-24 col-md-12 col-lg-6">
           <FloatDatePicker
-            className="active-color"
+            className="text-active-underline"
             on:change={onChangeDeadline}
             placeholder={T('COMMON.LABEL.DEADLINE')}
             bind:value={form.deadline}

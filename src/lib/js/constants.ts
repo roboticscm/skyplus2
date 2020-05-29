@@ -46,6 +46,8 @@ export class App {
   static DELAY_ON_INPUT = 50; //ms
 
   static MIN_SEARCH_LENGTH = 2;
+  static SEARCH_ALL = '@*';
+  static SEARCH_EXACTLY = '#';
 }
 
 export class Image {

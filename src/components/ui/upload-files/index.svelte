@@ -141,7 +141,7 @@
     id={id + 'UploadFileId'}
     on:close={onDeleteFile} />
   <div class="upload-files__info">
-    <i class="upload-files__info__icon fa fa-cloud-upload-alt" />
+    <i class="upload-files__info__icon fa fa-cloud-upload-alt" on:click={onSelectFile} />
     <div class="upload-files__info__label">
       <span
         on:click={onSelectFile}

@@ -75,7 +75,7 @@
         preset(ButtonId.Config, 'CONFIG', 'config', 'btn-flat');
         break;
       case ButtonType.TrashRestore:
-        preset(ButtonId.TrashRestore, 'TRASH_RESTORE', '<i class="fa fa-trash-restore-alt"></i>', 'btn-flat');
+        preset(ButtonId.TrashRestore, 'TRASH_RESTORE', 'trash-restore', 'btn-flat');
         break;
       case ButtonType.CloseModal:
         preset(undefined, undefined, '<i class="fa fa-times"></i>', 'btn-flat');

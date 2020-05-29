@@ -117,6 +117,7 @@ export default class Store {
       page: 1,
       pageSize: App.DEFAULT_PAGE_SIZE,
       textSearch: '',
+      isExactly: false,
       taskName: '',
       projectName: '',
       assigneeName: '',

@@ -42,6 +42,7 @@ export interface Notification {
   id?: string;
   fromHumanId?: string;
   fromHumanFullName?: string;
+  fromHumanAvatar?: string;
   toHumanId?: string;
   toHumanListIds?: string[];
   fromGroupId?: string;
@@ -52,6 +53,7 @@ export interface Notification {
   targetId?: string;
   title: string;
   type?: string;
+  messageType?: string;
   isRead?: boolean;
   isFinished?: boolean;
   createdDate?: number;

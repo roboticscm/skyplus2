@@ -26,7 +26,7 @@ export enum ButtonType {
   UnAssign,
   Hold,
   UnHold,
-  Dashboard
+  Dashboard,
 }
 
 export enum ButtonPressed {
@@ -55,5 +55,5 @@ export enum ButtonId {
   UnAssign = 'btnUnAssign',
   Hold = 'btnHold',
   UnHold = 'btnUnHold',
-  Dashboard='btnDashboard'
+  Dashboard = 'btnDashboard',
 }
