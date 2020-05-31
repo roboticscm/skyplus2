@@ -45,14 +45,14 @@
       password,
     })
       .then((res: any) => {
-        if (res.loginResult === 'SUCCESS') {
+        if (res && res.loginResult === 'SUCCESS') {
           didLogin(res);
         } else {
-          snackbarRef.show(T(`SYS.MSG.${res.loginResult}`));
+          snackbarRef && snackbarRef.show(T(`SYS.MSG.${res.loginResult}`));
         }
       })
       .catch((error: any) => {
-        snackbarRef.show(T(`SYS.MSG.${error.loginResult}`));
+        snackbarRef && snackbarRef.show(T(`SYS.MSG.${error.loginResult}`));
       });
   };
 
@@ -83,7 +83,7 @@
           doLogin(username, password);
         } else {
           // validate error
-          snackbarRef.show(T('SYS.MSG.PASSWORD_MUST_NOT_BE_BLANK'));
+          snackbarRef && snackbarRef.show(T('SYS.MSG.PASSWORD_MUST_NOT_BE_BLANK'));
         }
       }
     }

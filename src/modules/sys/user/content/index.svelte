@@ -25,6 +25,7 @@
   import Store from '../store';
   import { Debug } from '@/lib/js/debug';
   import { SJSON } from '@/lib/js/sjson';
+  import { resizeBase64Img } from '../../../../lib/js/image';
 
   // Props
   export let view: ViewStore;
@@ -208,12 +209,12 @@
 
     // check for data change
     // @ts-ignore
-    if ($isUpdateMode$) {
-      const dataChanged = view.checkObjectChange(beforeForm, SObject.clone(form), scRef.snackbarRef());
-      if (!dataChanged) {
-        return false;
-      }
-    }
+    // if ($isUpdateMode$) {
+    //   const dataChanged = view.checkObjectChange(beforeForm, SObject.clone(form), scRef.snackbarRef());
+    //   if (!dataChanged) {
+    //     return false;
+    //   }
+    // }
 
     return true;
   };
@@ -272,10 +273,21 @@
             }),
           ),
         ),
+        concatMap((_) =>
+          fromPromise(
+            new Promise((resolve, reject) => {
+              resizeBase64Img(form.iconData, 35, 35).then(function(newImg) {
+                form.lowIconData = newImg;
+                resolve('ok');
+              });
+            }),
+          ),
+        ),
         filter((value) => value !== 'fail') /* filter if pass verify permission*/,
         switchMap((_) => {
           /* submit data to API server*/
           saveRunning$.next(true);
+          console.log(form.data());
           return form.post(saveUpdateUri).pipe(
             catchError((error) => {
               return of(error);

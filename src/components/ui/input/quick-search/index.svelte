@@ -10,6 +10,9 @@
   export let showAdvancedSearch = false;
   export let loading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   export let title = `
+    ${T('COMMON.LABEL.SEARCH_ALL')}: ${T('COMMON.LABEL.ADD_BEFORE')} @*
+    ${T('COMMON.LABEL.SEARCH_EXACTLY')}: ${T('COMMON.LABEL.ADD')} #
+    ---------------------------
     ${T('COMMON.LABEL.FULL_TEXT_SEARCH_OPTION')}:
     1. ${T('COMMON.LABEL.EXACT')}: ${T('COMMON.LABEL.START_WITH')} " -> ${T('COMMON.LABEL.EX')}: "some text
     2. ${T('COMMON.LABEL.SEARCH_OR')}: | -> ${T('COMMON.LABEL.EX')}: some | text

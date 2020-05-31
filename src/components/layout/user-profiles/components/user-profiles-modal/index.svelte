@@ -3,6 +3,7 @@
   import { T } from '@/lib/js/locale/locale';
   import Tabs from '@/components/ui/tabs';
   import PasswordField from '@/components/ui/float-input/custom-password-field';
+  import InputField from '@/components/ui/float-input/text-input';
   import Error from '@/components/ui/error';
   import Form from '@/lib/js/form/form';
   import { themes, getThemeColors } from './helper';
@@ -23,7 +24,7 @@
   import { Debug } from '@/lib/js/debug';
 
   const { usedLanguages$ } = LanguageStore;
-
+  const { user$ } = appStore;
   const { theme$ } = appStore;
 
   let containerWidth = '300px';
@@ -226,8 +227,16 @@
       .catch((error) => Debug.errorSection('onApplyLanguage', error));
   };
 
+  let username = '';
   onMount(() => {
     LanguageStore.sysGetUsedLanguages();
+    const userSub = user$.subscribe((res: any) => {
+      username = res && res.username;
+    });
+
+    return () => {
+      userSub.unsubscribe;
+    };
   });
 </script>
 
@@ -257,6 +266,10 @@
         placeholder={T('COMMON.LABEL.LANGUAGE')} />
     {:else if activeTab === 'ACCOUNT'}
       <form class="form" on:keydown={(event) => form.errors.clear(event.target.name)}>
+        <div>
+          <InputField readonly={true} bind:value={username} placeholder={T('COMMON.LABEL.USERNAME')} />
+        </div>
+
         <div>
           <PasswordField
             name="currentPassword"

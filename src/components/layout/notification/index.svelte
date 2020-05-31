@@ -19,6 +19,22 @@
   import { getViewTitleFromMenuPath } from '@/lib/js/url-util';
   import { SDate } from '@/lib/js/sdate';
   import { T } from '@/lib/js/locale/locale';
+  import { StringUtil } from '@/lib/js/string-util';
+
+  import SubmitIcon from '@/icons/submit24x24.svelte';
+  import CancelSubmitIcon from '@/icons/cancel-submit24x24.svelte';
+
+  import AssignIcon from '@/icons/assign24x24.svelte';
+  import UnAssignIcon from '@/icons/un-assign24x24.svelte';
+
+  import HoldIcon from '@/icons/hold24x24.svelte';
+  import UnHoldIcon from '@/icons/un-hold24x24.svelte';
+
+  import Reminder1 from '@/icons/reminder124x24.svelte';
+  import Reminder2 from '@/icons/reminder224x24.svelte';
+
+  import HumanOrOrgStore from '@/modules/sys/user/store';
+  import { findAvatar } from './helper';
 
   // @ts-ignore
   const { isLogged$ } = AppStore;
@@ -41,7 +57,25 @@
 
   const reload = () => {
     notificationStore.findNotifications('', '').subscribe((res: any) => {
-      notificationStore.data$.next(res.data.map((it: any) => SObject.convertFieldsToCamelCase(it)));
+      const filteredData = res.data.map((it: any) => SObject.convertFieldsToCamelCase(it));
+
+      notificationStore.data$.next(filteredData);
+
+      if (filteredData && filteredData.length > 0) {
+        const fromHumanIds = filteredData.map((it: Notification) => it.fromHumanId);
+        const distinctFromHumanIds = new Set(fromHumanIds.filter((it) => it !== null));
+
+        console.log(distinctFromHumanIds);
+
+        HumanOrOrgStore.findAvatars([...distinctFromHumanIds].join(',')).subscribe((res: any) => {
+          const _filteredData = filteredData.map((it: Notification) => {
+            it.fromHumanAvatar = findAvatar(res.data, it.fromHumanId);
+            return it;
+          });
+
+          notificationStore.data$.next(_filteredData);
+        });
+      }
     });
   };
 
@@ -213,57 +247,122 @@
   <source src={messageTone} type="audio/ogg" />
 </audio>
 
+<!--title={'<span class="bold-text">@: ' + (item.fromHumanFullName || T('COMMON.LABEL.SYSTEM')) + '</span>' + '\\' + item.departmentName + '\\' + getViewTitleFromMenuPath(item.menuPath)}-->
+<!--content={'<span class="italic-text">' + SDate.convertMillisecondToDateTimeString(item.createdDate) + '</span></br>' + item.title}-->
+
 {#each newestNotificationList as item}
   <MessageModal
     lineThrough={item.isCancel}
     on:click={() => onClickModal(item)}
     on:close={() => onCloseModal(item.id)}
-    title={'<span class="bold-text">@: ' + (item.fromHumanFullName || T('COMMON.LABEL.SYSTEM')) + '</span>' + '\\' + item.departmentName + '\\' + getViewTitleFromMenuPath(item.menuPath)}
-    content={'<span class="italic-text">' + SDate.convertMillisecondToDateTimeString(item.createdDate) + '</span></br>' + item.title}
     right={item.right}
-    top={item.top} />
+    top={item.top}>
+    <div slot="title">
+      <div class="message-modal__title__header">
+        <div class="message-modal__title__header__avatar">
+          {#if item.fromHumanAvatar}
+            <img class="message-modal__title__header__avatar__image" src={item.fromHumanAvatar} alt="" />
+          {:else if item.fromHumanFullName}
+            <div class="notify-dropdown-item__title__header__avatar__no">
+              {StringUtil.getAvatar(item.fromHumanFullName)}
+            </div>
+          {:else}
+            <i class="message-modal__title__header__avatar__no fa fa-desktop" />
+          {/if}
+        </div>
+
+        <div class="message-modal__title__header__text">
+          <div>{item.departmentName || T('COMMON.MSG.NO_DEPARTMENT')}\{getViewTitleFromMenuPath(item.menuPath)}</div>
+
+          <div>{SDate.convertMillisecondToDateTimeString(item.createdDate)}</div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="message-modal__body__content"
+      title={StringUtil.replaceAll(item.title, '</br>', '\n')
+        .replace('<span class="italic-text">', '')
+        .replace('</span>', '')}>
+      <div class="message-modal__body__content__image">
+        {#if item.messageType === 'SUBMIT'}
+          {#if item.isCancel}
+            <item className="large-svg-icon" />
+          {:else}
+            <SubmitIcon className="large-svg-icon" />
+          {/if}
+        {:else if item.messageType === 'ASSIGN'}
+          {#if item.isCancel}
+            <UnAssignIcon className="large-svg-icon" />
+          {:else}
+            <AssignIcon className="large-svg-icon" />
+          {/if}
+        {:else if item.messageType === 'HOLD'}
+          {#if item.isCancel}
+            <UnHoldIcon className="large-svg-icon" />
+          {:else}
+            <HoldIcon className="large-svg-icon" />
+          {/if}
+        {:else if item.messageType === 'REMINDER1'}
+          <Reminder1 className="large-svg-icon" />
+        {:else if item.messageType === 'REMINDER2'}
+          <Reminder2 className="large-svg-icon" />
+        {/if}
+      </div>
+      <div class="message-modal__body__content__text">
+        <div class="message-modal__body__content__text__inside">
+          {@html item.title}
+        </div>
+      </div>
+    </div>
+  </MessageModal>
 {/each}
 
 <div class="notification">
   {#if $isLogged$}
     <div
+      style="position: relative; margin-left: 20px;"
       on:mouseover={() => onMouseover('chatDropdown')}
       on:mouseout={() => onMouseout('chatDropdown')}
       class="notify-icon {countChat === 0 ? 'notify-icon-disabled' : ''}">
       <ChatIcon />
+      {#if countChat > 0}
+        <div class="badge">{countChat}</div>
+      {/if}
+
       <div id="chatDropdown" class="right-dropdown-content" style="height: 600px;">
         <MessageDropdownContent type={NotifyType.Chat} on:click={onClickItem} data={chat} />
       </div>
     </div>
-    {#if countChat > 0}
-      <div class="badge badge-chat">{countChat}</div>
-    {/if}
 
     <div
+      style="position: relative; margin-left: 20px;"
       on:mouseover={() => onMouseover('functionalDropdown')}
       on:mouseout={() => onMouseout('functionalDropdown')}
       class="notify-icon {countFunctional === 0 ? 'notify-icon-disabled' : ''}">
       <BellIcon />
+
+      {#if countFunctional > 0}
+        <div class="badge">{countFunctional}</div>
+      {/if}
+
       <div id="functionalDropdown" class="right-dropdown-content" style="height: 600px;">
         <MessageDropdownContent type={NotifyType.Functional} on:click={onClickItem} data={functional} />
       </div>
     </div>
 
-    {#if countFunctional > 0}
-      <div class="badge badge-functional">{countFunctional}</div>
-    {/if}
-
     <div
+      style="position: relative; margin-left: 20px;"
       on:mouseover={() => onMouseover('alarmDropdown')}
       on:mouseout={() => onMouseout('alarmDropdown')}
       class="notify-icon {countAlarm === 0 ? 'notify-icon-disabled' : ''}">
       <AlertIcon />
+      {#if countAlarm > 0}
+        <div class="badge">{countAlarm}</div>
+      {/if}
       <div id="alarmDropdown" class="right-dropdown-content" style="height: 600px;">
         <MessageDropdownContent type={NotifyType.Alarm} on:click={onClickItem} data={alarm} />
       </div>
     </div>
-    {#if countAlarm > 0}
-      <div class="badge badge-alert">{countAlarm}</div>
-    {/if}
   {/if}
 </div>

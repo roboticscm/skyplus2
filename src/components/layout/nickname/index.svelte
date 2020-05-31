@@ -7,8 +7,6 @@
 
 <div class="nickname">
   {#if $user$}
-    (
-    {@html $user$.firstName + ', ' + StringUtil.getFirstWord($user$.lastName)}
-    )
+    {@html '(' + $user$.firstName + ', ' + StringUtil.getFirstWord($user$.lastName) + ')'}
   {/if}
 </div>

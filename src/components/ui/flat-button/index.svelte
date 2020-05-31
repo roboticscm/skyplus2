@@ -57,25 +57,25 @@
         preset(undefined, 'RESET', '<i class="fa fa-redo-alt"></i>', 'btn-flat');
         break;
       case ButtonType.AddNew:
-        preset(ButtonId.AddNew, 'ADD_NEW', 'add-new', 'btn-flat');
+        preset(ButtonId.AddNew, 'ADD_NEW', 'add-new24x24', 'btn-flat');
         break;
       case ButtonType.Save:
-        preset(ButtonId.Save, 'SAVE', 'save', 'btn-flat');
+        preset(ButtonId.Save, 'SAVE', 'save24x24', 'btn-flat');
         break;
       case ButtonType.Delete:
-        preset(ButtonId.Delete, 'DELETE', 'delete', 'btn-flat');
+        preset(ButtonId.Delete, 'DELETE', 'delete24x24', 'btn-flat');
         break;
       case ButtonType.Edit:
-        preset(ButtonId.Edit, 'EDIT', 'edit', 'btn-flat');
+        preset(ButtonId.Edit, 'EDIT', 'edit24x24', 'btn-flat');
         break;
       case ButtonType.Update:
-        preset(ButtonId.Update, 'UPDATE', 'update', 'btn-flat');
+        preset(ButtonId.Update, 'UPDATE', 'update24x24', 'btn-flat');
         break;
       case ButtonType.Config:
-        preset(ButtonId.Config, 'CONFIG', 'config', 'btn-flat');
+        preset(ButtonId.Config, 'CONFIG', 'config24x24', 'btn-flat');
         break;
       case ButtonType.TrashRestore:
-        preset(ButtonId.TrashRestore, 'TRASH_RESTORE', 'trash-restore', 'btn-flat');
+        preset(ButtonId.TrashRestore, 'TRASH_RESTORE', 'trash-restore24x24', 'btn-flat');
         break;
       case ButtonType.CloseModal:
         preset(undefined, undefined, '<i class="fa fa-times"></i>', 'btn-flat');
@@ -99,10 +99,10 @@
         preset(undefined, undefined, '<i class="fa fa-toggle-on"></i>', 'btn-small-primary');
         break;
       case ButtonType.Submit:
-        preset(ButtonId.Submit, 'SUBMIT', 'submit', 'btn-flat');
+        preset(ButtonId.Submit, 'SUBMIT', 'submit24x24', 'btn-flat');
         break;
       case ButtonType.CancelSubmit:
-        preset(ButtonId.CancelSubmit, 'CANCEL_SUBMIT', 'cancel-submit', 'btn-flat');
+        preset(ButtonId.CancelSubmit, 'CANCEL_SUBMIT', 'cancel-submit24x24', 'btn-flat');
         break;
       case ButtonType.Approve:
         preset(ButtonId.Approve, 'APPROVE', '<i class="fa fa-check"></i>', 'btn-flat');
@@ -111,21 +111,21 @@
         preset(ButtonId.CancelApprove, 'CANCEL_APPROVE', '', 'btn-flat');
         break;
       case ButtonType.Assign:
-        preset(ButtonId.Assign, 'ASSIGN', 'assign', 'btn-flat');
+        preset(ButtonId.Assign, 'ASSIGN', 'assign24x24', 'btn-flat');
         break;
       case ButtonType.UnAssign:
-        preset(ButtonId.UnAssign, 'UN_ASSIGN', 'un-assign', 'btn-flat');
+        preset(ButtonId.UnAssign, 'UN_ASSIGN', 'un-assign24x24', 'btn-flat');
         break;
 
       case ButtonType.Hold:
-        preset(ButtonId.Hold, 'HOLD', 'hold', 'btn-flat');
+        preset(ButtonId.Hold, 'HOLD', 'hold24x24', 'btn-flat');
         break;
       case ButtonType.UnHold:
-        preset(ButtonId.UnHold, 'UN_HOLD', 'un-hold', 'btn-flat');
+        preset(ButtonId.UnHold, 'UN_HOLD', 'un-hold24x24', 'btn-flat');
         break;
 
       case ButtonType.Dashboard:
-        preset(ButtonId.Dashboard, 'DASHBOARD', 'dashboard', 'btn-flat');
+        preset(ButtonId.Dashboard, 'DASHBOARD', 'dashboard24x24', 'btn-flat');
         break;
       default:
     }
@@ -165,7 +165,8 @@
   {id}
   {type}
   class="{className}
-  {uppercase ? 'uppercase' : ''}"
+  {uppercase ? 'uppercase' : ''}
+  {disabled ? 'disabled' : ''}"
   {disabled}
   on:click|stopPropagation>
   {#if running}

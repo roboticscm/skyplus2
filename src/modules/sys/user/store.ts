@@ -57,4 +57,10 @@ export default class Store {
   loadAssignedDep(humanId: string) {
     return orgStore.sysGetAssignedHumanOrgTree(humanId);
   }
+
+  static findAvatars(userIds: string) {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('findAvatars')}`, {
+      userIds,
+    });
+  }
 }

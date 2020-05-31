@@ -10,6 +10,7 @@
   export let rightCheck = false;
   export let title = '';
   export let checkTitle = '';
+  export let readonly = false;
 
   let inputRef: any;
   export const focus = () => {
@@ -28,6 +29,7 @@
     {title}
     {name}
     type="search"
+    {readonly}
     {disabled}
     class="{checked !== undefined ? 'check' : ''}
     {rightCheck ? 'right' : ''} floating__input {className}"

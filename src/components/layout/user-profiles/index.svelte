@@ -7,6 +7,8 @@
   import UserProfilesModal from './components/user-profiles-modal/index.svelte';
   import { User } from '@/model/user';
   import { Subscription } from 'rxjs';
+  import LogoutIcon from '@/icons/logout24x24.svelte';
+  import ProfilesIcon from '@/icons/profiles24x24.svelte';
 
   const { user$ } = appStore;
 
@@ -74,17 +76,17 @@
       {/if}
 
       <div id="userProfilesDropdown" class="right-dropdown-content">
-        <div class="user-profiles__fullname">{` ${user.username} - ${user.lastName} ${user.firstName}`}</div>
+        <div class="user-profiles__fullname">{`${user.lastName} ${user.firstName}`}</div>
         <div on:click|stopPropagation={showUserProfiles} class="dropdown-item">
-          <i class="fa fa-file-invoice" />
-          {T('SYS.MENU.USER_PROFILES')}
+          <ProfilesIcon />
+          &nbsp; {T('SYS.MENU.USER_PROFILES')}
         </div>
         <div on:click={onLogout} class="dropdown-item">
-          <i class="fa fa-sign-out-alt" />
-          {T('SYS.MENU.LOGOUT')}
+          <LogoutIcon />
+          &nbsp; {T('SYS.MENU.LOGOUT')}
         </div>
       </div>
     </div>
   {/if}
-  <i class="user-profiles-mark fa fa-sort-down" />
+  <!--  <i class="user-profiles-mark fa fa-sort-down" />-->
 </div>

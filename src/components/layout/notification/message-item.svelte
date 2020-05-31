@@ -6,17 +6,17 @@
   import { getViewTitleFromMenuPath } from '@/lib/js/url-util';
   import { createEventDispatcher } from 'svelte';
   import { StringUtil } from '@/lib/js/string-util';
-  import SubmitIcon from '@/icons/submit.svelte';
-  import CancelSubmitIcon from '@/icons/cancel-submit.svelte';
+  import SubmitIcon from '@/icons/submit24x24.svelte';
+  import CancelSubmitIcon from '@/icons/cancel-submit24x24.svelte';
 
-  import AssignIcon from '@/icons/assign.svelte';
-  import UnAssignIcon from '@/icons/un-assign.svelte';
+  import AssignIcon from '@/icons/assign24x24.svelte';
+  import UnAssignIcon from '@/icons/un-assign24x24.svelte';
 
-  import HoldIcon from '@/icons/hold.svelte';
-  import UnHoldIcon from '@/icons/un-hold.svelte';
+  import HoldIcon from '@/icons/hold24x24.svelte';
+  import UnHoldIcon from '@/icons/un-hold24x24.svelte';
 
-  import Reminder1 from '@/icons/reminder1.svelte';
-  import Reminder2 from '@/icons/reminder2.svelte';
+  import Reminder1 from '@/icons/reminder124x24.svelte';
+  import Reminder2 from '@/icons/reminder224x24.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -39,7 +39,7 @@
   style="margin-top: 6px;">
 
   <div class="notify-dropdown-item__header">
-    <div class="notify-dropdown-item__header__avatar">
+    <div title={notification.fromHumanFullName} class="notify-dropdown-item__header__avatar">
       {#if notification.fromHumanAvatar}
         <img class="notify-dropdown-item__header__avatar__image" src={notification.fromHumanAvatar} alt="" />
       {:else if notification.fromHumanFullName}
@@ -66,31 +66,35 @@
     title={StringUtil.replaceAll(notification.title, '</br>', '\n')
       .replace('<span class="italic-text">', '')
       .replace('</span>', '')}>
-    {#if notification.messageType === 'SUBMIT'}
-      {#if notification.isCancel}
-        <CancelSubmitIcon />
-      {:else}
-        <SubmitIcon />
+    <div class="notify-dropdown-item__content__image">
+      {#if notification.messageType === 'SUBMIT'}
+        {#if notification.isCancel}
+          <CancelSubmitIcon className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
+        {:else}
+          <SubmitIcon className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
+        {/if}
+      {:else if notification.messageType === 'ASSIGN'}
+        {#if notification.isCancel}
+          <UnAssignIcon className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
+        {:else}
+          <AssignIcon className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
+        {/if}
+      {:else if notification.messageType === 'HOLD'}
+        {#if notification.isCancel}
+          <UnHoldIcon className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
+        {:else}
+          <HoldIcon className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
+        {/if}
+      {:else if notification.messageType === 'REMINDER1'}
+        <Reminder1 className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
+      {:else if notification.messageType === 'REMINDER2'}
+        <Reminder2 className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
       {/if}
-    {:else if notification.messageType === 'ASSIGN'}
-      {#if notification.isCancel}
-        <UnAssignIcon />
-      {:else}
-        <AssignIcon />
-      {/if}
-    {:else if notification.messageType === 'HOLD'}
-      {#if notification.isCancel}
-        <UnHoldIcon />
-      {:else}
-        <HoldIcon />
-      {/if}
-    {:else if notification.messageType === 'REMINDER1'}
-      <Reminder1 />
-    {:else if notification.messageType === 'REMINDER2'}
-      <Reminder2 />
-    {/if}
-
-    {@html notification.title}
-
+    </div>
+    <div class="notify-dropdown-item__content__text">
+      <div class="notify-dropdown-item__content__text__inside">
+        {@html notification.title}
+      </div>
+    </div>
   </div>
 </div>
