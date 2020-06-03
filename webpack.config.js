@@ -24,6 +24,20 @@ const alias = {
       'd': path.resolve(__dirname, 'src/lib/js/debug'),
       // 'bignumber.js$': 'bignumber.js/bignumber.js',
     };
+const  HtmlWebpackPlugin = require('html-webpack-plugin');
+// const createVariants = require('parallel-webpack').createVariants;
+//
+// const baseOptions = {
+//   preferredDevTool: process.env.DEVTOOL || 'eval'
+// };
+//
+// const variants = {
+//   minified: [true, false],
+//   debug: [true, false],
+//   target: ['commonjs2', 'var', 'umd', 'amd']
+// };
+
+// const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = smp.wrap({
   entry: {
@@ -36,8 +50,8 @@ module.exports = smp.wrap({
   },
   output: {
     path: path.resolve(__dirname, '../../www'),
-    filename: '[name].js',
-    chunkFilename: '[name].[id].js',
+    filename: '[name][contenthash].js',
+    chunkFilename: '[name].[id][contenthash].js'
   },
   module: {
     rules: [
@@ -129,7 +143,7 @@ module.exports = smp.wrap({
     new Dotenv(),
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
-      filename: '[name].css',
+      filename: '[name][contenthash].css',
     }),
     new webpack.ProvidePlugin({
       j: 'jquery',
@@ -137,8 +151,13 @@ module.exports = smp.wrap({
       'd': 'd'
     }),
 
+    new HtmlWebpackPlugin({
+      hash: true,
+      template: './public/template.html',
+      filename: './index.html'
+    }),
     new CopyPlugin([
-      { from: './public/index.html', to: './index.html' },
+      // { from: './public/index.html', to: './index.html' },
       { from: './public/favicon.png', to: './favicon.png' },
     ]),
   ],
@@ -155,6 +174,22 @@ module.exports = smp.wrap({
       'Access-Control-Allow-Origin': '*',
     },
   },
+  // optimization: {
+  //   minimize: true,
+  //   minimizer: [
+  //     new TerserPlugin({
+  //       parallel: 8,
+  //       cache: true,
+  //       cacheKeys: (defaultCacheKeys, file) => {
+  //         defaultCacheKeys.myCacheKey = 'myCacheKeyValue';
+  //
+  //         return defaultCacheKeys;
+  //       },
+  //     }),
+  //   ],
+  // },
 });
 
+
+// module.exports = createVariants(baseOptions, variants, () => config);
 

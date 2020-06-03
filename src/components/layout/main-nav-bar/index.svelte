@@ -87,14 +87,14 @@
 <div class="nav" id="mainNavBarWrapperId">
   <div bind:this={mainNavBarRef} id="mainNavBarId" style="display: flex;">
     {#each dataList as row}
-      {#if window['$']('#mainNavBarId').width() < containerWidth - 250}
+      {#if window['$']('#mainNavBarId').width() < containerWidth - 300}
         <RouterLink
           bind:this={routerLink}
           menuName={row.menuName}
           on:navigate={onNavigate}
           __path={'/' + row.path.replace('/', '--')}
           activeClass="active" />
-      {:else if window['$']('#mainNavBarId').width() >= containerWidth - 250 && !document.querySelector('#mainNavBarMoreId')}
+      {:else if window['$']('#mainNavBarId').width() >= containerWidth - 300 && !document.querySelector('#mainNavBarMoreId')}
         <div class="more nav-item" on:mouseover|stopPropagation={onMouseoverMore} on:mouseout={onMouseoutMore}>
           <span>{T('COMMON.LABEL.MORE')} &nbsp;&nbsp;</span>
           <i class="dropdown-mark-icon fa fa-angle-down" />

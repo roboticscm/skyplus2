@@ -78,6 +78,9 @@
         orgStore.sysGetRoledDepartmentListByUserId().subscribe((res: any) => {
           modules = res.data;
           selectedDep = findDepartmentById(org.departmentId);
+
+          console.log('xxxxxx', selectedDep, org.departmentId);
+
           appStore.org.selectedDepartment = selectedDep;
           if (selectedDep) {
             // loadFirstMenu(selectedDep.departmentId);

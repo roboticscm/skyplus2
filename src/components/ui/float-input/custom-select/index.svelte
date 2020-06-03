@@ -16,6 +16,9 @@
   export let value: any;
   export let loading = true;
 
+  loading;
+  saveState;
+
   let inputRef: any;
   let tableRef: any;
   let dropdownFocused = false;

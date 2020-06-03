@@ -17,7 +17,10 @@
 
   import Reminder1 from '@/icons/reminder124x24.svelte';
   import Reminder2 from '@/icons/reminder224x24.svelte';
-
+  import UpdateIcon from '@/icons/update24x24.svelte';
+  import { SObject } from '@/lib/js/sobject';
+  import CompleteIcon from '@/icons/complete.svelte';
+  import UnCompleteIcon from '@/icons/un-complete.svelte';
   const dispatch = createEventDispatcher();
 
   export let notification: Notification;
@@ -63,7 +66,7 @@
 
   <div
     class="notify-dropdown-item__content"
-    title={StringUtil.replaceAll(notification.title, '</br>', '\n')
+    title={StringUtil.removeHtmlTag(StringUtil.replaceAll(notification.title, '<br>', '\n'))
       .replace('<span class="italic-text">', '')
       .replace('</span>', '')}>
     <div class="notify-dropdown-item__content__image">
@@ -85,10 +88,18 @@
         {:else}
           <HoldIcon className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
         {/if}
+      {:else if notification.messageType === 'COMPLETE'}
+        {#if notification.isCancel}
+          <UnCompleteIcon className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
+        {:else}
+          <CompleteIcon className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
+        {/if}
       {:else if notification.messageType === 'REMINDER1'}
         <Reminder1 className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
       {:else if notification.messageType === 'REMINDER2'}
         <Reminder2 className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
+      {:else if notification.messageType === 'UPDATE'}
+        <UpdateIcon className="large-svg-icon {isOld ? 'svg-disabled' : ''}" />
       {/if}
     </div>
     <div class="notify-dropdown-item__content__text">

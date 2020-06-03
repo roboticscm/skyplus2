@@ -65,8 +65,6 @@
         const fromHumanIds = filteredData.map((it: Notification) => it.fromHumanId);
         const distinctFromHumanIds = new Set(fromHumanIds.filter((it) => it !== null));
 
-        console.log(distinctFromHumanIds);
-
         HumanOrOrgStore.findAvatars([...distinctFromHumanIds].join(',')).subscribe((res: any) => {
           const _filteredData = filteredData.map((it: Notification) => {
             it.fromHumanAvatar = findAvatar(res.data, it.fromHumanId);
@@ -281,7 +279,7 @@
 
     <div
       class="message-modal__body__content"
-      title={StringUtil.replaceAll(item.title, '</br>', '\n')
+      title={StringUtil.replaceAll(item.title, '<br>', '\n')
         .replace('<span class="italic-text">', '')
         .replace('</span>', '')}>
       <div class="message-modal__body__content__image">

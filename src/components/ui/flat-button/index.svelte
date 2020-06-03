@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import { T } from '@/lib/js/locale/locale';
   import { StringUtil } from '@/lib/js/string-util';
   import { ButtonType, ButtonId } from '../button/types';
   import { ButtonDropdown } from '../button/model';
   import DropdownItem from '@/components/ui/dropdown-item';
   import { Dropdown } from '@/lib/js/dropdown';
+  import {Browser} from "../../../lib/js/browser";
+  import {debounceTime} from "../modal/use-modal";
 
   export let id: string = undefined;
   export let type = 'button';
@@ -18,8 +20,10 @@
   export let running = false;
   export let action: any = undefined;
   export let showIcon = true;
+  export let showText = true;
   export let dropdownList: ButtonDropdown[] = [];
   export let uppercase = true;
+  export let container = undefined;
   // export let dropdownList: ButtonDropdown[] = [
   //   { id: 'ITEM1', name: 'Demo Item1', useFontIcon: true, fontIcon: '<i class="fab fa-skyatlas"></i>' },
   //   { id: 'ITEM2', name: 'Demo Item2', useFontIcon: true, fontIcon: '<i class="fa fa-adjust"></i>' },
@@ -27,6 +31,7 @@
   // ];
 
   let IconComponent: any = undefined;
+  const BUTTON_MIN_WITH = 120;
 
   const dispatch = createEventDispatcher();
   let btnRef: any;
@@ -75,7 +80,7 @@
         preset(ButtonId.Config, 'CONFIG', 'config24x24', 'btn-flat');
         break;
       case ButtonType.TrashRestore:
-        preset(ButtonId.TrashRestore, 'TRASH_RESTORE', 'trash-restore24x24', 'btn-flat');
+        preset(ButtonId.TrashRestore, 'TRASH_RESTORE', 'trash-restore', 'btn-flat');
         break;
       case ButtonType.CloseModal:
         preset(undefined, undefined, '<i class="fa fa-times"></i>', 'btn-flat');
@@ -127,6 +132,14 @@
       case ButtonType.Dashboard:
         preset(ButtonId.Dashboard, 'DASHBOARD', 'dashboard24x24', 'btn-flat');
         break;
+
+      case ButtonType.Complete:
+        preset(ButtonId.Complete, 'COMPLETE', 'complete', 'btn-flat');
+        break;
+
+      case ButtonType.UnComplete:
+        preset(ButtonId.UnComplete, 'UN_COMPLETE', 'un-complete', 'btn-flat');
+        break;
       default:
     }
 
@@ -156,10 +169,55 @@
   const onMouseout = () => {
     Dropdown.hide(`dropdown${id}`);
   };
+
+  const showTextOrHide = (containerWidth: number, childrenCount: number ) => {
+    if(btnRef && childrenCount > 0 && (containerWidth / childrenCount) >= BUTTON_MIN_WITH) {
+      showText = true;
+      btnRef.style.minWidth = `${BUTTON_MIN_WITH}px`;
+    } else if(btnRef) {
+      showText = false;
+      btnRef.style.minWidth = '50px';
+    }
+  }
+
+  const onResizeContainer = (e: any) => {
+    const container = e[0].target;
+    const containerWidth = window['$'](container).width();
+    const childrenCount = container.childElementCount;
+
+    showTextOrHide(containerWidth, childrenCount);
+  }
+
+  onMount(() => {
+    let resizeObserver: any;
+    if(!container) {
+      if (Browser.getBrowser() !== 'Safari') {
+        // @ts-ignore
+        resizeObserver = new ResizeObserver(debounceTime(100, onResizeContainer));
+        resizeObserver && resizeObserver.observe(btnRef.parentElement);
+      }
+    }
+
+    return () => {
+      if (container) {
+        resizeObserver && resizeObserver.unobserve(btnRef.parentElement);
+      }
+    }
+  });
+
+  // $: if(container){
+  //   const containerWidth = window['$'](container).width();
+  //   console.log('containerWidth -- ', containerWidth);
+  //   const childrenCount = container.childElementCount;
+  //   console.log(' childrenCount -- ', childrenCount);
+  //   container.addEventListener('onresize', () => {
+  //     console.log('resize');
+  //   });
+  // }
 </script>
 
 <button
-  {title}
+  title = {title ? title : text}
   use:useAction
   bind:this={btnRef}
   {id}
@@ -176,10 +234,12 @@
       {@html icon}
     {:else}
       <svelte:component this={IconComponent} className={disabled ? 'readonly-svg-color' : ''} />
-      &nbsp; &nbsp;
     {/if}
   {/if}
-  {text}
+  {#if showText}
+    &nbsp; &nbsp;
+    {@html text}
+  {/if}
   {#if dropdownList && dropdownList.length > 0}
     <i on:mouseover={onMouseover} on:mouseout={onMouseout} class="dropdown-mark-icon fa fa-angle-down">
       <div id={`dropdown${id}`} class="dropdown-content">

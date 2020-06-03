@@ -5,7 +5,9 @@ export enum SubmitStatus {
   Init = 0,
   Submitted = 1,
   Assigned = 2,
-  Help = 3,
+  Held = 3,
+
+  Completed = 999,
 }
 
 export class Task {
@@ -56,7 +58,6 @@ export class Task {
   evaluateQualificationName? = null;
   evaluateVerificationName? = null;
   evaluateStatusId? = null;
-  evaluateComplete? = false;
 
   // Characteristic
   chars?: any[] = [];

@@ -419,6 +419,72 @@ export class ViewStore {
     );
   };
 
+  verifyAssignAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
+    return this.verifySimpleAction(
+      buttonId,
+      scRef.confirmModalRef(),
+      scRef.confirmPasswordModalRef(),
+      'ASSIGN',
+      extraMessage,
+      disabled,
+    );
+  };
+
+  verifyUnAssignAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
+    return this.verifySimpleAction(
+      buttonId,
+      scRef.confirmModalRef(),
+      scRef.confirmPasswordModalRef(),
+      'UN_ASSIGN',
+      extraMessage,
+      disabled,
+    );
+  };
+
+  verifyHoldAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
+    return this.verifySimpleAction(
+      buttonId,
+      scRef.confirmModalRef(),
+      scRef.confirmPasswordModalRef(),
+      'HOLD',
+      extraMessage,
+      disabled,
+    );
+  };
+
+  verifyUnHoldAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
+    return this.verifySimpleAction(
+      buttonId,
+      scRef.confirmModalRef(),
+      scRef.confirmPasswordModalRef(),
+      'UN_HOLD',
+      extraMessage,
+      disabled,
+    );
+  };
+
+  verifyCompleteAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
+    return this.verifySimpleAction(
+      buttonId,
+      scRef.confirmModalRef(),
+      scRef.confirmPasswordModalRef(),
+      'COMPLETE',
+      extraMessage,
+      disabled,
+    );
+  };
+
+  verifyUnCompleteAction = (buttonId: string, scRef: any, extraMessage: string = '', disabled = false) => {
+    return this.verifySimpleAction(
+      buttonId,
+      scRef.confirmModalRef(),
+      scRef.confirmPasswordModalRef(),
+      'UN_COMPLETE',
+      extraMessage,
+      disabled,
+    );
+  };
+
   checkObjectArrayChange = (beforeData: any, currentData: any, snackbar: any = undefined) => {
     let changedObject = SObject.getDiffRowObjectArray(beforeData, currentData);
 

@@ -1,88 +1,58 @@
 import { T } from '@/lib/js/locale/locale';
 import { StringUtil } from '@/lib/js/string-util';
 
-export const filterColumns = [
+export const functionalStatusFields = [
   {
-    id: 'taskName',
-    name: T('TASK.LABEL.TASK_NAME'),
-    type: 'text',
+    id: 'isNewStatus',
+    status: 'INIT',
+    statusCode: 0,
+    title: T('COMMON.LABEL.NEW_STATUS'),
+    counter: 0,
+    active: false
   },
   {
-    id: 'projectName',
-    name: T('TASK.LABEL.PROJECT_NAME'),
-    type: 'text',
+    id: 'isSubmittedStatus',
+    status: 'SUBMITTED',
+    statusCode: 1,
+    title: T('COMMON.LABEL.SUBMITTED_STATUS'),
+    counter: 0,
+    active: false
   },
   {
-    id: 'assigneeName',
-    name: T('TASK.LABEL.ASSIGNEE'),
-    type: 'text',
+    id: 'isApprovedStatus',
+    status: 'APPROVED',
+    statusCode: 2,
+    title: T('COMMON.LABEL.APPROVED_STATUS'),
+    counter: 0,
+    active: false
   },
   {
-    id: 'assignerName',
-    name: T('TASK.LABEL.ASSIGNER'),
-    type: 'text',
+    id: 'isProcessingStatus',
+    status: 'PROCESSING',
+    statusCode: 888,
+    title: T('COMMON.LABEL.PROCESSING_STATUS'),
+    counter: 0,
+    active: true
   },
   {
-    id: 'evaluatorName',
-    name: T('TASK.LABEL.EVALUATOR'),
-    type: 'text',
-  },
-  {
-    id: 'isCompleted',
-    name: T('TASK.LABEL.COMPLETED'),
-    type: 'boolean',
-  },
-  {
-    id: 'isDelayDeadline',
-    name: T('TASK.LABEL.DELAY_DEADLINE'),
-    type: 'boolean',
-  },
-  {
-    id: 'createdDateFrom',
-    name: T('TASK.LABEL.CREATED_DATE_FROM'),
-    type: 'date',
-  },
-  {
-    id: 'createdDateTo',
-    name: T('TASK.LABEL.CREATED_DATE_TO'),
-    type: 'date',
-  },
-  {
-    id: 'startTimeFrom',
-    name: T('TASK.LABEL.START_TIME_FROM'),
-    type: 'date',
-  },
-  {
-    id: 'startTimeTo',
-    name: T('TASK.LABEL.START_TIME_TO'),
-    type: 'date',
-  },
-  {
-    id: 'deadlineFrom',
-    name: T('TASK.LABEL.DEADLINE_FROM'),
-    type: 'date',
-  },
-  {
-    id: 'deadlineTo',
-    name: T('TASK.LABEL.DEADLINE_TO'),
-    type: 'date',
-  },
-  {
-    id: 'isAssignee',
-    name: T('TASK.LABEL.IAM_ASSIGNEE'),
-    type: 'boolean',
-  },
-  {
-    id: 'isAssigner',
-    name: T('TASK.LABEL.IAM_ASSIGNER'),
-    type: 'boolean',
-  },
-  {
-    id: 'isEvaluator',
-    name: T('TASK.LABEL.IAM_EVALUATOR'),
-    type: 'boolean',
+    id: 'isCompletedStatus',
+    status: 'COMPLETED',
+    statusCode: 999,
+    title: T('COMMON.LABEL.COMPLETED_STATUS'),
+    counter: 0,
+    active: false
   },
 ];
+
+export const getStatusCodeById = (id: string) => {
+  const index = functionalStatusFields.findIndex((it: any) => it.id === id);
+
+  if(index >= 0) {
+    return functionalStatusFields[index].statusCode;
+  }
+
+  return null;
+}
 
 export const convertArrayObjectToObject = (arrayObj: any[]) => {
   const objResult: any = {};

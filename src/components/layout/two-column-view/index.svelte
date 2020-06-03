@@ -10,6 +10,7 @@
   export let menuPath: string;
   export let minLeftPane = false;
   export let defaultLeftWidth = '260px'; // in pixel
+  export let leftMaxWidth = 350;
 
   let contentSplit: any;
 
@@ -53,7 +54,13 @@
           gridEle = document.querySelector('.view-container-2-col-modal');
         }
 
-        const [leftWidth] = gridEle.style['grid-template-columns'].split(' ');
+        let [leftWidth] = gridEle.style['grid-template-columns'].split(' ');
+
+        if (+leftWidth.replace('px', '') > leftMaxWidth) {
+          leftWidth = leftMaxWidth + 'px';
+        }
+
+        gridEle.style['grid-template-columns'] = `${minLeftPane ? 0 : leftWidth} ${GUTTER_WIDTH}px auto`;
 
         settingsStore.saveUserSettings(
           new Settings({

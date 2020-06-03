@@ -2,7 +2,7 @@
   import Button from '@/components/ui/flat-button';
   import { ButtonType, ButtonPressed } from '@/components/ui/button/types';
   import { ModalType, ModalId } from '@/components/ui/modal/types';
-  import { createModal } from '../use-modal';
+  import {createModal, debounceTime} from '../use-modal';
   import { onMount, createEventDispatcher, onDestroy } from 'svelte';
   import { StringUtil } from '@/lib/js/string-util';
   import { T } from '@/lib/js/locale/locale';
@@ -60,16 +60,6 @@
     }
   };
 
-  const debounceTime = (ms, fn) => {
-    let timer;
-    return function() {
-      clearTimeout(timer);
-      let args = Array.prototype.slice.call(arguments);
-      // @ts-ignore
-      args.unshift(this);
-      timer = setTimeout(fn.bind.apply(fn, args), ms);
-    };
-  };
 
   // @ts-ignore
   let resizeObserver: any;
@@ -78,6 +68,7 @@
     // @ts-ignore
     resizeObserver = new ResizeObserver(debounceTime(100, onResize));
   }
+
   let form: any = new Form({
     username: appStore.user && appStore.user.username,
     password: '',

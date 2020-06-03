@@ -3,6 +3,17 @@ import { Settings } from '@/model/settings';
 import { settingsStore } from '@/store/settings';
 import { ButtonPressed } from '@/components/ui/button/types';
 
+export const debounceTime = (ms, fn) => {
+  let timer;
+  return function() {
+    clearTimeout(timer);
+    let args = Array.prototype.slice.call(arguments);
+    // @ts-ignore
+    args.unshift(this);
+    timer = setTimeout(fn.bind.apply(fn, args), ms);
+  };
+};
+
 export const dragElement = (elmnt: any) => {
   let pos1 = 0,
     pos2 = 0,

@@ -179,7 +179,7 @@
   $: setTimestampValue(value);
 </script>
 
-<div class="floating-wrapper" style="margin-top: 17px;">
+<div class="floating-wrapper">
   <input
     style="color: var(--primary)"
     {title}

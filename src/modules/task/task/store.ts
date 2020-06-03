@@ -123,7 +123,7 @@ export default class Store {
       assigneeName: '',
       assignerName: '',
       evaluatorName: '',
-      isCompleted: '',
+      submitStatus: '',
       isDelayDeadline: '',
       createdDateFrom: '',
       createdDateTo: '',
@@ -139,6 +139,13 @@ export default class Store {
   tskGetTaskById(id: string) {
     return RxHttp.get(`${BASE_URL}${toSnackCase('tskGetTaskById')}`, {
       id,
+    });
+  }
+
+  tskStatusCount(menuPath: string, depId: string) {
+    return RxHttp.get(`${BASE_URL}${toSnackCase('tskStatusCount')}`, {
+      menuPath,
+      depId
     });
   }
 

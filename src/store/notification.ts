@@ -17,6 +17,8 @@ export enum MessageType {
   Submit = 'SUBMIT',
   Assign = 'ASSIGN',
   Hold = 'HOLD',
+  Update = 'UPDATE',
+  Complete = 'COMPLETE',
 }
 
 const BASE_URL = 'sys/notification/';

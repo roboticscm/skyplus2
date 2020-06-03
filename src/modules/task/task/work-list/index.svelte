@@ -15,7 +15,7 @@
   import Button from '@/components/ui/flat-button';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import ContentFilter from '@/components/ui/float-input/content-filter';
-  import { convertArrayObjectToObject } from './helper';
+  import {convertArrayObjectToObject, getStatusCodeById} from './helper';
   import CloseableList from '@/components/ui/closeable-list';
   import { StringUtil } from '@/lib/js/string-util';
   import { SObject } from '@/lib/js/sobject';
@@ -26,6 +26,8 @@
   import { markStringSearch } from '@/lib/js/util';
   import { SDate } from '@/lib/js/sdate';
   import { TableUtilStore } from '@/store/table-util';
+  import FunctionalStatus from '@/components/layout/functional-status';
+  import { functionalStatusFields } from './helper';
 
   export let menuPath: string;
   export let view: ViewStore;
@@ -40,12 +42,12 @@
   let selectedTask: Task = undefined;
 
   let mappedFilterList: any[] = [];
-
+  let mappedFunctionalStatusFields: any [] = functionalStatusFields;
   let usedFilterColumns: any[] = [];
 
   let taskSub, selectSub: Subscription;
   let taskApolloClient$: any;
-  let viewByTaskRef, pageRef: any;
+  let viewByTaskRef, pageRef, functionalStatusRef: any;
 
   const searchProgress$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   let markedData: any[] = undefined;
@@ -94,7 +96,7 @@
   const makeSearch$ = () => {
     const searchParam = getAdvSearchParam();
     if (StringUtil.isEmpty(textSearch) && SObject.isEmptyField(searchParam)) {
-      return store.tskFindTasks({ menuPath, departmentId: appStore.org.departmentId, isCompleted: false });
+      return store.tskFindTasks({ menuPath, departmentId: appStore.org.departmentId });
     } else if (textSearch.startsWith(App.SEARCH_ALL)) {
       textSearch = '';
       return store.tskFindTasks({ menuPath, departmentId: appStore.org.departmentId });
@@ -233,6 +235,10 @@
       filteredList = [...filteredList];
     }
 
+    if (mappedFunctionalStatusFields.findIndex((it: any) => it.id === itemId) >= 0) {
+      functionalStatusRef && functionalStatusRef.clearActive();
+    }
+
     if (filteredList.length === 0) {
       filteredList = [getDefaultValueForItem(filterColumns[0])];
     }
@@ -287,15 +293,20 @@
   const getAdvSearchParam = () => {
     let param = convertArrayObjectToObject(
       filteredList.map((it: any) => {
-        return {
-          [it.id]: it.value,
-        };
+        const statusCode = getStatusCodeById(it.id);
+        if(statusCode !== null) {
+          return {
+            submitStatus: statusCode,
+          };
+        } else
+        {
+          return {
+            [it.id]: it.value,
+          };
+        }
+
       }),
     );
-
-    if (SObject.isEmptyField(param) && StringUtil.isEmpty(textSearch)) {
-      param = { isCompleted: false };
-    }
 
     return param;
   };
@@ -379,6 +390,16 @@
       didSearch(res);
     });
     view.checkDeletedRecord(false);
+
+    store.tskStatusCount(menuPath, appStore.org.departmentId).subscribe((res: any) => {
+      functionalStatusFields[0].counter = res.data[0].statusNew;
+      functionalStatusFields[1].counter = res.data[0].statusSubmitted;
+      functionalStatusFields[2].counter = res.data[0].statusAssigned;
+      functionalStatusFields[3].counter = res.data[0].statusProcessing;
+      functionalStatusFields[4].counter = res.data[0].statusCompleted;
+      mappedFunctionalStatusFields = [...functionalStatusFields];
+
+    })
   };
 
   const onClickTask = (event: any) => {
@@ -418,6 +439,15 @@
           id,
         };
         doSelect(of(1));
+      }
+    });
+
+
+    onClickFunctionalStatus({
+      detail: {
+        field: mappedFunctionalStatusFields[3].id,
+        title: mappedFunctionalStatusFields[3].title,
+        value: true
       }
     });
   });
@@ -541,6 +571,23 @@
       return EMPTY;
     }
   };
+
+  const onClickFunctionalStatus = (event: any) => {
+    const selectedStatusField = {
+      id: event.detail.field,
+      name: event.detail.title,
+      value: true,
+    };
+
+
+    // remove the old first
+    filteredList = [
+      ...filteredList.filter((it: any) => mappedFunctionalStatusFields.findIndex((f: any) => f.id === it.id) < 0),
+      selectedStatusField,
+    ];
+
+    onSelectSearchField();
+  };
 </script>
 
 <style lang="scss">
@@ -638,7 +685,7 @@
 
 <section class="view-left-main" style="padding-top: 0px;">
   <!-- Add new -->
-  <div style="display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start;">
+  <div style="display: flex; justify-content: center; align-content: flex-start;">
     {#if view.isRendered(ButtonId.AddNew)}
       <Button on:click={onAddNew} btnType={ButtonType.AddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
     {/if}
@@ -649,6 +696,14 @@
   </div>
   <!--   // Add new-->
   <div class="horizontal-separator" style="margin-top: 5px;" />
+
+  <div style="margin-top: 6px; margin-bottom: 4px;">
+    <FunctionalStatus
+      bind:this={functionalStatusRef}
+      data={mappedFunctionalStatusFields}
+      on:click={onClickFunctionalStatus} />
+  </div>
+
   <!-- Search-->
   <div bind:this={searchWrapperRef}>
     <QuickSearch
@@ -674,7 +729,7 @@
 
           <div class="advanced-search__body">
             <div class="advanced-search__body__content">
-              {#each filteredList as item, index}
+              {#each filteredList.filter((it) => mappedFunctionalStatusFields.findIndex((f) => f.id === it.id) < 0) as item, index}
                 <div style="display: flex;">
                   <ContentFilter
                     {menuPath}

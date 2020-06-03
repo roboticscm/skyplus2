@@ -46,6 +46,7 @@
   import { SubmitStatus } from '../../types';
   import CustomSelect from '@/components/ui/float-input/custom-select';
   import { MessageType } from '@/store/notification';
+  import { HelperStore } from '../../../../store/helper';
 
   // Props
   export let view: ViewStore;
@@ -106,23 +107,29 @@
   const saveUpdateUri = 'task/task/save-or-update';
 
   let readOnlyMode: boolean;
-  let readOnlyModeAssignee, readOnlyModeAssigner, readOnlyModeEvaluator: boolean;
-  let userCanEdit = false;
   let isCancelSubmit = false;
   let priorityRef, taskVerificationRef, taskQualificationRef: any;
   let taskSectionRef: any;
 
+  let isTaskEditable = true;
+  let _isUserCanEditTask = true;
   // @ts-ignore
-  $: readOnlyMode = $isReadOnlyMode$ || form.submitStatus == 1 || !isEditTaskUser();
+  $: isTaskEditable = !$isReadOnlyMode$ && form.submitStatus !== SubmitStatus.Completed && _isUserCanEditTask;
 
   // @ts-ignore
-  $: readOnlyModeAssignee = $isReadOnlyMode$ || form.submitStatus !== 1 || !isAssigneeUser();
+  $: readOnlyMode = $isReadOnlyMode$ || form.submitStatus == 1 || !_isUserCanPressEditButton;
 
+  let isAssigneeEditable = true;
   // @ts-ignore
-  $: readOnlyModeAssigner = $isReadOnlyMode$ || form.submitStatus !== 1 || !isAssignerUser();
+  $: isAssigneeEditable = !$isReadOnlyMode$ && form.submitStatus === SubmitStatus.Assigned && isAssigneeUser();
 
+  let isAssignerEditable = false;
   // @ts-ignore
-  $: readOnlyModeEvaluator = $isReadOnlyMode$ || form.submitStatus !== 1 || !isEvaluatorUser();
+  $: isAssignerEditable = !$isReadOnlyMode$ && form.submitStatus !== SubmitStatus.Completed && isAssigneeUser();
+
+  let isEvaluatorEditable = false;
+  // @ts-ignore
+  $: isEvaluatorEditable = !$isReadOnlyMode$ && isEvaluatorUser() && form.assigneeEndConfirm;
 
   let disabledSave = false;
   // @ts-ignore
@@ -133,53 +140,125 @@
   $: disabledUpdate = view.isDisabled(ButtonId.Update, form.errors.any());
 
   let disabledEdit = true;
+  let _isUserCanPressEditButton = false;
   // @ts-ignore
-  $: disabledEdit = view.isDisabled(ButtonId.Edit) || !userCanEdit;
+  $: disabledEdit = view.isDisabled(ButtonId.Edit) || !_isUserCanPressEditButton;
 
   let disabledSubmit = false;
+  let _isUserCanPressSubmitButton = false;
   // @ts-ignore
-  $: disabledSubmit = view.isDisabled(ButtonId.Submit, form.errors.any() || $isReadOnlyMode$ || !isEditTaskUser());
+  $: disabledSubmit = view.isDisabled(
+    ButtonId.Submit,
+          // @ts-ignore
+    form.errors.any() || $isReadOnlyMode$ || !_isUserCanPressSubmitButton,
+  );
 
   let disabledCancelSubmit = true;
+  let _isUserCanPressCancelSubmitButton = false;
   // @ts-ignore
-  $: disabledCancelSubmit = view.isDisabled(ButtonId.CancelSubmit, $isReadOnlyMode$ || !isCancelSubmit);
+  $: disabledCancelSubmit = view.isDisabled(
+    ButtonId.CancelSubmit,
+          // @ts-ignore
+    $isReadOnlyMode$ || !_isUserCanPressCancelSubmitButton,
+  );
 
   let disabledAssign = true;
+  let _isUserCanPressAssignButton = false;
   // @ts-ignore
-  $: disabledAssign = view.isDisabled(ButtonId.Assign, form.errors.any() || $isReadOnlyMode$ || !isEditTaskUser());
+  $: disabledAssign = view.isDisabled(
+    ButtonId.Assign,
+          // @ts-ignore
+    form.errors.any() || $isReadOnlyMode$ || !_isUserCanPressAssignButton,
+  );
 
   let disabledUnAssign = false;
+  let _isUserCanPressUnAssignButton = false;
   // @ts-ignore
-  $: disabledUnAssign = view.isDisabled(ButtonId.UnAssign, $isReadOnlyMode$ || !isCancelSubmit);
+  $: disabledUnAssign = view.isDisabled(ButtonId.UnAssign, $isReadOnlyMode$ || !_isUserCanPressUnAssignButton);
 
   let disabledHold = true;
+  let _isUserCanPressHoldButton = false;
   // @ts-ignore
-  $: disabledHold = view.isDisabled(ButtonId.Hold, form.errors.any() || $isReadOnlyMode$ || !isEditTaskUser());
+  $: disabledHold = view.isDisabled(ButtonId.Hold, form.errors.any() || $isReadOnlyMode$ || !_isUserCanPressHoldButton);
 
   let disabledUnHold = false;
+  let _isUserCanPressUnHoldButton = false;
   // @ts-ignore
-  $: disabledUnHold = view.isDisabled(ButtonId.UnHold, $isReadOnlyMode$ || !isCancelSubmit);
+  $: disabledUnHold = view.isDisabled(ButtonId.UnHold, $isReadOnlyMode$ || !_isUserCanPressUnHoldButton);
 
   let disabledDelete = true;
+  let _isUserCanPressDeleteButton = false;
   // @ts-ignore
-  $: disabledDelete = view.isDisabled(ButtonId.Delete, readOnlyMode);
+  $: disabledDelete = view.isDisabled(ButtonId.Delete, $isReadOnlyMode$ || !_isUserCanPressDeleteButton);
 
-  const isEditTaskUser = () => {
-    return (
-      !selectedData ||
-      selectedData.createdBy == getUserId() ||
+  let disabledComplete = true;
+  let _isUserCanPressCompleteButton = false;
+  // @ts-ignore
+  $: disabledComplete = view.isDisabled(
+    ButtonId.Complete,
+          // @ts-ignore
+    form.errors.any() || $isReadOnlyMode$ || !_isUserCanPressCompleteButton,
+  );
+
+  let disabledUnComplete = true;
+  let _isUserCanPressUnCompleteButton = false;
+  // @ts-ignore
+  $: disabledUnComplete = view.isDisabled(ButtonId.UnComplete, form.errors.any() || $isReadOnlyMode$ || !_isUserCanPressUnCompleteButton,
+  );
+
+  const notAssignAssigner = () => {
+    return form.assigners.length === 1 && form.assigners[0].id === null;
+  };
+
+  const isUserCanEditTask = () => {
+    if (!selectedData) {
+      return true;
+    }
+
+    const result =
+      (selectedData && selectedData.createdBy == getUserId() && form.submitStatus === SubmitStatus.Init) ||
+      isAssignerUser();
+
+    return result;
+  };
+
+  const isUserCanPressEditButton = () => {
+    const result =
+      form.createdBy == getUserId() ||
       form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0 ||
       form.assignees.findIndex((it: any) => it.id == getUserId()) >= 0 ||
       form.evaluators.findIndex((it: any) => it.id == getUserId()) >= 0 ||
-      !(form.assignees[0].id || form.assigners[0].id || form.evaluators[0].id)
-    );
+      !(form.assignees[0].id || form.assigners[0].id || form.evaluators[0].id);
+
+    return result;
+  };
+
+  const isUserCanPressCompleteButton = () => {
+    const result = form.evaluators.findIndex((it: any) => it.id == getUserId()) >= 0;
+    return result;
+  };
+
+  const isUserCanPressDeleteButton = () => {
+    const result =
+      (form.createdBy == getUserId() && form.submitStatus === SubmitStatus.Init) ||
+      (form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0 && form.submitStatus === SubmitStatus.Init);
+
+    return result;
+  };
+
+  const isUserCanPressSubmitButton = () => {
+    const result = form.createdBy == getUserId() || form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0;
+
+    return result;
+  };
+
+  const isUserCanPressAssignButton = () => {
+    const result = form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0;
+
+    return result;
   };
 
   const canCancelSubmit = () => {
-    console.log(
-      form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0,
-      form.evaluators.findIndex((it: any) => it.id == getUserId()) >= 0,
-    );
     return (
       !selectedData ||
       selectedData.createdBy == getUserId() ||
@@ -330,13 +409,15 @@
         }
 
         // save notification on submit or cancel submit
-        const title =
-          SDate.convertMillisecondToDateTimeString(status.startTime) +
-          ' - ' +
-          SDate.convertMillisecondToDateTimeString(status.endTime) +
-          '</br>' +
-          (status.status ? status.status + '</br>' : '') +
-          status.note;
+        const title = `
+          ${form.name} <br>
+          ${status.status || ''}
+          (${SDate.convertMillisecondToDateTimeString(status.startTime)} - ${SDate.convertMillisecondToDateTimeString(
+          status.endTime,
+        )})<br>
+          ${status.note}
+        `;
+
         if (res.data.submitStatus === 1) {
           saveNotification(MessageType.Submit, title, status.taskId);
         } else if (res.data.submitStatus === 0) {
@@ -373,13 +454,15 @@
         }
 
         // save notification on submit or cancel submit
-        const title =
-          SDate.convertMillisecondToDateTimeString(status.startTime) +
-          ' - ' +
-          SDate.convertMillisecondToDateTimeString(status.endTime) +
-          '</br>' +
-          (status.status ? status.status + '</br>' : '') +
-          status.note;
+        const title = `
+          ${form.name} <br>
+          ${status.status || ''}
+          (${SDate.convertMillisecondToDateTimeString(status.startTime)} - ${SDate.convertMillisecondToDateTimeString(
+          status.endTime,
+        )})<br>
+          ${status.note}
+        `;
+
         if (res.data.submitStatus === 1) {
           saveNotification(MessageType.Submit, title, status.taskId);
         } else if (res.data.submitStatus === 0) {
@@ -423,7 +506,7 @@
 
   const onAddAssignerStatus = () => {
     // @ts-ignore
-    if (readOnlyModeAssigner) {
+    if (!isAssignerEditable) {
       return;
     }
 
@@ -442,7 +525,7 @@
 
   const onEditAssigneeStatus = (event: any) => {
     // @ts-ignore
-    if (readOnlyModeAssignee) {
+    if (!isAssigneeEditable) {
       return;
     }
 
@@ -462,7 +545,7 @@
 
   const onAddAssigneeStatus = () => {
     // @ts-ignore
-    if (readOnlyModeAssignee) {
+    if (!isAssigneeEditable) {
       return;
     }
 
@@ -519,7 +602,7 @@
   const addAssignHumanOrOrg = (source: any[]) => {
     return new Promise((resolve, reject) => {
       // @ts-ignore
-      if (readOnlyMode) {
+      if (!isTaskEditable) {
         return;
       }
 
@@ -544,7 +627,7 @@
   const addAssignOwnerOrg = (source: any[]) => {
     return new Promise((resolve, reject) => {
       // @ts-ignore
-      if (readOnlyMode) {
+      if (!isTaskEditable) {
         return;
       }
 
@@ -642,10 +725,12 @@
       form.submitStatus = SubmitStatus.Init;
     } else if (['submit', 'unAssign'].includes(submitType)) {
       form.submitStatus = SubmitStatus.Submitted;
-    } else if (['assign', 'unHold'].includes(submitType)) {
+    } else if (['assign', 'unHold', 'unComplete'].includes(submitType)) {
       form.submitStatus = SubmitStatus.Assigned;
     } else if (['hold'].includes(submitType)) {
-      form.submitStatus = SubmitStatus.Help;
+      form.submitStatus = SubmitStatus.Held;
+    } else if (['complete'].includes(submitType)) {
+      form.submitStatus = SubmitStatus.Completed;
     }
   };
 
@@ -704,7 +789,7 @@
         ...form.assignees.map((it: any) => it.id),
         ...form.evaluators.map((it: any) => it.id),
       ]),
-    ].filter((it) => it !== null && it != getUserId());
+    ].filter((it) => it !== null && it != getUserId() && it != form.createdBy);
     return ret;
   };
 
@@ -716,6 +801,7 @@
 
   // ============================== CLIENT VALIDATION ==========================
   const verifySaveOrUpdate = () => {
+    submitType = 'update';
     return fromPromise(
       /* verify permission*/
       view.verifySaveAction(
@@ -760,7 +846,7 @@
     submitType = 'assign';
     return fromPromise(
       /* verify permission*/
-      view.verifyCancelSubmitAction(ButtonId.Assign, scRef, undefined, disabledAssign),
+      view.verifyAssignAction(ButtonId.Assign, scRef, undefined, disabledAssign),
     ).pipe(
       catchError((error) => {
         return of(error);
@@ -772,7 +858,7 @@
     submitType = 'unAssign';
     return fromPromise(
       /* verify permission*/
-      view.verifyCancelSubmitAction(ButtonId.UnAssign, scRef, undefined, disabledUnAssign),
+      view.verifyUnAssignAction(ButtonId.UnAssign, scRef, undefined, disabledUnAssign),
     ).pipe(
       catchError((error) => {
         return of(error);
@@ -784,7 +870,7 @@
     submitType = 'hold';
     return fromPromise(
       /* verify permission*/
-      view.verifyCancelSubmitAction(ButtonId.Hold, scRef, undefined, disabledHold),
+      view.verifyHoldAction(ButtonId.Hold, scRef, undefined, disabledHold),
     ).pipe(
       catchError((error) => {
         return of(error);
@@ -796,7 +882,31 @@
     submitType = 'unHold';
     return fromPromise(
       /* verify permission*/
-      view.verifyCancelSubmitAction(ButtonId.UnHold, scRef, undefined, disabledUnHold),
+      view.verifyUnHoldAction(ButtonId.UnHold, scRef, undefined, disabledUnHold),
+    ).pipe(
+      catchError((error) => {
+        return of(error);
+      }),
+    );
+  };
+
+  const verifyComplete = () => {
+    submitType = 'complete';
+    return fromPromise(
+      /* verify permission*/
+      view.verifyCompleteAction(ButtonId.Complete, scRef, undefined, disabledComplete),
+    ).pipe(
+      catchError((error) => {
+        return of(error);
+      }),
+    );
+  };
+
+  const verifyUnComplete = () => {
+    submitType = 'unComplete';
+    return fromPromise(
+      /* verify permission*/
+      view.verifyUnCompleteAction(ButtonId.UnComplete, scRef, undefined, disabledUnComplete),
     ).pipe(
       catchError((error) => {
         return of(error);
@@ -853,6 +963,8 @@
    * @return {void}.
    */
   export const doAddNew = async () => {
+    selectedData = undefined;
+    _isUserCanEditTask = true;
     taskSectionRef.openSection();
     await tick();
     // reset status flag
@@ -864,9 +976,8 @@
     form = resetForm();
 
     // moving focus to the first element after DOM updated
-    tick().then(() => {
-      taskNameRef.focus();
-    });
+    await tick();
+    taskNameRef && taskNameRef.focus();
   };
 
   /**
@@ -907,12 +1018,19 @@
 
             // save notification on submit or cancel submit
             const title = res.data.name;
-            if (['submit', 'cancelSubmit'].includes(submitType)) {
+            if (
+              submitType === 'update' &&
+              [SubmitStatus.Submitted, SubmitStatus.Assigned].includes(form.submitStatus)
+            ) {
+              saveNotification(MessageType.Update, title, res.data.id, false);
+            } else if (['submit', 'cancelSubmit'].includes(submitType)) {
               saveNotification(MessageType.Submit, title, res.data.id, submitType === 'cancelSubmit');
             } else if (['assign', 'unAssign'].includes(submitType)) {
               saveNotification(MessageType.Assign, title, res.data.id, submitType === 'unAssign');
             } else if (['hold', 'unHold'].includes(submitType)) {
               saveNotification(MessageType.Hold, title, res.data.id, submitType === 'unHold');
+            } else if (['complete', 'unComplete'].includes(submitType)) {
+              saveNotification(MessageType.Complete, title, res.data.id, submitType === 'unComplete');
             }
 
             // @ts-ignore
@@ -995,8 +1113,26 @@
       // save init value for checking data change
       beforeForm = SObject.clone(form);
 
-      userCanEdit = isEditTaskUser();
       isCancelSubmit = canCancelSubmit();
+
+      HelperStore.isManager(getUserId(), form.createdBy, menuPath).subscribe((res: any) => {
+        const isManager = StringUtil.toBoolean(res.data);
+
+        _isUserCanEditTask = isUserCanEditTask() || isManager;
+
+        _isUserCanPressEditButton = isUserCanPressEditButton() || isManager;
+        _isUserCanPressSubmitButton = isUserCanPressSubmitButton() || isManager;
+        _isUserCanPressCancelSubmitButton = isUserCanPressSubmitButton() || isManager;
+        _isUserCanPressAssignButton = isUserCanPressAssignButton() || isManager;
+        _isUserCanPressUnAssignButton = isUserCanPressAssignButton() || isManager;
+        _isUserCanPressHoldButton = isUserCanPressAssignButton() || isManager;
+        _isUserCanPressUnHoldButton = isUserCanPressAssignButton() || isManager;
+        _isUserCanPressDeleteButton =
+          isUserCanPressDeleteButton() || (isManager && form.submitStatus === SubmitStatus.Init);
+
+        _isUserCanPressCompleteButton = isUserCanPressCompleteButton();
+        _isUserCanPressUnCompleteButton = isUserCanPressCompleteButton();
+      });
     }
   };
   // ============================== // FUNCTIONAL ==========================
@@ -1076,6 +1212,20 @@
     register(component: HTMLElement, param: any) {
       const ob$ = fromEvent(component, 'click');
       doSaveOrUpdate(ob$, verifyUnHold, validateForSubmitOrCancelSubmit);
+    },
+  };
+
+  const useCompleteAction = {
+    register(component: HTMLElement, param: any) {
+      const ob$ = fromEvent(component, 'click');
+      doSaveOrUpdate(ob$, verifyComplete, validateForSubmitOrCancelSubmit);
+    },
+  };
+
+  const useUnCompleteAction = {
+    register(component: HTMLElement, param: any) {
+      const ob$ = fromEvent(component, 'click');
+      doSaveOrUpdate(ob$, verifyUnComplete, validateForSubmitOrCancelSubmit);
     },
   };
 
@@ -1194,6 +1344,22 @@
   //   }
   // }
   // ============================== //REACTIVE ==========================
+
+  const onChangeAssigneeStartTimeConfirm = (event: any) => {
+    if (event.target.checked) {
+      form.assigneeStartTime = Date.now();
+    } else {
+      form.assigneeStartTime = null;
+    }
+  };
+
+  const onChangeAssigneeEndTimeConfirm = (event: any) => {
+    if (event.target.checked) {
+      form.assigneeEndTime = Date.now();
+    } else {
+      form.assigneeEndTime = null;
+    }
+  };
 </script>
 
 <style lang="scss">
@@ -1253,7 +1419,7 @@
 <!--//Invisible Element-->
 <!--Form controller-->
 <section class="view-content-controller" style="display: flex; justify-content: space-between;">
-  <div>
+  <div style="flex: 4">
     {#if view.isRendered(ButtonId.Save, !$isUpdateMode$)}
       <Button
         action={useSaveOrUpdateAction}
@@ -1286,7 +1452,7 @@
       <Button action={useAssignAction} btnType={ButtonType.Assign} disabled={disabledAssign} />
     {/if}
 
-    {#if view.isRendered(ButtonId.UnAssign, [SubmitStatus.Assigned, SubmitStatus.Help].includes(form.submitStatus))}
+    {#if view.isRendered(ButtonId.UnAssign, [SubmitStatus.Assigned, SubmitStatus.Held].includes(form.submitStatus))}
       <Button action={useUnAssignAction} btnType={ButtonType.UnAssign} disabled={disabledUnAssign} />
     {/if}
 
@@ -1294,16 +1460,25 @@
       <Button action={useHoldAction} btnType={ButtonType.Hold} disabled={disabledHold} />
     {/if}
 
-    {#if view.isRendered(ButtonId.UnHold, form.submitStatus === SubmitStatus.Help)}
+    {#if view.isRendered(ButtonId.UnHold, form.submitStatus === SubmitStatus.Held)}
       <Button action={useUnHoldAction} btnType={ButtonType.UnHold} disabled={disabledUnHold} />
     {/if}
 
     {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
       <Button btnType={ButtonType.Delete} on:click={onDelete} disabled={disabledDelete} running={$deleteRunning$} />
     {/if}
+
+    {#if view.isRendered(ButtonId.Complete, form.submitStatus === SubmitStatus.Assigned)}
+      <Button action={useCompleteAction} btnType={ButtonType.Complete} disabled={disabledComplete} />
+    {/if}
+
+    {#if view.isRendered(ButtonId.UnComplete, form.submitStatus === SubmitStatus.Completed)}
+      <Button action={useUnCompleteAction} btnType={ButtonType.UnComplete} disabled={disabledUnComplete} />
+    {/if}
+
   </div>
 
-  <div>
+  <div style="flex: 0">
     {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
       <Button
         btnType={ButtonType.TrashRestore}
@@ -1332,7 +1507,7 @@
       id={view.getViewName() + 'TaskSectionId'}>
       <div slot="subTitle" class="section-sub-title w-100">
         <div class="col1 bold-text large-font-sizer text-active-underline">
-          {@html form.name}
+          {@html form.name + (form.submitStatus === SubmitStatus.Completed ? ' (' + T('COMMON.LABEL.COMPLETE') + ')' : '')}
         </div>
 
         <div class="col2">
@@ -1354,7 +1529,7 @@
             bind:this={taskNameRef}
             placeholder={T('COMMON.LABEL.NAME')}
             name="name"
-            disabled={readOnlyMode}
+            disabled={!isTaskEditable}
             bind:value={form.name} />
           <Error {form} field="name" />
         </div>
@@ -1368,7 +1543,7 @@
             id={view.getViewName() + 'ProjectId'}
             on:clickLabel={() => onOpenModal('task/project')}
             {menuPath}
-            disabled={readOnlyMode}
+            disabled={!isTaskEditable}
             data={$projects$} />
 
           <!--          <FloatSelect-->
@@ -1389,7 +1564,7 @@
       <div class="row" style="margin-top: 6px;">
         <!-- Task Description -->
         <div class="col-xs-24 col-md-12">
-          <RichEditor bind:value={form.description} disabled={readOnlyMode}>
+          <RichEditor bind:value={form.description} disabled={!isTaskEditable}>
             {T('TASK.LABEL.TASK_DESCRIPTION')}:
           </RichEditor>
         </div>
@@ -1418,7 +1593,7 @@
             id={view.getViewName() + 'PriorityId'}
             placeholder={T('TASK.LABEL.PRIORITY') + '(+)'}
             {menuPath}
-            disabled={readOnlyMode}
+            disabled={!isTaskEditable}
             data$={priority$} />
         </div>
         <!-- // Last status -->
@@ -1435,7 +1610,7 @@
           <FloatDatePicker
             bind:value={form.startTime}
             placeholder={T('COMMON.LABEL.START_TIME')}
-            disabled={readOnlyMode} />
+            disabled={!isTaskEditable} />
 
         </div>
         <!-- // tart time -->
@@ -1448,7 +1623,7 @@
             placeholder={T('COMMON.LABEL.DEADLINE')}
             bind:value={form.deadline}
             name="deadline"
-            disabled={readOnlyMode} />
+            disabled={!isTaskEditable} />
           <Error {form} field="deadline" />
         </div>
         <!-- // Deadline -->
@@ -1457,7 +1632,7 @@
           <FloatDatePicker
             placeholder={T('COMMON.LABEL.FIRST_REMINDER')}
             bind:value={form.firstReminder}
-            disabled={readOnlyMode} />
+            disabled={!isTaskEditable} />
         </div>
 
         <div class="col-xs-24 col-md-12 col-lg-6">
@@ -1466,7 +1641,7 @@
             placeholder={T('COMMON.LABEL.SECOND_REMINDER')}
             bind:value={form.secondReminder}
             name="secondReminder"
-            disabled={readOnlyMode} />
+            disabled={!isTaskEditable} />
           <Error {form} field="secondReminder" />
         </div>
       </div>
@@ -1477,7 +1652,7 @@
           <CloseableList
             linkClass="task-assigner"
             directClose={true}
-            disabled={readOnlyMode}
+            disabled={!isTaskEditable}
             bind:list={form.assigners}
             {menuPath}
             id={view.getViewName() + 'AssignerId'}>
@@ -1506,7 +1681,7 @@
           <CloseableList
             linkClass="task-assignee"
             directClose={true}
-            disabled={readOnlyMode}
+            disabled={!isTaskEditable}
             bind:list={form.assignees}
             {menuPath}
             id={view.getViewName() + 'AssigneeId'}>
@@ -1524,7 +1699,7 @@
           <CloseableList
             linkClass="task-evaluator"
             directClose={true}
-            disabled={readOnlyMode}
+            disabled={!isTaskEditable}
             bind:list={form.evaluators}
             {menuPath}
             id={view.getViewName() + 'EvaluatorId'}>
@@ -1551,7 +1726,7 @@
               <div class="col-xs-24 col-md-12 col-lg-8">
                 <CloseableList
                   directClose={true}
-                  disabled={readOnlyMode}
+                  disabled={!isTaskEditable}
                   bind:list={form.chars}
                   {menuPath}
                   id={view.getViewName() + 'TaskCharacteristicId'}>
@@ -1567,7 +1742,7 @@
               <div class="col-xs-24 col-md-12 col-lg-8">
                 <CloseableList
                   directClose={true}
-                  disabled={readOnlyMode}
+                  disabled={!isTaskEditable}
                   bind:list={form.targetPersons}
                   {menuPath}
                   id={view.getViewName() + 'TargetPersonId'}>
@@ -1582,7 +1757,7 @@
               <div class="col-xs-24 col-md-12 col-lg-8">
                 <CloseableList
                   directClose={true}
-                  disabled={readOnlyMode}
+                  disabled={!isTaskEditable}
                   bind:list={form.targetTeams}
                   {menuPath}
                   id={view.getViewName() + 'TargetTeamId'}>
@@ -1610,7 +1785,13 @@
       {menuPath}>
 
       <div slot="subTitle" class="section-sub-title w-100">
-        <div class="col1">{form.assignees.map((it) => it.name).join(', ')}</div>
+        <div class="col1">
+          {form.assignees
+            .map((it) => it.name)
+            .join(
+              ', ',
+            ) + (form.submitStatus === SubmitStatus.Held ? ' (' + T('TASK.MSG.HOLD') + ')' : form.submitStatus !== SubmitStatus.Assigned ? ' (' + T('TASK.MSG.TASK_NOT_ASSIGN_YET') + ')' : '')}
+        </div>
 
         <div class="col2">{SDate.convertMillisecondToDateTimeString(form.assigneeStartTime)}</div>
 
@@ -1624,13 +1805,14 @@
             placeholder={T('COMMON.LABEL.START_TIME')}
             name="assigneeStartTime"
             bind:value={form.assigneeStartTime}
-            disabled={readOnlyModeAssignee} />
+            disabled={!isAssigneeEditable || (form.assigneeStatusDetails.length > 0 && form.assigneeStatusDetails[0].id)} />
         </div>
 
         <div class="col-xs-24 col-md-12 col-lg-6">
           <FloatCheckbox
             text={T('COMMON.LABEL.CONFIRM')}
-            disabled={readOnlyModeAssignee}
+            disabled={!isAssigneeEditable || (form.assigneeStatusDetails.length > 0 && form.assigneeStatusDetails[0].id)}
+            on:change={onChangeAssigneeStartTimeConfirm}
             bind:checked={form.assigneeStartConfirm} />
         </div>
       </div>
@@ -1639,7 +1821,7 @@
       {#if form.assigneeStartConfirm}
         <div class="row" style="margin-top: 6px;">
           <div
-            class="label-link col-24 {readOnlyModeAssignee ? '' : 'label-button-hover'}"
+            class="label-link col-24 {!isAssigneeEditable ? '' : 'label-button-hover'}"
             on:click={onAddAssigneeStatus}>
             {T('COMMON.LABEL.ADD_NEW_DETAIL')}
           </div>
@@ -1652,7 +1834,7 @@
                 on:submit={onSubmitAssigneeStatus}
                 on:view={onViewAssigneeStatus}
                 directClose={true}
-                disabled={readOnlyModeAssignee}
+                disabled={!isAssigneeEditable}
                 bind:list={form.assigneeStatusDetails}
                 className="closeable-list__floating-controller"
                 customRender="modules/task/task/components/status/index.svelte"
@@ -1670,14 +1852,15 @@
               placeholder={T('COMMON.LABEL.END_TIME')}
               bind:value={form.assigneeEndTime}
               name="assigneeEndTime"
-              disabled={readOnlyModeAssignee} />
+              disabled={!isAssigneeEditable} />
             <Error {form} field="assigneeEndTime" />
           </div>
 
           <div class="col-xs-24 col-md-12 col-lg-6">
             <FloatCheckbox
               text={T('COMMON.LABEL.CONFIRM')}
-              disabled={$isReadOnlyMode$}
+              disabled={!isAssigneeEditable}
+              on:change={onChangeAssigneeEndTimeConfirm}
               bind:checked={form.assigneeEndConfirm} />
           </div>
         </div>
@@ -1702,9 +1885,7 @@
         <div class="col3">&nbsp;</div>
       </div>
       <div class="row" style="margin-top: 6px;">
-        <div
-          class="label-link col-24 {readOnlyModeAssigner ? '' : 'label-button-hover'}"
-          on:click={onAddAssignerStatus}>
+        <div class="label-link col-24 {!isAssignerEditable ? '' : 'label-button-hover'}" on:click={onAddAssignerStatus}>
           {T('COMMON.LABEL.ADD_NEW_DETAIL')}
         </div>
       </div>
@@ -1716,7 +1897,7 @@
               on:submit={onSubmitAssignerStatus}
               on:view={onViewAssignerStatus}
               directClose={true}
-              disabled={readOnlyModeAssigner}
+              disabled={!isAssignerEditable}
               bind:list={form.assignerStatusDetails}
               className="closeable-list__floating-controller"
               customRender="modules/task/task/components/status/index.svelte"
@@ -1741,31 +1922,18 @@
         <div class="col2">{form.evaluateQualificationName || ''}</div>
         <div class="col3">{form.evaluateVerificationName || ''}</div>
       </div>
-      <!-- Date-->
       <div class="row">
+        <!-- Date-->
         <div class="col-xs-24 col-md-12 col-lg-6">
           <FloatDatePicker
             on:change={onChangeEvaluateTime}
             placeholder={T('COMMON.LABEL.DATE')}
             name="evaluateTime"
             bind:value={form.evaluateTime}
-            disabled={readOnlyModeEvaluator} />
+            disabled={!isEvaluatorEditable} />
           <Error {form} field="evaluateTime" />
         </div>
-      </div>
-      <!-- // Date-->
-
-      <!-- Comment-->
-      <div class="row">
-        <div class="col-24">
-          <RichEditor bind:value={form.evaluateComment} disabled={readOnlyModeEvaluator}>
-            {T('TASK.LABEL.COMMENT')}:
-          </RichEditor>
-        </div>
-      </div>
-      <!-- // Comment-->
-
-      <div class="row">
+        <!-- // Date-->
         <!-- Task Verification-->
         <div class="col-xs-24 col-md-12 col-lg-6">
           <FloatSelect
@@ -1775,7 +1943,7 @@
             id={view.getViewName() + 'TaskVerificationId'}
             placeholder={T('TASK.LABEL.TASK_VERIFICATION') + '(+)'}
             {menuPath}
-            disabled={readOnlyModeEvaluator}
+            disabled={!isEvaluatorEditable}
             data$={taskVerification$} />
         </div>
         <!-- // Task Verification-->
@@ -1789,7 +1957,7 @@
             id={view.getViewName() + 'TaskQualificationId'}
             placeholder={T('TASK.LABEL.TASK_QUALIFICATION') + '(+)'}
             {menuPath}
-            disabled={readOnlyModeEvaluator}
+            disabled={!isEvaluatorEditable}
             data$={taskQualification$} />
         </div>
         <!-- // Task Qualification-->
@@ -1802,19 +1970,22 @@
             id={view.getViewName() + 'EvaluateStatusId'}
             placeholder={T('TASK.LABEL.EVALUATE_STATUS') + '(+)'}
             {menuPath}
-            disabled={readOnlyModeEvaluator}
+            disabled={!isEvaluatorEditable}
             data$={taskStatus$} />
-        </div>
-
-        <div class="col-xs-24 col-md-12 col-lg-6">
-          <FloatCheckbox
-            text={T('COMMON.LABEL.COMPLETE')}
-            disabled={readOnlyModeEvaluator}
-            bind:checked={form.evaluateComplete} />
         </div>
         <!-- // Status-->
       </div>
+      <!-- // Date-->
 
+      <!-- Comment-->
+      <div class="row">
+        <div class="col-24">
+          <RichEditor bind:value={form.evaluateComment} disabled={!isEvaluatorEditable}>
+            {T('TASK.LABEL.COMMENT')}:
+          </RichEditor>
+        </div>
+      </div>
+      <!-- // Comment-->
     </Section>
     <!-- // Evaluator Info-->
   </form>

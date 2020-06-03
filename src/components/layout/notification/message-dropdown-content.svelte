@@ -20,8 +20,10 @@
   import HoldIcon from '@/icons/hold24x24.svelte';
   import UnHoldIcon from '@/icons/un-hold24x24.svelte';
 
-  import Reminder1 from '@/icons/reminder124x24.svelte';
-  import Reminder2 from '@/icons/reminder224x24.svelte';
+  import Reminder1Icon from '@/icons/reminder124x24.svelte';
+  import Reminder2Icon from '@/icons/reminder224x24.svelte';
+
+  import NotifyIcon from '@/icons/notify24x24.svelte';
 
   export let data: any[];
   export let type: string;
@@ -31,27 +33,40 @@
   let searchProgress$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   let textSearch = '';
 
+  // let iconsTab = [
+  //   { icon: SubmitIcon, messageType: 'SUBMIT', isCancel: false, show: true, count: 10 },
+  //   { icon: CancelSubmitIcon, messageType: 'SUBMIT', isCancel: true, show: false, count: 0 },
+  //
+  //   { icon: AssignIcon, messageType: 'ASSIGN', isCancel: false, show: false, count: 0 },
+  //   { icon: UnAssignIcon, messageType: 'ASSIGN', isCancel: true, show: false, count: 0 },
+  //
+  //   { icon: HoldIcon, messageType: 'HOLD', isCancel: false, show: undefined, count: 0 },
+  //   { icon: UnHoldIcon, messageType: 'HOLD', isCancel: true, show: undefined, count: 0 },
+  //
+  //   { icon: Reminder1Icon, messageType: 'REMINDER1', isCancel: false, show: undefined, count: 0 },
+  //   { icon: Reminder2Icon, messageType: 'REMINDER2', isCancel: false, show: undefined, count: 0 },
+  //
+  //   { icon: UpdateIcon, messageType: 'UPDATE', isCancel: false, show: undefined, count: 0 },
+  // ];
+
   let iconsTab = [
-    { icon: SubmitIcon, messageType: 'SUBMIT', isCancel: false, show: true, count: 10 },
-    { icon: CancelSubmitIcon, messageType: 'SUBMIT', isCancel: true, show: false, count: 0 },
+    { icon: SubmitIcon, messageTypes: ['SUBMIT', 'APPROVE'], show: true, count: 0 },
 
-    { icon: AssignIcon, messageType: 'ASSIGN', isCancel: false, show: false, count: 0 },
-    { icon: UnAssignIcon, messageType: 'ASSIGN', isCancel: true, show: false, count: 0 },
+    { icon: AssignIcon, messageTypes: ['ASSIGN', 'HOLD'], show: false, count: 0 },
 
-    { icon: HoldIcon, messageType: 'HOLD', isCancel: false, show: undefined, count: 0 },
-    { icon: UnHoldIcon, messageType: 'HOLD', isCancel: true, show: undefined, count: 0 },
+    { icon: Reminder1Icon, messageTypes: ['REMINDER1'], show: undefined, count: 0 },
+    { icon: Reminder2Icon, messageTypes: ['REMINDER2'], show: undefined, count: 0 },
 
-    { icon: Reminder1, messageType: 'REMINDER1', isCancel: false, show: undefined, count: 0 },
-    { icon: Reminder2, messageType: 'REMINDER2', isCancel: false, show: undefined, count: 0 },
+    { icon: NotifyIcon, messageTypes: ['UPDATE', 'COMPLETE'], show: undefined, count: 0 },
   ];
+
   // @ts-ignore
   $: {
     filteredData = data;
   }
 
-  const getCounter = (messageType: string, isCancel: boolean) => {
-    return filteredData.filter((it: any) => !it.isRead && messageType === it.messageType && isCancel === it.isCancel)
-      .length;
+  const getCounter = (messageTypes: string[]) => {
+    return filteredData.filter((it: any) => !it.isRead && messageTypes.includes(it.messageType)).length;
   };
 
   const applyTab = (foundMessageType: any[]) => {
@@ -59,19 +74,21 @@
     for (let i = 0; i < iconsTab.length; i++) {
       iconsTab[i].show = undefined;
 
-      const index = foundMessageType.findIndex(
-        (it: any) => iconsTab[i].messageType === it.messageType && iconsTab[i].isCancel === it.isCancel,
-      );
+      const index = foundMessageType.findIndex((it: any) => iconsTab[i].messageTypes.includes(it.messageType));
 
       if (index >= 0) {
         if (!firstTime) {
           iconsTab[i].show = true;
+
+          onClickTab({
+            messageTypes: iconsTab[i].messageTypes,
+            show: undefined,
+          });
         } else {
           iconsTab[i].show = false;
         }
         firstTime = true;
-        iconsTab[i].isCancel = foundMessageType[index].isCancel;
-        iconsTab[i].count = getCounter(iconsTab[i].messageType, iconsTab[i].isCancel);
+        iconsTab[i].count = getCounter(iconsTab[i].messageTypes);
       }
     }
 
@@ -83,9 +100,8 @@
     groupFilteredData = filteredData;
     let messageTypeAndIsCancel = filteredData.map((it: Notification) => {
       return {
-        index: it.messageType + it.isCancel,
+        index: it.messageType,
         messageType: it.messageType,
-        isCancel: it.isCancel,
       };
     });
 
@@ -141,9 +157,8 @@
       return;
     }
 
-    const index = iconsTab.findIndex(
-      (it: any) => it.messageType === event.messageType && it.isCancel === event.isCancel,
-    );
+    const index = iconsTab.findIndex((it: any) => it.messageTypes === event.messageTypes);
+
     iconsTab.map((it: any, idx: number) => {
       it.show = index === idx ? true : it.show === undefined ? undefined : false;
 
@@ -154,7 +169,7 @@
 
     if (index >= 0) {
       groupFilteredData = filteredData.filter((it: Notification) => {
-        return it.messageType === iconsTab[index].messageType && it.isCancel === iconsTab[index].isCancel;
+        return iconsTab[index].messageTypes.includes(it.messageType);
       });
     }
   };
@@ -163,15 +178,15 @@
 <div style="overflow: auto; width: 100%; height: 100%;" class="default-padding">
   <div class="bold-text">{T('TASK.LABEL.' + type)}</div>
   <QuickSearch loading$={searchProgress$} action={useInputAction} placeholder={T('COMMON.LABEL.FILTER')} />
-  <div style="display: flex; margin-top: 10px;">
+  <div style="display: flex; margin-top: 10px; justify-content: center; align-content: center;">
     {#each iconsTab as icon}
       {#if icon.show !== undefined}
-        <div on:click={() => onClickTab(icon)} style="position: relative; margin-right: 10px;">
+        <div on:click={() => onClickTab(icon)} style="position: relative; margin-left: 10px; margin-right: 10px;">
           <svelte:component
             this={icon.icon}
             className="large-svg-icon {icon.show === false ? 'svg-disabled cursor-pointer' : ''}" />
           {#if icon.count > 0}
-            <div class="badge">{icon.count}</div>
+            <div class="badge {icon.show === false ? 'disabled-badge' : ''}">{icon.count}</div>
           {/if}
         </div>
       {/if}

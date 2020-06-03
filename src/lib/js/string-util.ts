@@ -35,7 +35,7 @@ export class StringUtil {
     return source === null || source === undefined || source.trim().length === 0;
   }
 
-  public static replaceAll(source: any, find: string, replace: string) {
+  public static replaceAll(source: string, find: string, replace: string) {
     if (StringUtil.isEmpty(source)) {
       return '';
     }
