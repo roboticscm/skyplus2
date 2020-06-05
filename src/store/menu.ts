@@ -6,6 +6,7 @@ import { HistoryMenu, RoleMenu } from '@/modules/sys/menu/model';
 import { toSnackCase } from '@/lib/js/util';
 import { Debug } from '@/lib/js/debug';
 import { SJSON } from '@/lib/js/sjson';
+import {getMenuPathFromUrl, getMenuPathFromUrlParam} from "@/lib/js/url-util";
 
 const BASE_URL = 'sys/menu/';
 class MenuStore {
@@ -37,6 +38,7 @@ class MenuStore {
     });
   }
 
+
   sysGetRoledMenuListByUserIdAndDepId(depId: any, isSubscribed = true) {
     const ob$ = RxHttp.get(`${BASE_URL}${toSnackCase('sysGetRoledMenuListByUserIdAndDepId')}`, {
       depId,
@@ -48,8 +50,17 @@ class MenuStore {
         (res: any) => {
           this.dataList$.next(res.data);
           if (res.data.length > 0) {
-            this.selectedData = res.data[0];
-            this.selectedData$.next(res.data[0]);
+            const menuPathFromUrlParam = getMenuPathFromUrlParam();
+            if(menuPathFromUrlParam) {
+              this.sysGetMenuByPath(menuPathFromUrlParam).subscribe((res: any) => {
+                this.selectedData = res.data;
+                this.selectedData$.next(res.data);
+              });
+            } else {
+              this.selectedData = res.data[0];
+              this.selectedData$.next(res.data[0]);
+            }
+
           }
         },
         (error) => Debug.errorSection('MenuStore - sysGetRoledMenuListByUserIdAndDepId', error),
@@ -57,6 +68,7 @@ class MenuStore {
     }
     return ob$;
   }
+
 
   // setSelectedData(menuPath: string) {
   //   const path = menuPath.startsWith('/') ? menuPath.slice(1) : menuPath;

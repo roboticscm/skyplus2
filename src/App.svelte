@@ -14,9 +14,17 @@
   import { unlockScreen } from '@/lib/js/security';
   import Nickname from '@/components/layout/nickname';
   import { getUserFullName } from '@/lib/js/security';
+  import {onMount} from 'svelte';
+  import OrgIconMark from '@/components/layout/icons/org-mark';
+  import { OrgStore } from '@/store/org';
+  import MobileMainNavBar from '@/components/layout/mobile-main-nav-bar';
+
+  const { currentCompany$ } = OrgStore;
 
   let routerView: any;
   let confirmPasswordModalRef: any;
+  let windowWidth = window.innerWidth;
+  const SMALL_SCREEN_WIDTH = 768;
 
   // @ts-ignore
   const { isLogged$, screenLock$ } = AppStore;
@@ -30,6 +38,16 @@
         unlockScreen();
       });
   }
+
+  const onResizeWindow = () => {
+    windowWidth = window.innerWidth;
+  }
+
+  onMount(() => {
+    window.addEventListener('resize', onResizeWindow);
+  });
+
+
 </script>
 
 {#if $isLogged$ && $user$}
@@ -45,44 +63,25 @@
 {/if}
 
 {#if $isLogged$}
+  {#if windowWidth >= SMALL_SCREEN_WIDTH}
   <MainLayout>
-    <section slot="header" class="layout-header {$isLogged$ ? 'layout-header-logged-in' : ''}">
-      <div class="layout-header__top {!$isLogged$ ? 'layout-header__large_top' : ''}">
+    <section slot="header" class="layout-header layout-header-logged-in">
+      <div class="layout-header__top">
         <div class="layout-header__top__left">
           <BranchDropdown />
-
-          {#if $isLogged$}
-            <div class="separator" />
-            <ModulesDropdown id="moduleId" />
-          {/if}
-
+          <div class="separator" />
+          <ModulesDropdown id="moduleId" />
         </div>
         <div class="layout-header__top__center">
-          {#if !$isLogged$}
-            <div class="layout-header__top__center__body">
-              <div class="layout-header__top__center__body__welcome">
-                <i class="fa fa-sign-in-alt" />
-                {@html `${T('SYS.MSG.WELCOME_TO')} <b>SKYHUB</b>`}
-              </div>
-              <SearchBar id="mainSearchBarId" menuPath="intro" />
-            </div>
-          {/if}
-
-          {#if $isLogged$}
             <SearchBar id="mainSearchBarId" menuPath="intro" />
-          {/if}
         </div>
         <div class="layout-header__top__right">
-          {#if $isLogged$}
-            <Notification />
-          {/if}
+          <Notification />
           <UserProfiles />
         </div>
       </div>
       <nav class="layout-header__bottom">
-        {#if $isLogged$}
           <MainNavBar />
-        {/if}
       </nav>
     </section>
 
@@ -90,6 +89,44 @@
       <RouterView bind:this={routerView} />
     </div>
   </MainLayout>
+  {:else}
+    <MainLayout>
+      <section slot="header" class="mobile-header">
+        <div class="mobile-header__top">
+          <div class="mobile-header__top__logo">
+            <div class="mobile-header__top__logo__mark">
+              <OrgIconMark />
+            </div>
+            <img class="mobile-header__top__logo__img" src={$currentCompany$.iconData} alt="" />
+            <div class="mobile-separator" ></div>
+          </div>
+          <div class="mobile-header__top__module">
+            <ModulesDropdown id="moduleId" />
+          </div>
+          <div class="mobile-header__top__avatar">
+            <UserProfiles />
+          </div>
+        </div>
+
+        <div class="mobile-header__bottom">
+          <div class="mobile-header__bottom__hamburger-menu">
+            <MobileMainNavBar></MobileMainNavBar>
+          </div>
+
+          <div class="mobile-header__bottom__search">
+            <SearchBar id="mainSearchBarId" menuPath="intro" />
+          </div>
+
+          <div class="mobile-header__bottom__notify">
+            <Notification />
+          </div>
+        </div>
+      </section>
+      <div slot="default" style="height: 100%; background: var(--bg-tertiary); overflow: auto;">
+        <RouterView bind:this={routerView} />
+      </div>
+    </MainLayout>
+  {/if}
   <Nickname />
 {:else}
   <div style="height: 100%; background: var(--bg-tertiary); overflow: auto;">

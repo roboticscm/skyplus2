@@ -759,6 +759,7 @@ export class ViewStore {
     title: string,
     targetId: string,
     isCancel = false,
+    sendEmail = false
   ) {
     const notification = {
       fromHumanId: getUserId(),
@@ -770,6 +771,7 @@ export class ViewStore {
       title,
       type,
       isCancel,
+      sendEmail
     };
     return notificationStore.save(notification);
   }
@@ -780,8 +782,9 @@ export class ViewStore {
     title: string,
     targetId: string,
     isCancel = false,
+    sendEmail = false
   ) {
-    return this.saveNotification(NotifyType.Chat, toHumanListIds, messageType, title, targetId, isCancel);
+    return this.saveNotification(NotifyType.Chat, toHumanListIds, messageType, title, targetId, isCancel, sendEmail);
   }
 
   saveAlarmNotification(
@@ -800,7 +803,8 @@ export class ViewStore {
     title: string,
     targetId: string,
     isCancel = false,
+    sendEmail = false
   ) {
-    return this.saveNotification(NotifyType.Functional, toHumanListIds, messageType, title, targetId, isCancel);
+    return this.saveNotification(NotifyType.Functional, toHumanListIds, messageType, title, targetId, isCancel, sendEmail);
   }
 }

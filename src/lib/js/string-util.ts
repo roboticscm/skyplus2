@@ -127,7 +127,7 @@ export class StringUtil {
       return StringUtil.replaceAll(value, '`', '');
     }
 
-    return unccentVietnamese(StringUtil.replaceAll(StringUtil.replaceAll(value, ' ', ':*&') + ':*', '#', ''));
+    return unccentVietnamese( StringUtil.replaceAll(StringUtil.replaceAll(value, ' ', ':*&') + ':*', '#', ''));
   }
 
   public static formatSearchParam(value: string) {

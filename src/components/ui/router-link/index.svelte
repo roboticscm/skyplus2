@@ -15,7 +15,7 @@
 
   export let __path: string = '/';
   export let activeClass: string = '';
-  export let className: string = '';
+  export let className: string = 'nav-item';
 
   export let menuName: string;
 
@@ -63,7 +63,7 @@
 <div
   id={__path.replace('/', '')}
   on:click={() => onClick(__path)}
-  class="nav-item {className}
+  class="{className}
   {isActiveComponent ? activeClass : ''}">
   {@html name}
 

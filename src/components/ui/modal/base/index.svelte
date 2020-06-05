@@ -2,7 +2,7 @@
   import Button from '@/components/ui/flat-button';
   import { ButtonType, ButtonPressed } from '@/components/ui/button/types';
   import { ModalType, ModalId } from '@/components/ui/modal/types';
-  import {createModal, debounceTime} from '../use-modal';
+  import { createModal, debounceTime } from '../use-modal';
   import { onMount, createEventDispatcher, onDestroy } from 'svelte';
   import { StringUtil } from '@/lib/js/string-util';
   import { T } from '@/lib/js/locale/locale';
@@ -59,7 +59,6 @@
       });
     }
   };
-
 
   // @ts-ignore
   let resizeObserver: any;

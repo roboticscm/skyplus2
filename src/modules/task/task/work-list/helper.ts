@@ -8,7 +8,7 @@ export const functionalStatusFields = [
     statusCode: 0,
     title: T('COMMON.LABEL.NEW_STATUS'),
     counter: 0,
-    active: false
+    active: false,
   },
   {
     id: 'isSubmittedStatus',
@@ -16,7 +16,7 @@ export const functionalStatusFields = [
     statusCode: 1,
     title: T('COMMON.LABEL.SUBMITTED_STATUS'),
     counter: 0,
-    active: false
+    active: false,
   },
   {
     id: 'isApprovedStatus',
@@ -24,7 +24,7 @@ export const functionalStatusFields = [
     statusCode: 2,
     title: T('COMMON.LABEL.APPROVED_STATUS'),
     counter: 0,
-    active: false
+    active: false,
   },
   {
     id: 'isProcessingStatus',
@@ -32,7 +32,7 @@ export const functionalStatusFields = [
     statusCode: 888,
     title: T('COMMON.LABEL.PROCESSING_STATUS'),
     counter: 0,
-    active: true
+    active: true,
   },
   {
     id: 'isCompletedStatus',
@@ -40,19 +40,27 @@ export const functionalStatusFields = [
     statusCode: 999,
     title: T('COMMON.LABEL.COMPLETED_STATUS'),
     counter: 0,
-    active: false
+    active: false,
+  },
+  {
+    id: 'recent',
+    status: 'RECENT',
+    statusCode: 777,
+    title: T('COMMON.LABEL.RECENT_TASK'),
+    counter: undefined,
+    active: false,
   },
 ];
 
 export const getStatusCodeById = (id: string) => {
   const index = functionalStatusFields.findIndex((it: any) => it.id === id);
 
-  if(index >= 0) {
+  if (index >= 0) {
     return functionalStatusFields[index].statusCode;
   }
 
   return null;
-}
+};
 
 export const convertArrayObjectToObject = (arrayObj: any[]) => {
   const objResult: any = {};

@@ -1,8 +1,36 @@
 import { T } from '@/lib/js/locale/locale';
 import { StringUtil } from '@/lib/js/string-util';
+import {AppStore} from "@/store/app";
 
 export const getMenuPathFromUrl = () => {
   return location.pathname.slice(1).replace('--', '/');
+};
+
+export const getMenuPathFromUrlParam = () => {
+  const url = new URL(AppStore.urlParam);
+  if(url) {
+    return url.pathname.slice(1).replace('--', '/');
+  } else {
+    return null;
+  }
+};
+
+export const getDepIdFromUrlParam = () => {
+  const url = new URL(AppStore.urlParam);
+  if(url) {
+    return url.searchParams.get('depId');
+  } else {
+    return null;
+  }
+};
+
+export const getTargetIdFromUrlParam = () => {
+  const url = new URL(AppStore.urlParam);
+  if(url) {
+    return url.searchParams.get('id');
+  } else {
+    return null;
+  }
 };
 
 export const getMenuNameFromPath = (menuPath: string) => {

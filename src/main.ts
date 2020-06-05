@@ -33,6 +33,7 @@ import {
 import '@/lib/js/session';
 
 const startApp = () => {
+  AppStore.urlParam = location.href;
   const companyId = getCompanyId();
   const locale = getLanguage();
 

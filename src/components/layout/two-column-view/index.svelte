@@ -89,8 +89,11 @@
   <div class="view-left">
     <slot name="viewLeft" />
   </div>
+
   <div class="left-grid-vertical-gutter" />
-  <div class="view-content">
-    <slot />
-  </div>
+  {#if !window.isSmartPhone}
+    <div class="view-content">
+      <slot />
+    </div>
+  {/if}
 </main>

@@ -4,6 +4,7 @@
   import SubmitStatusApprovedIcon from '@/icons/submit-status-approved24x24.svelte';
   import SubmitStatusProcessingIcon from '@/icons/submit-status-processing24x24.svelte';
   import SubmitStatusCompletedIcon from '@/icons/submit-status-completed24x24.svelte';
+  import RecentIcon from '@/icons/recent24.svelte';
   import { createEventDispatcher } from 'svelte';
   import { T } from '@/lib/js/locale/locale';
 
@@ -12,18 +13,19 @@
   const dispatch = createEventDispatcher();
 
   let iconsTab = [
-    { icon: SubmitStatusNewIcon, className: 'large-svg-icon', status: 'INIT' },
-    { icon: SubmitStatusWaitForApprovedIcon, className: 'large-svg-icon', status: 'SUBMITTED' },
-    { icon: SubmitStatusApprovedIcon, className: 'large-svg-icon', status: 'APPROVED' },
-    { icon: SubmitStatusProcessingIcon, className: 'large-svg-icon', status: 'PROCESSING' },
-    { icon: SubmitStatusCompletedIcon, className: 'large-svg-icon', status: 'COMPLETED' },
+    { icon: SubmitStatusNewIcon, className: 'status-new large-svg-icon', status: 'INIT' },
+    { icon: SubmitStatusWaitForApprovedIcon, className: 'status-wait-for-approve large-svg-icon', status: 'SUBMITTED' },
+    { icon: SubmitStatusApprovedIcon, className: 'status-approved large-svg-icon', status: 'APPROVED' },
+    { icon: SubmitStatusProcessingIcon, className: 'status-processing large-svg-icon', status: 'PROCESSING' },
+    { icon: SubmitStatusCompletedIcon, className: 'status-completed large-svg-icon', status: 'COMPLETED' },
+    { icon: RecentIcon, className: 'recent-color large-plus-svg-icon', status: 'RECENT' },
   ];
 
   let activeIndex = undefined;
+  let firstTime = true;
   // @ts-ignore
   $: {
     if (data && data.length > 0) {
-
       iconsTab = iconsTab.map((it: any) => {
         const index = data.findIndex((dt: any) => dt.status === it.status);
         if (index >= 0) {
@@ -31,9 +33,9 @@
           it.title = data[index].title;
           it.field = data[index].id;
           it.counter = data[index].counter;
-          console.log('data .... ', it.counter);
-          if(data[index].active) {
+          if (data[index].active && firstTime) {
             activeIndex = index;
+            firstTime = false;
           }
         }
 
@@ -64,10 +66,13 @@
             className="{item.className}
             {idx === activeIndex ? 'active' : 'svg-disabled'}" />
         </div>
+
+        {#if item.counter != undefined}
         <div
           class="functional-status__item__counter {idx === activeIndex ? 'functional-status__item__counter__active' : 'text-disabled'}">
-          {item.counter || ''}
+          {item.counter || '0'}
         </div>
+          {/if}
       </div>
     {/if}
   {/each}

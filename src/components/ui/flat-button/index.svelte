@@ -6,8 +6,8 @@
   import { ButtonDropdown } from '../button/model';
   import DropdownItem from '@/components/ui/dropdown-item';
   import { Dropdown } from '@/lib/js/dropdown';
-  import {Browser} from "../../../lib/js/browser";
-  import {debounceTime} from "../modal/use-modal";
+  import { Browser } from '../../../lib/js/browser';
+  import { debounceTime } from '../modal/use-modal';
 
   export let id: string = undefined;
   export let type = 'button';
@@ -23,7 +23,7 @@
   export let showText = true;
   export let dropdownList: ButtonDropdown[] = [];
   export let uppercase = true;
-  export let container = undefined;
+
   // export let dropdownList: ButtonDropdown[] = [
   //   { id: 'ITEM1', name: 'Demo Item1', useFontIcon: true, fontIcon: '<i class="fab fa-skyatlas"></i>' },
   //   { id: 'ITEM2', name: 'Demo Item2', useFontIcon: true, fontIcon: '<i class="fa fa-adjust"></i>' },
@@ -140,6 +140,10 @@
       case ButtonType.UnComplete:
         preset(ButtonId.UnComplete, 'UN_COMPLETE', 'un-complete', 'btn-flat');
         break;
+
+      case ButtonType.Back:
+        preset(undefined, 'BACK', '<i class="fa fa-arrow-left"></i>', 'btn-flat');
+        break;
       default:
     }
 
@@ -170,15 +174,15 @@
     Dropdown.hide(`dropdown${id}`);
   };
 
-  const showTextOrHide = (containerWidth: number, childrenCount: number ) => {
-    if(btnRef && childrenCount > 0 && (containerWidth / childrenCount) >= BUTTON_MIN_WITH) {
+  const showTextOrHide = (containerWidth: number, childrenCount: number) => {
+    if (btnRef && childrenCount > 0 && containerWidth / childrenCount >= BUTTON_MIN_WITH) {
       showText = true;
       btnRef.style.minWidth = `${BUTTON_MIN_WITH}px`;
-    } else if(btnRef) {
+    } else if (btnRef) {
       showText = false;
       btnRef.style.minWidth = '50px';
     }
-  }
+  };
 
   const onResizeContainer = (e: any) => {
     const container = e[0].target;
@@ -186,38 +190,31 @@
     const childrenCount = container.childElementCount;
 
     showTextOrHide(containerWidth, childrenCount);
-  }
+  };
 
   onMount(() => {
+    if ((window as any).isSmartPhone) {
+      btnRef.style.minWidth = '50px';
+    } else {
+      btnRef.style.minWidth = `${BUTTON_MIN_WITH}px`;
+    }
+
     let resizeObserver: any;
-    if(!container) {
-      if (Browser.getBrowser() !== 'Safari') {
-        // @ts-ignore
-        resizeObserver = new ResizeObserver(debounceTime(100, onResizeContainer));
-        resizeObserver && resizeObserver.observe(btnRef.parentElement);
-      }
+
+    if (Browser.getBrowser() !== 'Safari') {
+      // @ts-ignore
+      resizeObserver = new ResizeObserver(debounceTime(100, onResizeContainer));
+      resizeObserver && resizeObserver.observe(btnRef.parentElement);
     }
 
     return () => {
-      if (container) {
-        resizeObserver && resizeObserver.unobserve(btnRef.parentElement);
-      }
-    }
+      resizeObserver && resizeObserver.unobserve(btnRef.parentElement);
+    };
   });
-
-  // $: if(container){
-  //   const containerWidth = window['$'](container).width();
-  //   console.log('containerWidth -- ', containerWidth);
-  //   const childrenCount = container.childElementCount;
-  //   console.log(' childrenCount -- ', childrenCount);
-  //   container.addEventListener('onresize', () => {
-  //     console.log('resize');
-  //   });
-  // }
 </script>
 
 <button
-  title = {title ? title : text}
+  title={title ? title : text}
   use:useAction
   bind:this={btnRef}
   {id}
@@ -233,10 +230,10 @@
     {#if icon && icon.includes('<')}
       {@html icon}
     {:else}
-      <svelte:component this={IconComponent} className={disabled ? 'readonly-svg-color' : ''} />
+      <svelte:component this={IconComponent} className={disabled ? 'svg-disabled' : ''} />
     {/if}
   {/if}
-  {#if showText}
+  {#if showText && !window.isSmartPhone}
     &nbsp; &nbsp;
     {@html text}
   {/if}

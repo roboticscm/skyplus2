@@ -47,11 +47,13 @@
   import CustomSelect from '@/components/ui/float-input/custom-select';
   import { MessageType } from '@/store/notification';
   import { HelperStore } from '../../../../store/helper';
+  import {getTargetIdFromUrlParam} from "@/lib/js/url-util";
 
   // Props
   export let view: ViewStore;
   export let menuPath: string;
   export let store: Store;
+  export let backCallback: Function = undefined;
 
   // @ts-ignore
   const {
@@ -87,6 +89,7 @@
 
   let modalTitle = '';
   let submitType = undefined;
+  let isManager = false;
   /**
    * Reset form (reset input and errors)
    * @param {none}
@@ -110,6 +113,24 @@
   let isCancelSubmit = false;
   let priorityRef, taskVerificationRef, taskQualificationRef: any;
   let taskSectionRef: any;
+
+
+  const notAssignAssigner = () => {
+    return form.assigners.length === 1 && form.assigners[0].id === null;
+  };
+
+  const isAssigneeUser = () => {
+    return form.assignees.findIndex((it: any) => it.id == getUserId()) >= 0;
+  };
+
+  const isAssignerUser = () => {
+    return form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0;
+  };
+
+  const isEvaluatorUser = () => {
+    return form.evaluators.findIndex((it: any) => it.id == getUserId()) >= 0;
+  };
+
 
   let isTaskEditable = true;
   let _isUserCanEditTask = true;
@@ -145,70 +166,57 @@
   $: disabledEdit = view.isDisabled(ButtonId.Edit) || !_isUserCanPressEditButton;
 
   let disabledSubmit = false;
-  let _isUserCanPressSubmitButton = false;
+  let _isUserCanPressSubmitButton = true;
   // @ts-ignore
-  $: disabledSubmit = view.isDisabled(
-    ButtonId.Submit,
-          // @ts-ignore
-    form.errors.any() || $isReadOnlyMode$ || !_isUserCanPressSubmitButton,
-  );
+  $: disabledSubmit = view.isDisabled(ButtonId.Submit, form.errors.any() || !_isUserCanPressSubmitButton);
 
   let disabledCancelSubmit = true;
   let _isUserCanPressCancelSubmitButton = false;
   // @ts-ignore
-  $: disabledCancelSubmit = view.isDisabled(
-    ButtonId.CancelSubmit,
-          // @ts-ignore
-    $isReadOnlyMode$ || !_isUserCanPressCancelSubmitButton,
-  );
+  $: disabledCancelSubmit = view.isDisabled(ButtonId.CancelSubmit, !_isUserCanPressCancelSubmitButton);
 
   let disabledAssign = true;
   let _isUserCanPressAssignButton = false;
   // @ts-ignore
   $: disabledAssign = view.isDisabled(
     ButtonId.Assign,
+    form.errors.any() ||
+      form.assignees.length === 0 ||
+      (form.assigners.length > 0 && !isAssignerUser()) ||
           // @ts-ignore
-    form.errors.any() || $isReadOnlyMode$ || !_isUserCanPressAssignButton,
+      (!_isUserCanPressAssignButton && $isUpdateMode$),
   );
 
   let disabledUnAssign = false;
   let _isUserCanPressUnAssignButton = false;
   // @ts-ignore
-  $: disabledUnAssign = view.isDisabled(ButtonId.UnAssign, $isReadOnlyMode$ || !_isUserCanPressUnAssignButton);
+  $: disabledUnAssign = view.isDisabled(ButtonId.UnAssign, !_isUserCanPressUnAssignButton);
 
   let disabledHold = true;
   let _isUserCanPressHoldButton = false;
   // @ts-ignore
-  $: disabledHold = view.isDisabled(ButtonId.Hold, form.errors.any() || $isReadOnlyMode$ || !_isUserCanPressHoldButton);
+  $: disabledHold = view.isDisabled(ButtonId.Hold, form.errors.any() || !_isUserCanPressHoldButton);
 
   let disabledUnHold = false;
   let _isUserCanPressUnHoldButton = false;
   // @ts-ignore
-  $: disabledUnHold = view.isDisabled(ButtonId.UnHold, $isReadOnlyMode$ || !_isUserCanPressUnHoldButton);
+  $: disabledUnHold = view.isDisabled(ButtonId.UnHold, !_isUserCanPressUnHoldButton);
 
   let disabledDelete = true;
   let _isUserCanPressDeleteButton = false;
   // @ts-ignore
-  $: disabledDelete = view.isDisabled(ButtonId.Delete, $isReadOnlyMode$ || !_isUserCanPressDeleteButton);
+  $: disabledDelete = view.isDisabled(ButtonId.Delete, !_isUserCanPressDeleteButton);
 
   let disabledComplete = true;
   let _isUserCanPressCompleteButton = false;
   // @ts-ignore
-  $: disabledComplete = view.isDisabled(
-    ButtonId.Complete,
-          // @ts-ignore
-    form.errors.any() || $isReadOnlyMode$ || !_isUserCanPressCompleteButton,
-  );
+  $: disabledComplete = view.isDisabled(ButtonId.Complete, form.errors.any() || !_isUserCanPressCompleteButton);
 
   let disabledUnComplete = true;
   let _isUserCanPressUnCompleteButton = false;
   // @ts-ignore
-  $: disabledUnComplete = view.isDisabled(ButtonId.UnComplete, form.errors.any() || $isReadOnlyMode$ || !_isUserCanPressUnCompleteButton,
-  );
+  $: disabledUnComplete = view.isDisabled(ButtonId.UnComplete, form.errors.any() || !_isUserCanPressUnCompleteButton);
 
-  const notAssignAssigner = () => {
-    return form.assigners.length === 1 && form.assigners[0].id === null;
-  };
 
   const isUserCanEditTask = () => {
     if (!selectedData) {
@@ -227,8 +235,7 @@
       form.createdBy == getUserId() ||
       form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0 ||
       form.assignees.findIndex((it: any) => it.id == getUserId()) >= 0 ||
-      form.evaluators.findIndex((it: any) => it.id == getUserId()) >= 0 ||
-      !(form.assignees[0].id || form.assigners[0].id || form.evaluators[0].id);
+      form.evaluators.findIndex((it: any) => it.id == getUserId()) >= 0;
 
     return result;
   };
@@ -253,7 +260,7 @@
   };
 
   const isUserCanPressAssignButton = () => {
-    const result = form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0;
+    const result = form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0 || (form.assigners.length === 0 || !form.assigners[0].id);
 
     return result;
   };
@@ -268,17 +275,7 @@
     );
   };
 
-  const isAssigneeUser = () => {
-    return form.assignees.findIndex((it: any) => it.id == getUserId()) >= 0;
-  };
 
-  const isAssignerUser = () => {
-    return form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0;
-  };
-
-  const isEvaluatorUser = () => {
-    return form.evaluators.findIndex((it: any) => it.id == getUserId()) >= 0;
-  };
   // ============================== EVENT HANDLE ==========================
 
   /**
@@ -329,18 +326,32 @@
     view.showTrashRestoreModal(event.currentTarget.id, false, scRef);
   };
 
+  // @ts-ignore
+  $: if(form.assignees) {
+    _isUserCanPressAssignButton =
+            (isUserCanPressAssignButton()) && form.assignees.length > 0 && form.assignees[0].id && (form.assigners.length === 0 || isAssignerUser());
+  }
   const onAddAssigner = () => {
     addAssignHumanOrOrg(form.assigners).then((res: any) => {
       form.assigners = res;
     });
   };
 
+  // @ts-ignore
+  $: if(form.assignees) {
+    _isUserCanPressAssignButton =
+            (isUserCanPressAssignButton()) && form.assignees.length > 0 && form.assignees[0].id && (form.assigners.length === 0 || isAssignerUser());
+  }
   const onAddAssignee = () => {
     addAssignHumanOrOrg(form.assignees).then((res: any) => {
       form.assignees = res;
     });
   };
 
+  // @ts-ignore
+  $: if(form.evaluators) {
+    _isUserCanPressCompleteButton = isUserCanPressCompleteButton();
+  }
   const onAddEvaluator = () => {
     addAssignHumanOrOrg(form.evaluators).then((res: any) => {
       form.evaluators = res;
@@ -439,6 +450,8 @@
     }
 
     status.assignPosition = 'ASSIGNEE';
+    status.completed = form.assigneeEndConfirm;
+
     store.submitOrCancelSubmit(status).subscribe((res) => {
       if (res.data) {
         let index = form.assigneeStatusDetails.findIndex((st: StatusDetail) => st.id === res.data.id);
@@ -539,6 +552,14 @@
           form.assigneeStatusDetails[index] = editedData;
           form.assigneeStatusDetails = [...form.assigneeStatusDetails];
         }
+
+        if(form.assigneeStatusDetails.findIndex((it: StatusDetail) => it.statusCode === 'COMPLETE') >=0) {
+          form.assigneeEndConfirm = true;
+          form.assigneeEndTime = Date.now();
+        } else {
+          form.assigneeEndConfirm = false;
+          form.assigneeEndTime = null;
+        }
       }
     });
   };
@@ -557,6 +578,14 @@
           form.assigneeStatusDetails = [...form.assigneeStatusDetails, { ...statusModalRef.getData() }];
         } else {
           form.assigneeStatusDetails = [{ ...statusModalRef.getData() }];
+        }
+
+        if(form.assigneeStatusDetails.findIndex((it: StatusDetail) => it.statusCode === 'COMPLETE') >=0) {
+          form.assigneeEndConfirm = true;
+          form.assigneeEndTime = Date.now();
+        } else {
+          form.assigneeEndConfirm = false;
+          form.assigneeEndTime = null;
         }
       }
     });
@@ -785,11 +814,11 @@
   const getHumanIds = () => {
     const ret = [
       ...new Set([
-        ...form.assigners.map((it: any) => it.id),
-        ...form.assignees.map((it: any) => it.id),
-        ...form.evaluators.map((it: any) => it.id),
+        ...form.assigners.map((it: any) => it.id ? it.id.toString() : it.id),
+        ...form.assignees.map((it: any) => it.id ? it.id.toString() : it.id),
+        ...form.evaluators.map((it: any) => it.id ? it.id.toString() : it.id),
       ]),
-    ].filter((it) => it !== null && it != getUserId() && it != form.createdBy);
+    ].filter((it) => it !== null && it != getUserId() );
     return ret;
   };
 
@@ -844,6 +873,9 @@
 
   const verifyAssign = () => {
     submitType = 'assign';
+    if(form.assigners.length === 0 || !form.assigners[0].id) {
+      form.assigners = [{id: getUserId(), name: getUserFullName()}];
+    }
     return fromPromise(
       /* verify permission*/
       view.verifyAssignAction(ButtonId.Assign, scRef, undefined, disabledAssign),
@@ -964,6 +996,8 @@
    */
   export const doAddNew = async () => {
     selectedData = undefined;
+    isManager = false;
+    _isUserCanPressSubmitButton = true;
     _isUserCanEditTask = true;
     taskSectionRef.openSection();
     await tick();
@@ -1011,8 +1045,18 @@
             if (res.response.data.message) {
               scRef.snackbarRef().showUnknownError(res.response.data.message);
             } else {
+
               form.errors.errors = form.recordErrors(res.response.data);
             }
+
+            // rollback prev submit status
+            form.submitStatus = (beforeForm && beforeForm.submitStatus) || SubmitStatus.Init;
+
+            // rollback prev assigner list
+            if(submitType === 'assign') {
+              form.assigners = (beforeForm && beforeForm.assigners) || [];
+            }
+
           } else {
             // success
 
@@ -1047,9 +1091,8 @@
             }
 
             view.needSelectId$.next(res.data.id);
-
-            submitType = undefined;
           }
+          submitType = undefined;
           saveRunning$.next(false);
         },
         error: (error) => {
@@ -1060,6 +1103,7 @@
   };
 
   const doSelect = (data: any) => {
+    console.log('...data... ', data);
     selectedData = data;
     if (selectedData) {
       isReadOnlyMode$.next(true);
@@ -1116,14 +1160,17 @@
       isCancelSubmit = canCancelSubmit();
 
       HelperStore.isManager(getUserId(), form.createdBy, menuPath).subscribe((res: any) => {
-        const isManager = StringUtil.toBoolean(res.data);
+        isManager = StringUtil.toBoolean(res.data);
 
-        _isUserCanEditTask = isUserCanEditTask() || isManager;
+        _isUserCanEditTask = isUserCanEditTask() || (isManager && (form.assigners.length === 0 || !form.assigners[0].id));
 
         _isUserCanPressEditButton = isUserCanPressEditButton() || isManager;
         _isUserCanPressSubmitButton = isUserCanPressSubmitButton() || isManager;
         _isUserCanPressCancelSubmitButton = isUserCanPressSubmitButton() || isManager;
-        _isUserCanPressAssignButton = isUserCanPressAssignButton() || isManager;
+
+        _isUserCanPressAssignButton =
+                (isUserCanPressAssignButton()) && form.assignees.length > 0 && form.assignees[0].id && (form.assigners.length === 0 || isAssignerUser());
+
         _isUserCanPressUnAssignButton = isUserCanPressAssignButton() || isManager;
         _isUserCanPressHoldButton = isUserCanPressAssignButton() || isManager;
         _isUserCanPressUnHoldButton = isUserCanPressAssignButton() || isManager;
@@ -1273,22 +1320,30 @@
 
   onMount(() => {
     registerSubscription();
-    doAddNew();
+    if(!(window as any).isSmartPhone) {
+      doAddNew();
+    }
+
     // Capture hot key (Ctrl - S) for save or update
     doSaveOrUpdate(view.registerHotKey$(document, isReadOnlyMode$), verifySaveOrUpdate);
 
-    needSelectId$.subscribe((id: string) => {
+    const needSelectIdSub = needSelectId$.subscribe((id: string) => {
       if (id) {
-        console.log('select id ', id);
         setTimeout(() => {
           isReadOnlyMode$.next(false);
         }, 1000);
       }
     });
+
+
+    return () => {
+      needSelectIdSub.unsubscribe();
+    }
   });
 
   onDestroy(() => {
     saveOrUpdateSub && saveOrUpdateSub.unsubscribe();
+    selectDataSub && selectDataSub.unsubscribe();
   });
 
   // ============================== REACTIVE ==========================
@@ -1319,7 +1374,9 @@
 
   // when user click on work list. load selected data to the right form
   const selectDataSub = view.selectedData$.subscribe((data) => {
-    doSelect(data);
+    if(data) {
+      doSelect(data);
+    }
   });
 
   let lastAssigneeSubmittedStatus: string;
@@ -1333,7 +1390,7 @@
     }
   }
 
-  // // @ts-ignore
+  // @ts-ignore
   // $: {
   //   // @ts-ignore
   //   const needSelectId = $needSelectId$;
@@ -1360,6 +1417,10 @@
       form.assigneeEndTime = null;
     }
   };
+
+  const onClickBack = () => {
+    backCallback && backCallback();
+  }
 </script>
 
 <style lang="scss">
@@ -1368,18 +1429,23 @@
   .section-sub-title {
     display: flex;
     align-content: space-between;
+    flex-wrap: wrap;
     .col1 {
-      flex: 2;
+      margin-left: 10px;
+      flex: 1;
+      white-space: nowrap;
     }
 
     .col2 {
-      flex: 2;
+      flex: 1;
       text-align: right;
+      white-space: nowrap;
     }
 
     .col3 {
       flex: 1;
       text-align: right;
+      white-space: nowrap;
     }
   }
 </style>
@@ -1418,8 +1484,13 @@
 </ViewWrapperModal>
 <!--//Invisible Element-->
 <!--Form controller-->
-<section class="view-content-controller" style="display: flex; justify-content: space-between;">
-  <div style="flex: 4">
+<section class="view-content-controller" style="display: flex; justify-content: space-between; flex-wrap: nowrap">
+  <div style="width: 70%; display: flex; flex-wrap: nowrap">
+    {#if window.isSmartPhone}
+      <Button
+              on:click={onClickBack}
+              btnType={ButtonType.Back}/>
+    {/if}
     {#if view.isRendered(ButtonId.Save, !$isUpdateMode$)}
       <Button
         action={useSaveOrUpdateAction}
@@ -1464,7 +1535,7 @@
       <Button action={useUnHoldAction} btnType={ButtonType.UnHold} disabled={disabledUnHold} />
     {/if}
 
-    {#if view.isRendered(ButtonId.Delete, $isUpdateMode$)}
+    {#if view.isRendered(ButtonId.Delete, $isUpdateMode$ && form.submitStatus !== SubmitStatus.Completed)}
       <Button btnType={ButtonType.Delete} on:click={onDelete} disabled={disabledDelete} running={$deleteRunning$} />
     {/if}
 
@@ -1478,7 +1549,7 @@
 
   </div>
 
-  <div style="flex: 0">
+  <div style="width: 30%; white-space: nowrap; text-align: right">
     {#if view.isRendered(ButtonId.TrashRestore, $hasAnyDeletedRecord$)}
       <Button
         btnType={ButtonType.TrashRestore}
@@ -1505,7 +1576,7 @@
       title={T('TASK.LABEL.TASK')}
       {menuPath}
       id={view.getViewName() + 'TaskSectionId'}>
-      <div slot="subTitle" class="section-sub-title w-100">
+      <div slot="subTitle" class="section-sub-title">
         <div class="col1 bold-text large-font-sizer text-active-underline">
           {@html form.name + (form.submitStatus === SubmitStatus.Completed ? ' (' + T('COMMON.LABEL.COMPLETE') + ')' : '')}
         </div>
@@ -1535,7 +1606,7 @@
         </div>
         <!-- // Name -->
 
-        <div class="col-xs-24 col-md-12">
+        <div class="col-xs-24 col-md-12 col-lg-6">
           <!--           Project-->
           <CustomSelect
             bind:value={form.projectId}
@@ -1559,6 +1630,12 @@
           <!--            data$={projects$} />-->
         </div>
         <!-- // Project -->
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatTextInput
+                  placeholder={T('TASK.LABEL.TASK_CODE')}
+                  disabled={true}
+                  bind:value={form.code} />
+        </div>
       </div>
 
       <div class="row" style="margin-top: 6px;">
@@ -1790,12 +1867,14 @@
             .map((it) => it.name)
             .join(
               ', ',
-            ) + (form.submitStatus === SubmitStatus.Held ? ' (' + T('TASK.MSG.HOLD') + ')' : form.submitStatus !== SubmitStatus.Assigned ? ' (' + T('TASK.MSG.TASK_NOT_ASSIGN_YET') + ')' : '')}
+            )}
         </div>
 
-        <div class="col2">{SDate.convertMillisecondToDateTimeString(form.assigneeStartTime)}</div>
+        <div class="col2">
+          {(form.submitStatus === SubmitStatus.Held ? ' (' + T('TASK.MSG.HOLD') + ')' : form.submitStatus !== SubmitStatus.Assigned ? ' (' + T('TASK.MSG.TASK_NOT_ASSIGN_YET') + ')' : '')}
+        </div>
 
-        <div class="col3">{SDate.convertMillisecondToDateTimeString(form.assigneeEndTime)}</div>
+        <div class="col3">{SDate.convertMillisecondToDateTimeString(form.assigneeStartTime)} - {SDate.convertMillisecondToDateTimeString(form.assigneeEndTime)}</div>
       </div>
 
       <!-- Start date-->

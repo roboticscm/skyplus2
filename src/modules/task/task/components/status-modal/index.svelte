@@ -43,7 +43,6 @@
   let modalRoleControls: any[] = [];
 
   export const show = (_data: any = undefined, _disabled = false) => {
-    console.log(_data);
     disabled = _disabled;
     if (_data) {
       form = new Form({
@@ -70,6 +69,7 @@
         : taskVerificationRef && taskVerificationRef.getSelectedName(),
       statusId: statusRef && statusRef.getSelectedId(),
       verificationId: taskVerificationRef && taskVerificationRef.getSelectedId(),
+      statusCode:  taskVerificationRef && taskVerificationRef.getSelectedItem().code,
     };
   };
 

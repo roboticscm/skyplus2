@@ -56,7 +56,9 @@
     {#if $showDashboard$}
       <DashboardContent />
     {:else}
-      <MainContent {view} {menuPath} {store} bind:this={mainContentRef} />
+      {#if !window.isSmartPhone}
+        <MainContent {view} {menuPath} {store} bind:this={mainContentRef} />
+      {/if}
     {/if}
   </div>
 </TwoColumnView>

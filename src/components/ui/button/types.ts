@@ -29,6 +29,7 @@ export enum ButtonType {
   Dashboard,
   Complete,
   UnComplete,
+  Back
 }
 
 export enum ButtonPressed {

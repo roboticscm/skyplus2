@@ -126,14 +126,6 @@
   }
 </script>
 
-<style lang="scss">
-  @import '../sass/sass/helpers/variables.scss';
-
-  .floating__hover:hover {
-    color: var(--my-active-color);
-    cursor: pointer;
-  }
-</style>
 
 <div class="floating-wrapper">
   <select
@@ -164,7 +156,7 @@
 
   <label
     on:click|stopPropagation={onClickLabel}
-    class="floating__label {disabled ? '' : 'floating__hover'}"
+    class="floating__label {disabled ? 'disabled' : ''}"
     data-content={placeholder} />
   {#if checked !== undefined}
     <input class={rightCheck ? 'right' : ''} tabindex="-1" bind:checked type="checkbox" on:change={onCheck} />

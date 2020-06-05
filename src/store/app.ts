@@ -4,11 +4,13 @@ import { settingsStore } from '@/store/settings';
 import HumanOrOrgStore from '@/modules/sys/user/store';
 import { NavBarConfig } from '@/model/nav-bar-config';
 import { catchError } from 'rxjs/operators';
+import {getDepIdFromUrlParam} from "@/lib/js/url-util";
 
 export class AppStore {
   static isLogged$ = new BehaviorSubject<boolean>(false);
   static screenLock$ = new BehaviorSubject<number>(0);
   static rememberLogin = false;
+  static urlParam: any = undefined;
 
   user$ = new BehaviorSubject<User>(null);
   user: User;
@@ -37,7 +39,12 @@ export class AppStore {
       .pipe(catchError((e) => of(e)))
       .subscribe(
         (res: any) => {
-          const [companyId, departmentId, menuPath, lang, theme, alpha, headerHeight] = res.data.split('#');
+          let [companyId, departmentId, menuPath, lang, theme, alpha, headerHeight] = res.data.split('#');
+
+          const depIdFromUrlParam = getDepIdFromUrlParam();
+          if(depIdFromUrlParam) {
+              departmentId = depIdFromUrlParam;
+          }
           // org
           this.org = {
             companyId,
@@ -45,6 +52,7 @@ export class AppStore {
             lang,
             menuPath,
           };
+
           this.org$.next({
             companyId,
             departmentId,

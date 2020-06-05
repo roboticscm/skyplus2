@@ -63,6 +63,8 @@ export const decodeToken = (token: string) => {
 };
 
 export const loginSuccess = function(userId: string, token: string) {
+  console.log('AppStore.urlParam', AppStore.urlParam);
+
   localStorage.setItem('userId', userId);
   localStorage.setItem(Token.TOKEN_KEY, encodeToken(token));
   AppStore.isLogged$.next(true);

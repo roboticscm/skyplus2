@@ -43,12 +43,8 @@
 
 <div class="section {showBorder ? 'border' : ''} {roundedBorder ? 'border-radius' : ''}">
   {#if title && title.length > 0}
-    <div
-      on:click={onToggle}
-      class="section__title {collapse ? 'link' : ''}
-      {titleClass}"
-      style="display: flex; flex-wrap: wrap;">
-      <div style="width: 12%; white-space: nowrap">
+    <div on:click={onToggle}>
+      <div class="section__title {collapse ? 'link' : ''} {titleClass}">
         {@html title}
         &nbsp;
         {#if open}
@@ -58,7 +54,7 @@
         {/if}
       </div>
       {#if !open}
-        <div style="width: 88%;">
+        <div>
           <slot name="subTitle" />
         </div>
       {/if}

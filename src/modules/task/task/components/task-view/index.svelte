@@ -209,7 +209,7 @@
         {@html '(' + (task.projectName || T('TASK.LABEL.PROJECT') + ' ' + T('TASK.LABEL.NO_PROJECT')) + ')'}
       </div>
     {:else}
-      <div style="height: 10px;"></div>
+      <div style="height: 10px;" />
     {/if}
     <div class="task-wrapper__task__item">
       <span class="task-wrapper__task__item__assignee" title={T('TASK.LABEL.ASSIGNEE')} style="display: flex">
@@ -240,10 +240,10 @@
         </div>
       </span>
       {#if task.priorityName}
-      <span title={T('TASK.LABEL.PRIORITY')}>
-        {task.priorityName ? task.priorityName : T('TASK.LABEL.PRIORITY') + ' ' + T('TASK.MSG.NO_PRIORITY')}
-      </span>
-        {/if}
+        <span title={T('TASK.LABEL.PRIORITY')}>
+          {task.priorityName ? task.priorityName : T('TASK.LABEL.PRIORITY') + ' ' + T('TASK.MSG.NO_PRIORITY')}
+        </span>
+      {/if}
     </div>
 
     <div class="task-wrapper__task__item">
@@ -259,13 +259,13 @@
       </span>
 
       {#if task.lastStatusName[0]}
-      <span title={T('TASK.LABEL.LAST_STATUS')} class="task-wrapper__task__status">
-        {task.lastStatusName[0] || T('COMMON.LABEL.STATUS') + ' ' + T('TASK.LABEL.NO_STATUS')}
-      </span>
-        {/if}
+        <span title={T('TASK.LABEL.LAST_STATUS')} class="task-wrapper__task__status">
+          {task.lastStatusName[0] || T('COMMON.LABEL.STATUS') + ' ' + T('TASK.LABEL.NO_STATUS')}
+        </span>
+      {/if}
     </div>
 
-    <div style="min-height: 10px; height: 20px;" />
+    <div style="min-height: 10px; height: 13px;" />
     <div style="width: calc(100% - 25px); position: relative;">
       <div
         title={(progressRatio > 0 ? `${T('COMMON.MSG.EARLY')}: ${progressRatio}%` : progressRatio === 0 ? `${T('COMMON.MSG.BE_ON_TIME')}` : `${T('COMMON.MSG.DELAY')}: ${-progressRatio}%`) + '\n' + T('COMMON.LABEL.TASK_START_TIME') + ': ' + SDate.convertMillisecondToDateTimeString(task.startTime) + '\n' + T('COMMON.LABEL.TASK_DEADLINE') + ': ' + SDate.convertMillisecondToDateTimeString(task.deadline)}

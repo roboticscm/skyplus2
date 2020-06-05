@@ -83,7 +83,7 @@ export default class Store {
   findTaskVerification = () => {
     TableUtilStore.getSimpleList({
       tableName: 'tsk_task_verification',
-      columns: 'id,name,percent',
+      columns: 'id, code, name,percent',
       orderBy: 'sort',
       textSearch: '',
       page: 1,
@@ -118,6 +118,7 @@ export default class Store {
       pageSize: App.DEFAULT_PAGE_SIZE,
       textSearch: '',
       isExactly: false,
+      taskCode: '',
       taskName: '',
       projectName: '',
       assigneeName: '',
@@ -145,7 +146,7 @@ export default class Store {
   tskStatusCount(menuPath: string, depId: string) {
     return RxHttp.get(`${BASE_URL}${toSnackCase('tskStatusCount')}`, {
       menuPath,
-      depId
+      depId,
     });
   }
 

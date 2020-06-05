@@ -79,7 +79,8 @@
       dropdownFocused = false;
     }, 200);
 
-    document.querySelector(`#${'dropdown' + id}`).classList.remove('show-auto-dropdown');
+    const ele: any =  document.querySelector(`#${'dropdown' + id}`);
+    ele && ele.classList.remove('show-auto-dropdown');
   };
 
   const didSearch = (data: any[]) => {

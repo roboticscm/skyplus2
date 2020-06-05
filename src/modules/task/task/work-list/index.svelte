@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+  import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte';
   import { ViewStore } from '@/store/view';
   import QuickSearch from '@/components/ui/input/quick-search';
   import { switchMap, map, tap, filter, delay, debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -15,7 +15,7 @@
   import Button from '@/components/ui/flat-button';
   import { ButtonType, ButtonId } from '@/components/ui/button/types';
   import ContentFilter from '@/components/ui/float-input/content-filter';
-  import {convertArrayObjectToObject, getStatusCodeById} from './helper';
+  import { convertArrayObjectToObject, getStatusCodeById } from './helper';
   import CloseableList from '@/components/ui/closeable-list';
   import { StringUtil } from '@/lib/js/string-util';
   import { SObject } from '@/lib/js/sobject';
@@ -28,7 +28,9 @@
   import { TableUtilStore } from '@/store/table-util';
   import FunctionalStatus from '@/components/layout/functional-status';
   import { functionalStatusFields } from './helper';
+  import MainContent from '../content/index.svelte';
 
+  import {getTargetIdFromUrlParam} from "@/lib/js/url-util";
   export let menuPath: string;
   export let view: ViewStore;
   export let store: Store;
@@ -42,17 +44,19 @@
   let selectedTask: Task = undefined;
 
   let mappedFilterList: any[] = [];
-  let mappedFunctionalStatusFields: any [] = functionalStatusFields;
+  let mappedFunctionalStatusFields: any[] = functionalStatusFields;
   let usedFilterColumns: any[] = [];
 
   let taskSub, selectSub: Subscription;
   let taskApolloClient$: any;
-  let viewByTaskRef, pageRef, functionalStatusRef: any;
+  let viewByTaskRef, pageRef, functionalStatusRef, workListHeaderRef, listRef: any;
 
   const searchProgress$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   let markedData: any[] = undefined;
   let textSearch: string = '';
   let searchKeyword: string = '';
+  let showDetail = false;
+  let mainContentRef: any;
 
   const filterColumns = view.searchFields.map((it: any) => {
     it.name = T('TASK.LABEL.' + it.name);
@@ -95,23 +99,25 @@
 
   const makeSearch$ = () => {
     const searchParam = getAdvSearchParam();
+
     if (StringUtil.isEmpty(textSearch) && SObject.isEmptyField(searchParam)) {
       return store.tskFindTasks({ menuPath, departmentId: appStore.org.departmentId });
     } else if (textSearch.startsWith(App.SEARCH_ALL)) {
       textSearch = '';
       return store.tskFindTasks({ menuPath, departmentId: appStore.org.departmentId });
     } else {
+      let _textSearch = '';
       const isExactly = textSearch.includes(App.SEARCH_EXACTLY) ? true : false;
       if (isExactly) {
-        textSearch = StringUtil.formatExactlySearchParam(textSearch);
+        _textSearch = StringUtil.formatExactlySearchParam(textSearch);
       } else {
-        textSearch = StringUtil.formatFTSParam(textSearch);
+        _textSearch = StringUtil.formatFTSParam(textSearch);
       }
 
       return store.tskFindTasks({
         menuPath,
         departmentId: appStore.org.departmentId,
-        textSearch,
+        textSearch: _textSearch,
         ...searchParam,
         isExactly,
       });
@@ -294,17 +300,15 @@
     let param = convertArrayObjectToObject(
       filteredList.map((it: any) => {
         const statusCode = getStatusCodeById(it.id);
-        if(statusCode !== null) {
+        if (statusCode !== null) {
           return {
             submitStatus: statusCode,
           };
-        } else
-        {
+        } else {
           return {
             [it.id]: it.value,
           };
         }
-
       }),
     );
 
@@ -397,9 +401,9 @@
       functionalStatusFields[2].counter = res.data[0].statusAssigned;
       functionalStatusFields[3].counter = res.data[0].statusProcessing;
       functionalStatusFields[4].counter = res.data[0].statusCompleted;
-      mappedFunctionalStatusFields = [...functionalStatusFields];
 
-    })
+      mappedFunctionalStatusFields = [...functionalStatusFields];
+    });
   };
 
   const onClickTask = (event: any) => {
@@ -417,23 +421,29 @@
         switchMap((_) => forkJoin([store.tskGetTaskById(selectedTask.id)])),
       )
       .subscribe((res: any[]) => {
-        view.selectedData$.next(SObject.convertFieldsToCamelCase(res[0].data[0]));
-        view.loading$.next(false);
+        if((window as any).isSmartPhone) {
+          showDetail = true;
+          setTimeout(() => {
+            view.selectedData$.next(SObject.convertFieldsToCamelCase(res[0].data[0]));
+            view.loading$.next(false);
+          });
+        } else {
+          view.selectedData$.next(SObject.convertFieldsToCamelCase(res[0].data[0]));
+          view.loading$.next(false);
+        }
       });
   };
 
   onMount(() => {
     registerSubscription();
-    setTimeout(() => {
-      selectSub = doSelect(fromEvent(viewByTaskRef, 'click'));
-    }, 1000);
+
 
     pageRef.loadSettings().then(() => {
       reload();
     });
 
+
     needSelectId$.subscribe((id: string) => {
-      console.log('need selected id: ', id);
       if (id) {
         selectedTask = {
           id,
@@ -442,14 +452,27 @@
       }
     });
 
+    // select target from email link
+    setTimeout(() => {
+      if(getTargetIdFromUrlParam()) {
+        selectedTask = {
+          id: getTargetIdFromUrlParam(),
+        };
+        doSelect(of(1));
+      }
+    }, 1000);
+
 
     onClickFunctionalStatus({
       detail: {
         field: mappedFunctionalStatusFields[3].id,
         title: mappedFunctionalStatusFields[3].title,
-        value: true
-      }
+        value: true,
+      },
     });
+
+    const headerHeight = window['$'](workListHeaderRef).height() + 10;
+    listRef.style.height = `calc(100% - ${headerHeight}px)`;
   });
 
   onDestroy(() => {
@@ -460,8 +483,17 @@
   });
 
   const onAddNew = () => {
-    dispatch('addNew');
+
     selectedTask = undefined;
+    if((window as any).isSmartPhone) {
+      showDetail = true;
+      setTimeout(() => {
+        mainContentRef && mainContentRef.doAddNew();
+      }, 500);
+
+    } else {
+      dispatch('addNew');
+    }
   };
 
   const onLoadPage = (event) => {
@@ -474,6 +506,7 @@
     view.pageSize = event.detail;
   };
 
+  // select target from notify list
   // @ts-ignore
   $: {
     if (selectedId) {
@@ -512,6 +545,15 @@
     let query: string = undefined;
     textSearch = StringUtil.formatSearchParam(textSearch);
     switch (field) {
+      case 'taskCode':
+        query = `
+          SELECT DISTINCT code AS id, code AS name, access_date
+          FROM tsk_task
+          WHERE F_UNACCENT(code) ~* '${textSearch}'
+          ORDER BY access_date
+        `;
+        break;
+
       case 'taskName':
         query = `
           SELECT DISTINCT name AS id, name AS name, access_date
@@ -573,21 +615,37 @@
   };
 
   const onClickFunctionalStatus = (event: any) => {
-    const selectedStatusField = {
-      id: event.detail.field,
-      name: event.detail.title,
-      value: true,
-    };
+    view.page = 1;
+    if(event.detail.field === 'recent') {
+      filteredList =[getDefaultValueForItem(filterColumns[0])];
+      textSearch = App.SEARCH_ALL;
+    } else {
+      const selectedStatusField = {
+        id: event.detail.field,
+        name: event.detail.title,
+        value: true,
+      };
 
+      // remove the old first
+      filteredList = [
+        ...filteredList.filter((it: any) => mappedFunctionalStatusFields.findIndex((f: any) => f.id === it.id) < 0),
+        selectedStatusField,
+      ];
+    }
 
-    // remove the old first
-    filteredList = [
-      ...filteredList.filter((it: any) => mappedFunctionalStatusFields.findIndex((f: any) => f.id === it.id) < 0),
-      selectedStatusField,
-    ];
 
     onSelectSearchField();
   };
+
+
+  const onClickBack = () => {
+    showDetail = false;
+  }
+
+  const useActionTask = (component, param) => {
+    selectSub = doSelect(fromEvent(component, 'click'));
+  };
+
 </script>
 
 <style lang="scss">
@@ -683,7 +741,13 @@
   }
 </style>
 
+{#if showDetail && window.isSmartPhone}
+<section>
+  <MainContent backCallback="{onClickBack}" {view} {menuPath} {store} bind:this={mainContentRef} />
+</section>
+{:else}
 <section class="view-left-main" style="padding-top: 0px;">
+  <div bind:this={workListHeaderRef}>
   <!-- Add new -->
   <div style="display: flex; justify-content: center; align-content: flex-start;">
     {#if view.isRendered(ButtonId.AddNew)}
@@ -703,7 +767,8 @@
       data={mappedFunctionalStatusFields}
       on:click={onClickFunctionalStatus} />
   </div>
-
+  </div>
+  <div bind:this={listRef} style="overflow: auto;">
   <!-- Search-->
   <div bind:this={searchWrapperRef}>
     <QuickSearch
@@ -790,7 +855,8 @@
         on:init={onPaginationInit}
         bind:this={pageRef} />
     </div>
-    <div bind:this={viewByTaskRef}>
+
+    <div bind:this={viewByTaskRef} use:useActionTask >
       {#if markedData}
         {#if markedData.length > 0}
           {#each markedData as task}
@@ -814,5 +880,6 @@
       {/each}
     </div>
   {/if}
-
+  </div>
 </section>
+{/if}

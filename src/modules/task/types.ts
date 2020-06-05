@@ -1,6 +1,8 @@
 import { StringUtil } from '@/lib/js/string-util';
 import { genNumberUUID } from '@/lib/js/util';
 
+const DEFAULT_END_TIME = 2 * 60 * 60 * 1000;
+
 export enum SubmitStatus {
   Init = 0,
   Submitted = 1,
@@ -13,6 +15,7 @@ export enum SubmitStatus {
 export class Task {
   id? = '';
   name? = '';
+  code? = '---';
   description? = '';
   projectId? = null;
   projectName? = '';
@@ -20,12 +23,12 @@ export class Task {
   priorityId? = null;
   priorityName? = '';
   startTime? = Date.now();
-  deadline? = Date.now() + 1;
+  deadline? = Date.now() + DEFAULT_END_TIME;
   creatorFullName? = '';
   createdBy? = '';
 
-  firstReminder? = Date.now();
-  secondReminder? = Date.now() + 1;
+  firstReminder? = Date.now() + DEFAULT_END_TIME * 0.5;
+  secondReminder? = Date.now() + DEFAULT_END_TIME * 0.8;
   submitStatus? = 0;
 
   // one to many relation
@@ -98,6 +101,8 @@ export class StatusDetail {
   id? = genNumberUUID();
   taskId? = '';
   statusId? = null;
+  statusCode? = '';
+  completed? = false;
   verificationId? = null;
   startTime? = Date.now();
   endTime? = Date.now();

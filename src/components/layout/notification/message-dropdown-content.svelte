@@ -24,6 +24,7 @@
   import Reminder2Icon from '@/icons/reminder224x24.svelte';
 
   import NotifyIcon from '@/icons/notify24x24.svelte';
+  import SearchIcon from '@/icons/search.svelte';
 
   export let data: any[];
   export let type: string;
@@ -32,6 +33,7 @@
     groupFilteredData: Notification[] = [];
   let searchProgress$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   let textSearch = '';
+  let showSearch = false;
 
   // let iconsTab = [
   //   { icon: SubmitIcon, messageType: 'SUBMIT', isCancel: false, show: true, count: 10 },
@@ -173,11 +175,26 @@
       });
     }
   };
+
+  const onClickToggleSearch = () => {
+    showSearch = !showSearch;
+  }
 </script>
 
 <div style="overflow: auto; width: 100%; height: 100%;" class="default-padding">
-  <div class="bold-text">{T('TASK.LABEL.' + type)}</div>
+  <div style="display: flex; align-content: space-between;">
+    <div class="bold-text" style="width: 100%;">{T('TASK.LABEL.' + type)}</div>
+    <div style="text-align: right; cursor: pointer" on:click={onClickToggleSearch}>
+      {#if showSearch}
+      <i class="fa fa-chevron-up"></i>
+        {:else}
+      <SearchIcon></SearchIcon>
+        {/if}
+    </div>
+  </div>
+  {#if showSearch}
   <QuickSearch loading$={searchProgress$} action={useInputAction} placeholder={T('COMMON.LABEL.FILTER')} />
+    {/if}
   <div style="display: flex; margin-top: 10px; justify-content: center; align-content: center;">
     {#each iconsTab as icon}
       {#if icon.show !== undefined}
