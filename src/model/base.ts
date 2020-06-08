@@ -1,4 +1,4 @@
-export interface TableColumn {
+export class TableColumn {
   title?: string;
   name: string;
   width?: number;
@@ -7,7 +7,7 @@ export interface TableColumn {
   readOnly?: boolean;
 }
 
-export interface SimpleListParam {
+export class SimpleListParam {
   tableName: string;
   columns: string;
   orderBy: string;
@@ -18,12 +18,12 @@ export interface SimpleListParam {
   includeDisabled: boolean;
 }
 
-export interface PayloadRes {
+export class PayloadRes {
   payload: any[];
   fullCount: number;
 }
 
-export interface RoleControl {
+export class RoleControl {
   controlId: string;
   controlCode: string;
   renderControl: boolean;
@@ -32,13 +32,13 @@ export interface RoleControl {
   requirePassword: boolean;
 }
 
-export interface AuthRequest {
+export class AuthRequest {
   resetToken?: string;
   username: string;
   password: string;
 }
 
-export interface Notification {
+export class Notification {
   id?: string;
   fromHumanId?: string;
   fromHumanFullName?: string;

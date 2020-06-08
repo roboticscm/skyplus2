@@ -6,6 +6,7 @@ import { NavBarConfig } from '@/model/nav-bar-config';
 import { catchError } from 'rxjs/operators';
 import {getDepIdFromUrlParam} from "@/lib/js/url-util";
 
+
 export class AppStore {
   static isLogged$ = new BehaviorSubject<boolean>(false);
   static screenLock$ = new BehaviorSubject<number>(0);

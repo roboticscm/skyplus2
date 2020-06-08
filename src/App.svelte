@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { AppStore, appStore } from '@/store/app';
+  import { OrgStore } from '@/store/org';
   import MainLayout from '@/components/layout/main-layout';
+  import { AppStore, appStore } from '@/store/app';
   import MainNavBar from '@/components/layout/main-nav-bar';
   import BranchDropdown from '@/components/layout/branch-dropdown';
   import ModulesDropdown from '@/components/layout/modules-dropdown';
@@ -16,7 +17,6 @@
   import { getUserFullName } from '@/lib/js/security';
   import {onMount} from 'svelte';
   import OrgIconMark from '@/components/layout/icons/org-mark';
-  import { OrgStore } from '@/store/org';
   import MobileMainNavBar from '@/components/layout/mobile-main-nav-bar';
 
   const { currentCompany$ } = OrgStore;

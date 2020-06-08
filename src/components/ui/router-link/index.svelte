@@ -5,7 +5,7 @@
   import { T } from '@/lib/js/locale/locale';
   import { menuStore } from '@/store/menu';
   import { StringUtil } from '@/lib/js/string-util';
-  import { Dropdown } from '../../../lib/js/dropdown';
+  import { Dropdown } from '@/lib/js/dropdown';
   import { ButtonDropdown } from '@/components/ui/button/model';
   import DropdownItem from '@/components/ui/dropdown-item';
 

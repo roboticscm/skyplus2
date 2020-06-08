@@ -8,7 +8,7 @@
   import { orgStore } from '@/store/org';
   import DropdownItem from '@/components/ui/dropdown-item';
   import DepIconMark from '@/components/layout/icons/dep-mark';
-  import { Dropdown } from '../../../lib/js/dropdown';
+  import { Dropdown } from '@/lib/js/dropdown';
 
   export let id: string;
 

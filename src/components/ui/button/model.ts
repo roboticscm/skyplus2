@@ -1,4 +1,4 @@
-export interface ButtonDropdown {
+export class ButtonDropdown {
   id: string;
   name: string;
   useFontIcon?: boolean;
