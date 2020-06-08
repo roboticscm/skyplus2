@@ -62,10 +62,10 @@ if (isDevelopment) {
 module.exports = {
     input: 'src/main.ts',
     output: {
-        file: 'dist/index.js',
-        // dir: 'dist',
+        // file: 'dist/index.js',
+        dir: 'dist',
         sourcemap: true,
-        format: 'iife',
+        format: 'es',
     },
     plugins,
 };
