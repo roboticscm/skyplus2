@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
-  import { T } from '@/lib/js/locale/locale';
-  import { settingsStore } from '@/store/settings';
+  import { T } from 'src/lib/js/locale/locale';
+  import { settingsStore } from 'src/store/settings';
   import { Observable } from 'rxjs';
   import { take } from 'rxjs/operators';
 

@@ -1,39 +1,39 @@
 <script lang="ts">
-  import { AppStore } from '@/store/app';
-  import ChatIcon from '@/components/layout/icons/common/chat.svelte';
-  import BellIcon from '@/components/layout/icons/common/bell.svelte';
-  import AlertIcon from '@/components/layout/icons/common/alert.svelte';
+  import { AppStore } from 'src/store/app';
+  import ChatIcon from 'src/components/layout/icons/common/chat.svelte';
+  import BellIcon from 'src/components/layout/icons/common/bell.svelte';
+  import AlertIcon from 'src/components/layout/icons/common/alert.svelte';
   import { onMount, onDestroy } from 'svelte';
-  import { apolloClient } from '@/lib/js/hasura-client';
-  import { notificationStore, NotifyType } from '@/store/notification';
-  import { Notification } from '@/model/base';
-  import { getUserId } from '@/lib/js/security';
+  import { apolloClient } from 'src/lib/js/hasura-client';
+  import { notificationStore, NotifyType } from 'src/store/notification';
+  import { Notification } from 'src/model/base';
+  import { getUserId } from 'src/lib/js/security';
   import gql from 'graphql-tag';
   import { Subscription } from 'rxjs';
-  import { Dropdown } from '@/lib/js/dropdown';
+  import { Dropdown } from 'src/lib/js/dropdown';
   import MessageDropdownContent from './message-dropdown-content.svelte';
-  import { appStore } from '@/store/app';
-  import { menuStore } from '@/store/menu';
-  import MessageModal from '@/components/ui/modal/message';
-  import { SObject } from '@/lib/js/sobject';
-  import { getViewTitleFromMenuPath } from '@/lib/js/url-util';
-  import { SDate } from '@/lib/js/sdate';
-  import { T } from '@/lib/js/locale/locale';
-  import { StringUtil } from '@/lib/js/string-util';
+  import { appStore } from 'src/store/app';
+  import { menuStore } from 'src/store/menu';
+  import MessageModal from 'src/components/ui/modal/message';
+  import { SObject } from 'src/lib/js/sobject';
+  import { getViewTitleFromMenuPath } from 'src/lib/js/url-util';
+  import { SDate } from 'src/lib/js/sdate';
+  import { T } from 'src/lib/js/locale/locale';
+  import { StringUtil } from 'src/lib/js/string-util';
 
-  import SubmitIcon from '@/icons/submit24x24.svelte';
-  import CancelSubmitIcon from '@/icons/cancel-submit24x24.svelte';
+  import SubmitIcon from 'src/icons/submit24x24.svelte';
+  import CancelSubmitIcon from 'src/icons/cancel-submit24x24.svelte';
 
-  import AssignIcon from '@/icons/assign24x24.svelte';
-  import UnAssignIcon from '@/icons/un-assign24x24.svelte';
+  import AssignIcon from 'src/icons/assign24x24.svelte';
+  import UnAssignIcon from 'src/icons/un-assign24x24.svelte';
 
-  import HoldIcon from '@/icons/hold24x24.svelte';
-  import UnHoldIcon from '@/icons/un-hold24x24.svelte';
+  import HoldIcon from 'src/icons/hold24x24.svelte';
+  import UnHoldIcon from 'src/icons/un-hold24x24.svelte';
 
-  import Reminder1 from '@/icons/reminder124x24.svelte';
-  import Reminder2 from '@/icons/reminder224x24.svelte';
+  import Reminder1 from 'src/icons/reminder124x24.svelte';
+  import Reminder2 from 'src/icons/reminder224x24.svelte';
 
-  import HumanOrOrgStore from '@/modules/sys/user/store';
+  import HumanOrOrgStore from 'src/modules/sys/user/store';
   import { findAvatar } from './helper';
 
   // @ts-ignore

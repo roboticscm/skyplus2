@@ -1,9 +1,9 @@
-import { RxHttp } from '@/lib/js/rx-http';
+import { RxHttp } from 'src/lib/js/rx-http';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { Http } from '@/lib/js/http';
+import { Http } from 'src/lib/js/http';
 import { toSnackCase } from '../../lib/js/util';
-import { Browser, getClientInfo } from '@/lib/js/browser';
+import { Browser, getClientInfo } from 'src/lib/js/browser';
 
 const BASE_URL = 'sys/news/';
 

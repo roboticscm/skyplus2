@@ -1,6 +1,6 @@
 <script lang="ts">
-  import SC from '@/components/set-common';
-  import { ViewStore } from '@/store/view';
+  import SC from 'src/components/set-common';
+  import { ViewStore } from 'src/store/view';
 
   // Props
   export let view: ViewStore;

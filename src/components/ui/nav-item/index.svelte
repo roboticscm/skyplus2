@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { T } from '@/lib/js/locale/locale';
-  import { settingsStore } from '@/store/settings';
+  import { T } from 'src/lib/js/locale/locale';
+  import { settingsStore } from 'src/store/settings';
 
   export let router: any;
   export let link: string;

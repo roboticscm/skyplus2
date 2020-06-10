@@ -1,8 +1,8 @@
 <script lang="ts">
   import { News } from '../model';
-  import { App, Image } from '@/lib/js/constants';
-  import { StringUtil } from '@/lib/js/string-util';
-  import { SDate } from '@/lib/js/sdate';
+  import { App, Image } from 'src/lib/js/constants';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import { SDate } from 'src/lib/js/sdate';
 
   export let news: News;
 </script>

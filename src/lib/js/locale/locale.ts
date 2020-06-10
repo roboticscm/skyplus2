@@ -1,6 +1,6 @@
 // @ts-ignore
-import { Http } from '@/lib/js/http';
-import { isDebugMode } from '@/lib/js/debug';
+import { Http } from 'src/lib/js/http';
+import { isDebugMode } from 'src/lib/js/debug';
 
 let I18N: any[] = [];
 

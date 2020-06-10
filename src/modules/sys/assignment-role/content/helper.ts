@@ -1,7 +1,7 @@
-import { TableColumn } from '@/model/base';
-import { T } from '@/lib/js/locale/locale';
-import { SObject } from '@/lib/js/sobject';
-import { SJSON } from '@/lib/js/sjson';
+import { TableColumn } from 'src/model/base';
+import { T } from 'src/lib/js/locale/locale';
+import { SObject } from 'src/lib/js/sobject';
+import { SJSON } from 'src/lib/js/sjson';
 import { Observable } from 'rxjs';
 
 export const userColumns: TableColumn[] = [

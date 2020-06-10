@@ -1,12 +1,12 @@
-import { RxHttp } from '@/lib/js/rx-http';
-import { Http } from '@/lib/js/http';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { Http } from 'src/lib/js/http';
 import { BehaviorSubject, of } from 'rxjs';
 import { catchError, skip, take } from 'rxjs/operators';
-import { HistoryMenu, RoleMenu } from '@/modules/sys/menu/model';
-import { toSnackCase } from '@/lib/js/util';
-import { Debug } from '@/lib/js/debug';
-import { SJSON } from '@/lib/js/sjson';
-import {getMenuPathFromUrl, getMenuPathFromUrlParam} from "@/lib/js/url-util";
+import { HistoryMenu, RoleMenu } from 'src/modules/sys/menu/model';
+import { toSnackCase } from 'src/lib/js/util';
+import { Debug } from 'src/lib/js/debug';
+import { SJSON } from 'src/lib/js/sjson';
+import {getMenuPathFromUrl, getMenuPathFromUrlParam} from "src/lib/js/url-util";
 
 const BASE_URL = 'sys/menu/';
 class MenuStore {

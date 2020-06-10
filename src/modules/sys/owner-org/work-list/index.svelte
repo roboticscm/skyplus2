@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import { ViewStore } from '@/store/view';
+  import { ViewStore } from 'src/store/view';
   import Store from '../store';
   import { fromEvent, forkJoin, Observable, Subscription } from 'rxjs';
   import { switchMap, tap, filter } from 'rxjs/operators';
-  import TreeView from '@/components/ui/tree-view';
-  import { SObject } from '@/lib/js/sobject';
-  import { apolloClient } from '@/lib/js/hasura-client';
+  import TreeView from 'src/components/ui/tree-view';
+  import { SObject } from 'src/lib/js/sobject';
+  import { apolloClient } from 'src/lib/js/hasura-client';
 
   // Props
   export let view: ViewStore;

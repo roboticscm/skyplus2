@@ -1,12 +1,12 @@
-import { OrgStore, orgStore } from '@/store/org';
+import { OrgStore, orgStore } from 'src/store/org';
 import { catchError, first, skip, take, withLatestFrom, zipAll } from 'rxjs/operators';
 import { BehaviorSubject, forkJoin, of, zip } from 'rxjs';
-import { ViewStore } from '@/store/view';
-import { RoleStore } from '@/store/role';
+import { ViewStore } from 'src/store/view';
+import { RoleStore } from 'src/store/role';
 import { Role } from './model';
-import { RxHttp } from '@/lib/js/rx-http';
-import { toSnackCase } from '@/lib/js/util';
-import { OwnerOrg } from '@/modules/sys/owner-org/model';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { toSnackCase } from 'src/lib/js/util';
+import { OwnerOrg } from 'src/modules/sys/owner-org/model';
 
 const BASE_URL = 'sys/role-detail/';
 export class Store {

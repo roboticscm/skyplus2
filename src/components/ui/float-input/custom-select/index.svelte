@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
-  import { StringUtil } from '@/lib/js/string-util';
-  import { TableColumn } from '@/model/base';
-  import SelectableTable from '@/components/ui/selectable-table';
-  import { T } from '@/lib/js/locale/locale';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import { TableColumn } from 'src/model/base';
+  import SelectableTable from 'src/components/ui/selectable-table';
+  import { T } from 'src/lib/js/locale/locale';
 
   export let columns: TableColumn[] = [{ name: 'name' }];
   export let height = '50vh';

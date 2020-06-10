@@ -1,5 +1,5 @@
-import { RxHttp } from '@/lib/js/rx-http';
-import { toSnackCase } from '@/lib/js/util';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { toSnackCase } from 'src/lib/js/util';
 
 const BASE_URL = 'sys/role-control/';
 

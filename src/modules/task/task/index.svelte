@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import TwoColumnView from '@/components/layout/two-column-view';
+  import TwoColumnView from 'src/components/layout/two-column-view';
   import WorkList from './work-list/index.svelte';
   import DashboardWorkList from './work-list/dashboard.svelte';
   import MainContent from './content/index.svelte';
   import DashboardContent from './content/dashboard.svelte';
-  import ProgressBar from '@/components/ui/progress-bar';
-  import { ViewStore } from '@/store/view';
+  import ProgressBar from 'src/components/ui/progress-bar';
+  import { ViewStore } from 'src/store/view';
   import Store from './store';
 
   // Props

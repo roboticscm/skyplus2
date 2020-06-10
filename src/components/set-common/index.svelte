@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { T } from '@/lib/js/locale/locale';
-  import { ModalType } from '@/components/ui/modal/types';
+  import { T } from 'src/lib/js/locale/locale';
+  import { ModalType } from 'src/components/ui/modal/types';
 
-  import ConfirmModal from '@/components/ui/modal/base';
-  import ConfirmDeleteModal from '@/components/ui/modal/base';
-  import ConfirmPasswordModal from '@/components/ui/modal/base';
-  import ConfirmConflictDataModal from '@/components/modal/conflict-data-confirm';
-  import ConfigModal from '@/components/modal/view-config';
-  import TrashRestoreModal from '@/components/modal/trash-restore';
-  import Snackbar from '@/components/ui/snackbar';
-  import { ViewStore } from '@/store/view';
+  import ConfirmModal from 'src/components/ui/modal/base';
+  import ConfirmDeleteModal from 'src/components/ui/modal/base';
+  import ConfirmPasswordModal from 'src/components/ui/modal/base';
+  import ConfirmConflictDataModal from 'src/components/modal/conflict-data-confirm';
+  import ConfigModal from 'src/components/modal/view-config';
+  import TrashRestoreModal from 'src/components/modal/trash-restore';
+  import Snackbar from 'src/components/ui/snackbar';
+  import { ViewStore } from 'src/store/view';
 
   // Props
   export let view: ViewStore;

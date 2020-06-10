@@ -1,4 +1,4 @@
-import { StringUtil } from '@/lib/js/string-util';
+import { StringUtil } from 'src/lib/js/string-util';
 
 export class CommonValidation {
   public static DEADLINE_MUST_AFTER_START_TIME = 'TASK.MSG.DEADLINE_MUST_AFTER_START_TIME';

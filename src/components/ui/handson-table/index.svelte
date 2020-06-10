@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
   import Handsontable from 'handsontable';
-  import { TableColumn } from '@/model/base';
-  import { settingsStore } from '@/store/settings';
+  import { TableColumn } from 'src/model/base';
+  import { settingsStore } from 'src/store/settings';
 
   export let id: string;
   export let data: any[];

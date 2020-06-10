@@ -4,21 +4,21 @@ import 'jquery-ui';
 (window as any).$ = jQuery;
 (window as any).jQuery = jQuery;
 import '../../sass/sass/index.scss';
-import '@/lib/js/vendor/jquery.ztree.all';
+import 'src/lib/js/vendor/jquery.ztree.all';
 
-import App from '@/App.svelte';
+import App from 'src/App.svelte';
 
-import { Debug } from '@/lib/js/debug';
-import { sysGetLocaleResourceListByCompanyIdAndLocale } from '@/lib/js/locale/locale';
+import { Debug } from 'src/lib/js/debug';
+import { sysGetLocaleResourceListByCompanyIdAndLocale } from 'src/lib/js/locale/locale';
 
 import MobileDetect from 'mobile-detect';
-import { TableUtilStore } from '@/store/table-util';
+import { TableUtilStore } from 'src/store/table-util';
 import { take } from 'rxjs/operators';
-import { OrgStore } from '@/store/org';
-import { SObject } from '@/lib/js/sobject';
-import { AppStore, appStore } from '@/store/app';
-import { menuStore } from '@/store/menu';
-import { Color, getThemeColors } from '@/lib/js/color';
+import { OrgStore } from 'src/store/org';
+import { SObject } from 'src/lib/js/sobject';
+import { AppStore, appStore } from 'src/store/app';
+import { menuStore } from 'src/store/menu';
+import { Color, getThemeColors } from 'src/lib/js/color';
 import {
   getCompanyId,
   getLanguage,
@@ -29,8 +29,8 @@ import {
   logout,
   setHeader,
   isLockScreen,
-} from '@/lib/js/security';
-import '@/lib/js/session';
+} from 'src/lib/js/security';
+import 'src/lib/js/session';
 
 const startApp = () => {
   AppStore.urlParam = location.href;

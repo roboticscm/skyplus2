@@ -1,6 +1,6 @@
-import { SObject } from '@/lib/js/sobject';
-import { StringUtil } from '@/lib/js/string-util';
-import { markStringSearch } from '@/lib/js/util';
+import { SObject } from 'src/lib/js/sobject';
+import { StringUtil } from 'src/lib/js/string-util';
+import { markStringSearch } from 'src/lib/js/util';
 
 export class Mark {
   static mark(source, keywords) {

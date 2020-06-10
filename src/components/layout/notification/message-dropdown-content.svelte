@@ -1,30 +1,30 @@
 <script lang="ts">
-  import QuickSearch from '@/components/ui/input/quick-search';
+  import QuickSearch from 'src/components/ui/input/quick-search';
   import MessageItem from './message-item.svelte';
-  import { T } from '@/lib/js/locale/locale';
+  import { T } from 'src/lib/js/locale/locale';
   import { fromEvent, BehaviorSubject } from 'rxjs';
   import { map, switchMap, tap } from 'rxjs/operators';
-  import { notificationStore } from '@/store/notification';
-  import { SObject } from '@/lib/js/sobject';
-  import { Mark } from '@/lib/js/mark';
-  import { Notification } from '@/model/base';
-  import HumanOrOrgStore from '@/modules/sys/user/store';
+  import { notificationStore } from 'src/store/notification';
+  import { SObject } from 'src/lib/js/sobject';
+  import { Mark } from 'src/lib/js/mark';
+  import { Notification } from 'src/model/base';
+  import HumanOrOrgStore from 'src/modules/sys/user/store';
   import { findAvatar } from './helper';
 
-  import SubmitIcon from '@/icons/submit24x24.svelte';
-  import CancelSubmitIcon from '@/icons/cancel-submit24x24.svelte';
+  import SubmitIcon from 'src/icons/submit24x24.svelte';
+  import CancelSubmitIcon from 'src/icons/cancel-submit24x24.svelte';
 
-  import AssignIcon from '@/icons/assign24x24.svelte';
-  import UnAssignIcon from '@/icons/un-assign24x24.svelte';
+  import AssignIcon from 'src/icons/assign24x24.svelte';
+  import UnAssignIcon from 'src/icons/un-assign24x24.svelte';
 
-  import HoldIcon from '@/icons/hold24x24.svelte';
-  import UnHoldIcon from '@/icons/un-hold24x24.svelte';
+  import HoldIcon from 'src/icons/hold24x24.svelte';
+  import UnHoldIcon from 'src/icons/un-hold24x24.svelte';
 
-  import Reminder1Icon from '@/icons/reminder124x24.svelte';
-  import Reminder2Icon from '@/icons/reminder224x24.svelte';
+  import Reminder1Icon from 'src/icons/reminder124x24.svelte';
+  import Reminder2Icon from 'src/icons/reminder224x24.svelte';
 
-  import NotifyIcon from '@/icons/notify24x24.svelte';
-  import SearchIcon from '@/icons/search.svelte';
+  import NotifyIcon from 'src/icons/notify24x24.svelte';
+  import SearchIcon from 'src/icons/search.svelte';
 
   export let data: any[];
   export let type: string;

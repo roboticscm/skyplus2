@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { ViewStore } from '@/store/view';
-  import { T } from '@/lib/js/locale/locale';
-  import Filter from '@/components/ui/float-input/filter';
-  import ContentFilter from '@/components/ui/float-input/content-filter';
-  import DatePicker from '@/components/ui/float-input/date-picker';
+  import { ViewStore } from 'src/store/view';
+  import { T } from 'src/lib/js/locale/locale';
+  import Filter from 'src/components/ui/float-input/filter';
+  import ContentFilter from 'src/components/ui/float-input/content-filter';
+  import DatePicker from 'src/components/ui/float-input/date-picker';
 
   export let view: ViewStore;
 

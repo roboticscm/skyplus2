@@ -20,7 +20,7 @@ const smp = new SpeedMeasurePlugin();
 
 const alias = {
       svelte: path.resolve('node_modules', 'svelte'),
-      '@': path.resolve(__dirname, 'src'),
+      'src': path.resolve(__dirname, 'src'),
       'd': path.resolve(__dirname, 'src/lib/js/debug'),
       // 'bignumber.js$': 'bignumber.js/bignumber.js',
     };
@@ -50,8 +50,8 @@ module.exports = smp.wrap({
   },
   output: {
     path: path.resolve(__dirname, '../../www'),
-    filename: '[name][contenthash].js',
-    chunkFilename: '[name].[id][contenthash].js'
+    filename: '[name][hash].js',
+    chunkFilename: '[name].[id][hash].js'
   },
   module: {
     rules: [

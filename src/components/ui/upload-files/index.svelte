@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { T } from '@/lib/js/locale/locale';
+  import { T } from 'src/lib/js/locale/locale';
   import { RxHttp } from '../../../lib/js/rx-http';
   import { take } from 'rxjs/operators';
-  import CloseableList from '@/components/ui/closeable-list';
-  import { App } from '@/lib/js/constants';
+  import CloseableList from 'src/components/ui/closeable-list';
+  import { App } from 'src/lib/js/constants';
 
   export let selectPlaceholder = T('COMMON.LABEL.SELECT_FILE');
   export let dropPlaceholder = T('COMMON.LABEL.DROP_TO_UPLOAD');

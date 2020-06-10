@@ -2,8 +2,8 @@ import { Errors } from './errors';
 // @ts-ignore
 import axios, { Method } from 'axios';
 import { API } from '../constants';
-import { RxHttp } from '@/lib/js/rx-http';
-import { SJSON } from '@/lib/js/sjson';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { SJSON } from 'src/lib/js/sjson';
 
 export default class Form {
   originalData: any;

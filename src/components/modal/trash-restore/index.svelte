@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Modal from '@/components/ui/modal/base/index.svelte';
-  import { T } from '@/lib/js/locale/locale';
+  import Modal from 'src/components/ui/modal/base/index.svelte';
+  import { T } from 'src/lib/js/locale/locale';
 
   export let id: string;
   export let subTitle: string;
@@ -69,7 +69,7 @@
     const h = modalRef.getHeight().replace('px', '');
     height = `${h - 120}px`;
     return new Promise((resolve, reject) => {
-      import('@/components/ui/excel-grid/index.svelte').then((res) => {
+      import('src/components/ui/excel-grid/index.svelte').then((res) => {
         ExcelGridComponent = res.default;
         resolve(modalRef.show());
       });

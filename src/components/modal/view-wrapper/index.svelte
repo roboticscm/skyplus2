@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Modal from '@/components/ui/modal/base/index.svelte';
-  import { T } from '@/lib/js/locale/locale';
-  import { Menu } from '@/modules/sys/menu/model';
+  import Modal from 'src/components/ui/modal/base/index.svelte';
+  import { T } from 'src/lib/js/locale/locale';
+  import { Menu } from 'src/modules/sys/menu/model';
 
   export let id: string;
   export let title: string;

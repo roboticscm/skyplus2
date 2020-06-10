@@ -1,18 +1,18 @@
 <script lang="ts">
   import './selectable_table.js';
   import { BehaviorSubject } from 'rxjs';
-  import { TableColumn } from '@/model/base';
+  import { TableColumn } from 'src/model/base';
   import { tick, createEventDispatcher } from 'svelte';
   import { onMount } from 'svelte';
-  import { settingsStore } from '@/store/settings';
-  import { T } from '@/lib/js/locale/locale';
-  import { genUUID } from '@/lib/js/util';
+  import { settingsStore } from 'src/store/settings';
+  import { T } from 'src/lib/js/locale/locale';
+  import { genUUID } from 'src/lib/js/util';
   import { SObject } from '../../../lib/js/sobject';
   import { markStringSearch } from '../../../lib/js/util';
   import { StringUtil } from '../../../lib/js/string-util';
 
   const dispatch = createEventDispatcher();
-  // import { SObject } from '@/lib/js/sobject';
+  // import { SObject } from 'src/lib/js/sobject';
   // require('jquery-ui');
   // require('jquery-ui/ui/widgets/sortable');
 

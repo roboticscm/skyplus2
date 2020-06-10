@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
-  import Button from '@/components/ui/button';
-  import { ButtonType } from '@/components/ui/button/types';
+  import Button from 'src/components/ui/button';
+  import { ButtonType } from 'src/components/ui/button/types';
 
   export let data: any[] = [];
   export let disabled = false;

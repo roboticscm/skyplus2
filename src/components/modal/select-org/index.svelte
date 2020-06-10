@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import Modal from '@/components/ui/modal/base/index.svelte';
-  import { T } from '@/lib/js/locale/locale';
-  import TreeView from '@/components/ui/tree-view';
-  import { OrgStore } from '@/store/org';
-  import { fromEvents } from '@/lib/js/rx';
+  import Modal from 'src/components/ui/modal/base/index.svelte';
+  import { T } from 'src/lib/js/locale/locale';
+  import TreeView from 'src/components/ui/tree-view';
+  import { OrgStore } from 'src/store/org';
+  import { fromEvents } from 'src/lib/js/rx';
   import { map, switchMap } from 'rxjs/operators';
   import { Observable } from 'rxjs';
 

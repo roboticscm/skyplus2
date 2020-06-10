@@ -1,10 +1,10 @@
-import { orgStore } from '@/store/org';
+import { orgStore } from 'src/store/org';
 import { catchError, first, skip, take, withLatestFrom, zipAll } from 'rxjs/operators';
 import { BehaviorSubject, forkJoin, of, zip } from 'rxjs';
-import { ViewStore } from '@/store/view';
-import { Http } from '@/lib/js/http';
-import { toSnackCase } from '@/lib/js/util';
-import { RxHttp } from '@/lib/js/rx-http';
+import { ViewStore } from 'src/store/view';
+import { Http } from 'src/lib/js/http';
+import { toSnackCase } from 'src/lib/js/util';
+import { RxHttp } from 'src/lib/js/rx-http';
 
 const BASE_URL = 'sys/human-or-org/';
 

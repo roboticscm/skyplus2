@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount, tick, createEventDispatcher } from 'svelte';
-  import '@/lib/js/vendor/daterangepicker';
-  import { App } from '@/lib/js/constants';
-  import { T } from '@/lib/js/locale/locale';
+  import 'src/lib/js/vendor/daterangepicker';
+  import { App } from 'src/lib/js/constants';
+  import { T } from 'src/lib/js/locale/locale';
   import { SDate } from '../../../../lib/js/sdate';
   import moment from 'moment';
 

@@ -1,13 +1,13 @@
 // @ts-ignore
 import Axios from 'axios-observable';
 import { API } from './constants';
-import { SJSON } from '@/lib/js/sjson';
+import { SJSON } from 'src/lib/js/sjson';
 
 // @ts-ignore
 import { Method } from 'axios';
-import { getToken, getUserId } from '@/lib/js/security';
-import { StringUtil } from '@/lib/js/string-util';
-import { Http } from '@/lib/js/http';
+import { getToken, getUserId } from 'src/lib/js/security';
+import { StringUtil } from 'src/lib/js/string-util';
+import { Http } from 'src/lib/js/http';
 
 export class RxHttp {
   public static callApi(method: Method, url: string, params: any, jsonData: any) {

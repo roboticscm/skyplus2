@@ -1,11 +1,11 @@
 import { BehaviorSubject, noop } from 'rxjs';
-import { RxHttp } from '@/lib/js/rx-http';
-import { toSnackCase } from '@/lib/js/util';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { toSnackCase } from 'src/lib/js/util';
 import { take } from 'rxjs/operators';
-import { Notification } from '@/model/base';
-import { SJSON } from '@/lib/js/sjson';
-import { SObject } from '@/lib/js/sobject';
-import { getUserId } from '@/lib/js/security';
+import { Notification } from 'src/model/base';
+import { SJSON } from 'src/lib/js/sjson';
+import { SObject } from 'src/lib/js/sobject';
+import { getUserId } from 'src/lib/js/security';
 
 export enum NotifyType {
   Chat = 'CHAT',

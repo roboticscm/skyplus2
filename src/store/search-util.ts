@@ -1,6 +1,6 @@
-import { RxHttp } from '@/lib/js/rx-http';
-import { toSnackCase } from '@/lib/js/util';
-import { SJSON } from '@/lib/js/sjson';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { toSnackCase } from 'src/lib/js/util';
+import { SJSON } from 'src/lib/js/sjson';
 
 const BASE_URL = 'sys/search-util/';
 

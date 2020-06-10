@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import Split from 'split-grid';
-  import { GUTTER_WIDTH } from '@/lib/js/constants';
-  import { settingsStore } from '@/store/settings';
-  import { Settings } from '@/model/settings';
+  import { GUTTER_WIDTH } from 'src/lib/js/constants';
+  import { settingsStore } from 'src/store/settings';
+  import { Settings } from 'src/model/settings';
 
   export let showTitle: boolean = true;
   export let id: string = '';

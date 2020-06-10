@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { App } from '@/lib/js/constants';
-  import { T } from '@/lib/js/locale/locale';
+  import { App } from 'src/lib/js/constants';
+  import { T } from 'src/lib/js/locale/locale';
   import { SObject } from '../../../../lib/js/sobject';
 
   export let name: string;

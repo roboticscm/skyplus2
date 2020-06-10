@@ -1,14 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { logout } from '@/lib/js/security';
-  import { API } from '@/lib/js/constants';
-  import { T } from '@/lib/js/locale/locale';
-  import { AppStore, appStore } from '@/store/app';
+  import { logout } from 'src/lib/js/security';
+  import { API } from 'src/lib/js/constants';
+  import { T } from 'src/lib/js/locale/locale';
+  import { AppStore, appStore } from 'src/store/app';
   import UserProfilesModal from './components/user-profiles-modal/index.svelte';
-  import { User } from '@/model/user';
+  import { User } from 'src/model/user';
   import { Subscription } from 'rxjs';
-  import LogoutIcon from '@/icons/logout24x24.svelte';
-  import ProfilesIcon from '@/icons/profiles24x24.svelte';
+  import LogoutIcon from 'src/icons/logout24x24.svelte';
+  import ProfilesIcon from 'src/icons/profiles24x24.svelte';
 
   const { user$ } = appStore;
 

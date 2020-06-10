@@ -1,7 +1,7 @@
-import { T } from '@/lib/js/locale/locale';
+import { T } from 'src/lib/js/locale/locale';
 import { tick } from 'svelte';
 import { Observable } from 'rxjs';
-import { SObject } from '@/lib/js/sobject';
+import { SObject } from 'src/lib/js/sobject';
 
 export const nestedHeaders = [
   [

@@ -1,20 +1,20 @@
 <script lang="ts">
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-  import { SObject } from '@/lib/js/sobject';
-  import { markStringSearch } from '@/lib/js/util';
-  import { StringUtil } from '@/lib/js/string-util';
-  import { TableColumn } from '@/model/base';
-  import ProgressBar from '@/components/ui/progress-bar';
+  import { SObject } from 'src/lib/js/sobject';
+  import { markStringSearch } from 'src/lib/js/util';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import { TableColumn } from 'src/model/base';
+  import ProgressBar from 'src/components/ui/progress-bar';
   import { BehaviorSubject, Observable } from 'rxjs';
   import { map, switchMap, tap, mergeAll, filter, distinctUntilChanged } from 'rxjs/operators';
-  import { fromEvents } from '@/lib/js/rx';
-  import SelectableTable from '@/components/ui/selectable-table';
-  import { settingsStore } from '@/store/settings';
-  import { SearchType } from '@/components/layout/search-bar/types';
-  import { AppStore } from '@/store/app';
+  import { fromEvents } from 'src/lib/js/rx';
+  import SelectableTable from 'src/components/ui/selectable-table';
+  import { settingsStore } from 'src/store/settings';
+  import { SearchType } from 'src/components/layout/search-bar/types';
+  import { AppStore } from 'src/store/app';
   import { passwordChar } from './helper';
-  import { Browser } from '@/lib/js/browser';
-  import SearchIcon from '@/components/layout/icons/common/search.svelte';
+  import { Browser } from 'src/lib/js/browser';
+  import SearchIcon from 'src/components/layout/icons/common/search.svelte';
 
   export let columns: TableColumn[];
   export let height = '50vh';

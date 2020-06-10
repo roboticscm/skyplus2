@@ -2,8 +2,8 @@
   import { onMount } from 'svelte';
   import Store from './store';
   import NewsItem from './news-item/index.svelte';
-  import SkyhubLogo from '@/components/layout/icons/skyhub';
-  import SearchBar from '@/components/layout/search-bar';
+  import SkyhubLogo from 'src/components/layout/icons/skyhub';
+  import SearchBar from 'src/components/layout/search-bar';
   import QRCode from 'qrcode';
 
   const { dataList$ } = Store;

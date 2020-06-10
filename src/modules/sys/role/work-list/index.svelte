@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount, createEventDispatcher, onDestroy } from 'svelte';
-  import { ViewStore } from '@/store/view';
+  import { ViewStore } from 'src/store/view';
   import { fromEvent, forkJoin, Observable, Subscription } from 'rxjs';
   import { switchMap, tap, filter } from 'rxjs/operators';
-  import SimpleWorkList from '@/components/work-list/simple-work-list';
-  import { SObject } from '@/lib/js/sobject';
+  import SimpleWorkList from 'src/components/work-list/simple-work-list';
+  import { SObject } from 'src/lib/js/sobject';
 
   // Props
   export let view: ViewStore;

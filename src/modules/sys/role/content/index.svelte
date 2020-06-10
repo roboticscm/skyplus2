@@ -4,22 +4,22 @@
   import { fromEvent, of, Observable, EMPTY } from 'rxjs';
   import { fromPromise } from 'rxjs/internal-compatibility';
 
-  import { T } from '@/lib/js/locale/locale';
-  import Form from '@/lib/js/form/form';
-  import { ViewStore } from '@/store/view';
+  import { T } from 'src/lib/js/locale/locale';
+  import Form from 'src/lib/js/form/form';
+  import { ViewStore } from 'src/store/view';
   import { Role } from '../model';
-  import { SObject } from '@/lib/js/sobject';
-  import { apolloClient } from '@/lib/js/hasura-client';
-  import { ButtonType, ButtonId } from '@/components/ui/button/types';
-  import TreeView from '@/components/ui/tree-view';
+  import { SObject } from 'src/lib/js/sobject';
+  import { apolloClient } from 'src/lib/js/hasura-client';
+  import { ButtonType, ButtonId } from 'src/components/ui/button/types';
+  import TreeView from 'src/components/ui/tree-view';
   import { validation } from './validation';
 
-  import Button from '@/components/ui/flat-button';
-  import FloatNumberInput from '@/components/ui/float-input/number-input';
-  import FloatTextInput from '@/components/ui/float-input/text-input';
-  import Error from '@/components/ui/error';
-  import SC from '@/components/set-common';
-  import { Debug } from '@/lib/js/debug';
+  import Button from 'src/components/ui/flat-button';
+  import FloatNumberInput from 'src/components/ui/float-input/number-input';
+  import FloatTextInput from 'src/components/ui/float-input/text-input';
+  import Error from 'src/components/ui/error';
+  import SC from 'src/components/set-common';
+  import { Debug } from 'src/lib/js/debug';
   import { Store } from '../store';
 
   // Props

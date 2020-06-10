@@ -1,10 +1,10 @@
 import { BehaviorSubject, of } from 'rxjs';
-import { User } from '@/model/user';
-import { settingsStore } from '@/store/settings';
-import HumanOrOrgStore from '@/modules/sys/user/store';
-import { NavBarConfig } from '@/model/nav-bar-config';
+import { User } from 'src/model/user';
+import { settingsStore } from 'src/store/settings';
+import HumanOrOrgStore from 'src/modules/sys/user/store';
+import { NavBarConfig } from 'src/model/nav-bar-config';
 import { catchError } from 'rxjs/operators';
-import {getDepIdFromUrlParam} from "@/lib/js/url-util";
+import {getDepIdFromUrlParam} from "src/lib/js/url-util";
 
 
 export class AppStore {

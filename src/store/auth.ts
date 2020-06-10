@@ -1,7 +1,7 @@
-import { RxHttp } from '@/lib/js/rx-http';
-import { AuthRequest } from '@/model/base';
-import { SJSON } from '@/lib/js/sjson';
-import { Http } from '@/lib/js/http';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { AuthRequest } from 'src/model/base';
+import { SJSON } from 'src/lib/js/sjson';
+import { Http } from 'src/lib/js/http';
 import axios from 'axios';
 
 export class AuthStore {

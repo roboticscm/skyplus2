@@ -1,11 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
-  import { T } from '@/lib/js/locale/locale';
-  import { StringUtil } from '@/lib/js/string-util';
+  import { T } from 'src/lib/js/locale/locale';
+  import { StringUtil } from 'src/lib/js/string-util';
   import { ButtonType, ButtonId } from '../button/types';
   import { ButtonDropdown } from '../button/model';
-  import DropdownItem from '@/components/ui/dropdown-item';
-  import { Dropdown } from '@/lib/js/dropdown';
+  import DropdownItem from 'src/components/ui/dropdown-item';
+  import { Dropdown } from 'src/lib/js/dropdown';
   import { Browser } from '../../../lib/js/browser';
   import { debounceTime } from '../modal/use-modal';
 
@@ -148,7 +148,7 @@
     }
 
     if (icon && !icon.includes('<')) {
-      import(`@/icons/${icon}.svelte`).then((res: any) => {
+      import(`src/icons/${icon}.svelte`).then((res: any) => {
         IconComponent = res.default;
       });
     }

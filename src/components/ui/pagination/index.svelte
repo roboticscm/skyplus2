@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { T } from '@/lib/js/locale/locale';
-  import { settingsStore } from '@/store/settings';
+  import { T } from 'src/lib/js/locale/locale';
+  import { settingsStore } from 'src/store/settings';
   import { createEventDispatcher } from 'svelte';
-  import { App } from '@/lib/js/constants';
-  import { SNumber } from '@/lib/js/snumber';
+  import { App } from 'src/lib/js/constants';
+  import { SNumber } from 'src/lib/js/snumber';
 
   const dispatch = createEventDispatcher();
 

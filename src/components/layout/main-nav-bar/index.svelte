@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
-  import { T } from '@/lib/js/locale/locale';
-  import { menuStore, historyMenuStore } from '@/store/menu';
-  import { appStore } from '@/store/app';
-  import { Debug } from '@/lib/js/debug';
-  import RouterLink from '@/components/ui/router-link/index.svelte';
-  import { settingsStore } from '@/store/settings';
+  import { T } from 'src/lib/js/locale/locale';
+  import { menuStore, historyMenuStore } from 'src/store/menu';
+  import { appStore } from 'src/store/app';
+  import { Debug } from 'src/lib/js/debug';
+  import RouterLink from 'src/components/ui/router-link/index.svelte';
+  import { settingsStore } from 'src/store/settings';
   import { fromEvent } from 'rxjs';
   import { debounceTime } from 'rxjs/operators';
 

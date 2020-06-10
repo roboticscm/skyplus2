@@ -1,20 +1,20 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import Modal from '@/components/ui/modal/base/index.svelte';
-  import { T } from '@/lib/js/locale/locale';
-  import FloatDatePicker from '@/components/ui/float-input/date-picker';
-  import FloatSelect from '@/components/ui/float-input/select';
-  import FloatTextInput from '@/components/ui/float-input/text-input';
+  import Modal from 'src/components/ui/modal/base/index.svelte';
+  import { T } from 'src/lib/js/locale/locale';
+  import FloatDatePicker from 'src/components/ui/float-input/date-picker';
+  import FloatSelect from 'src/components/ui/float-input/select';
+  import FloatTextInput from 'src/components/ui/float-input/text-input';
   import Store from '../../store';
-  import UploadFiles from '@/components/ui/upload-files';
-  import Form from '@/lib/js/form/form';
+  import UploadFiles from 'src/components/ui/upload-files';
+  import Form from 'src/lib/js/form/form';
   import { StatusDetail } from '../../../types';
-  import { ViewStore } from '@/store/view';
-  import ViewWrapperModal from '@/components/modal/view-wrapper';
+  import { ViewStore } from 'src/store/view';
+  import ViewWrapperModal from 'src/components/modal/view-wrapper';
   import { take } from 'rxjs/operators';
-  import { roleControlStore } from '@/store/role-control';
-  import { appStore } from '@/store/app';
-  import Error from '@/components/ui/error';
+  import { roleControlStore } from 'src/store/role-control';
+  import { appStore } from 'src/store/app';
+  import Error from 'src/components/ui/error';
   import { validation } from './validation';
 
   export let menuPath: string;
@@ -84,7 +84,7 @@
           } else {
             modalRoleControls = res.data;
           }
-          import('@/modules/' + menuPath + '/index.svelte')
+          import('src/modules/' + menuPath + '/index.svelte')
             .then((res) => {
               ModalContentView = res.default;
               resolve('ok');

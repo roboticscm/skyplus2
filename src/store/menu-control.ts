@@ -1,6 +1,6 @@
-import { Http } from '@/lib/js/http';
-import { toSnackCase } from '@/lib/js/util';
-import { SJSON } from '@/lib/js/sjson';
+import { Http } from 'src/lib/js/http';
+import { toSnackCase } from 'src/lib/js/util';
+import { SJSON } from 'src/lib/js/sjson';
 
 const BASE_URL = 'sys/menu-control/';
 

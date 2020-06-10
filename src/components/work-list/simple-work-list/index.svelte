@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount, onDestroy, SvelteComponent } from 'svelte';
   import { fromEvent, Subscription } from 'rxjs';
-  import { apolloClient } from '@/lib/js/hasura-client';
-  import SelectableTable from '@/components/ui/selectable-table';
-  import { ViewStore } from '@/store/view';
+  import { apolloClient } from 'src/lib/js/hasura-client';
+  import SelectableTable from 'src/components/ui/selectable-table';
+  import { ViewStore } from 'src/store/view';
 
-  import Pagination from '@/components/ui/pagination';
+  import Pagination from 'src/components/ui/pagination';
   import { skip } from 'rxjs/operators';
-  import QuickSearch from '@/components/ui/input/quick-search';
+  import QuickSearch from 'src/components/ui/input/quick-search';
 
   export let view: ViewStore;
   export let menuPath: string;

@@ -1,14 +1,14 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import TreeView from '@/components/ui/tree-view';
-  import { ViewStore } from '@/store/view';
+  import TreeView from 'src/components/ui/tree-view';
+  import { ViewStore } from 'src/store/view';
   import { Store } from '../store';
-  import { T } from '@/lib/js/locale/locale';
-  import { OrgType } from '@/modules/sys/owner-org/model';
+  import { T } from 'src/lib/js/locale/locale';
+  import { OrgType } from 'src/modules/sys/owner-org/model';
   import { forkJoin, fromEvent, Subscription, Observable } from 'rxjs';
-  import { SObject } from '@/lib/js/sobject';
-  import CheckList from '@/components/ui/input/check-list';
-  import App from '@/App.svelte';
+  import { SObject } from 'src/lib/js/sobject';
+  import CheckList from 'src/components/ui/input/check-list';
+  import App from 'src/App.svelte';
   import { switchMap, tap, filter, delay } from 'rxjs/operators';
 
   export let view: ViewStore;

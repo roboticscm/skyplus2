@@ -1,5 +1,5 @@
-import { StringUtil } from '@/lib/js/string-util';
-import { genNumberUUID } from '@/lib/js/util';
+import { StringUtil } from 'src/lib/js/string-util';
+import { genNumberUUID } from 'src/lib/js/util';
 
 const DEFAULT_END_TIME = 2 * 60 * 60 * 1000;
 

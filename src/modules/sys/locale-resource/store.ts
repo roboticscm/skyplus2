@@ -1,14 +1,14 @@
-import { ViewStore } from '@/store/view';
-import { toSnackCase } from '@/lib/js/util';
-import { RxHttp } from '@/lib/js/rx-http';
+import { ViewStore } from 'src/store/view';
+import { toSnackCase } from 'src/lib/js/util';
+import { RxHttp } from 'src/lib/js/rx-http';
 import { take } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
-import { Language } from '@/modules/sys/language/model';
-import OwnerOrgStore from '@/modules/sys/owner-org/store';
-import { OwnerOrg } from '@/modules/sys/owner-org/model';
-import { Http } from '@/lib/js/http';
-import { SJSON } from '@/lib/js/sjson';
-import { StringUtil } from '@/lib/js/string-util';
+import { Language } from 'src/modules/sys/language/model';
+import OwnerOrgStore from 'src/modules/sys/owner-org/store';
+import { OwnerOrg } from 'src/modules/sys/owner-org/model';
+import { Http } from 'src/lib/js/http';
+import { SJSON } from 'src/lib/js/sjson';
+import { StringUtil } from 'src/lib/js/string-util';
 
 const BASE_URL = 'sys/locale-resource/';
 

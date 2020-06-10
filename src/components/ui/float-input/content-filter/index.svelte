@@ -1,16 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
-  import { App } from '@/lib/js/constants';
-  import { T } from '@/lib/js/locale/locale';
-  import { SObject } from '@/lib/js/sobject';
-  import SelectableTable from '@/components/ui/selectable-table';
-  import { StringUtil } from '@/lib/js/string-util';
-  import DatePicker from '@/components/ui/input/date-picker';
-  import { fromEvents } from '@/lib/js/rx';
+  import { App } from 'src/lib/js/constants';
+  import { T } from 'src/lib/js/locale/locale';
+  import { SObject } from 'src/lib/js/sobject';
+  import SelectableTable from 'src/components/ui/selectable-table';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import DatePicker from 'src/components/ui/input/date-picker';
+  import { fromEvents } from 'src/lib/js/rx';
   import { distinctUntilChanged, switchMap, tap, map, filter } from 'rxjs/operators';
   import { BehaviorSubject, Observable } from 'rxjs';
-  import { markStringSearch } from '@/lib/js/util';
-  import { SearchUtilStore } from '@/store/search-util';
+  import { markStringSearch } from 'src/lib/js/util';
+  import { SearchUtilStore } from 'src/store/search-util';
 
   export let disabled = false;
   export let className = '';

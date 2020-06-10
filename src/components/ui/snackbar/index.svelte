@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { StringUtil } from '@/lib/js/string-util';
-  import { T } from '@/lib/js/locale/locale';
-  import { App } from '@/lib/js/constants';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import { T } from 'src/lib/js/locale/locale';
+  import { App } from 'src/lib/js/constants';
 
   let snackbarRef: any;
   let msg: string;

@@ -1,23 +1,23 @@
 <script lang="ts">
-  import { OrgStore } from '@/store/org';
-  import MainLayout from '@/components/layout/main-layout';
-  import { AppStore, appStore } from '@/store/app';
-  import MainNavBar from '@/components/layout/main-nav-bar';
-  import BranchDropdown from '@/components/layout/branch-dropdown';
-  import ModulesDropdown from '@/components/layout/modules-dropdown';
-  import Notification from '@/components/layout/notification';
-  import UserProfiles from '@/components/layout/user-profiles';
-  import ConfirmPasswordModal from '@/components/ui/modal/base';
-  import SearchBar from '@/components/layout/search-bar';
-  import { T } from '@/lib/js/locale/locale';
-  import RouterView from '@/components/ui/router-view';
-  import { ModalType } from '@/components/ui/modal/types';
-  import { unlockScreen } from '@/lib/js/security';
-  import Nickname from '@/components/layout/nickname';
-  import { getUserFullName } from '@/lib/js/security';
+  import { OrgStore } from 'src/store/org';
+  import MainLayout from 'src/components/layout/main-layout';
+  import { AppStore, appStore } from 'src/store/app';
+  import MainNavBar from 'src/components/layout/main-nav-bar';
+  import BranchDropdown from 'src/components/layout/branch-dropdown';
+  import ModulesDropdown from 'src/components/layout/modules-dropdown';
+  import Notification from 'src/components/layout/notification';
+  import UserProfiles from 'src/components/layout/user-profiles';
+  import ConfirmPasswordModal from 'src/components/ui/modal/base';
+  import SearchBar from 'src/components/layout/search-bar';
+  import { T } from 'src/lib/js/locale/locale';
+  import RouterView from 'src/components/ui/router-view';
+  import { ModalType } from 'src/components/ui/modal/types';
+  import { unlockScreen } from 'src/lib/js/security';
+  import Nickname from 'src/components/layout/nickname';
+  import { getUserFullName } from 'src/lib/js/security';
   import {onMount} from 'svelte';
-  import OrgIconMark from '@/components/layout/icons/org-mark';
-  import MobileMainNavBar from '@/components/layout/mobile-main-nav-bar';
+  import OrgIconMark from 'src/components/layout/icons/org-mark';
+  import MobileMainNavBar from 'src/components/layout/mobile-main-nav-bar';
 
   const { currentCompany$ } = OrgStore;
 

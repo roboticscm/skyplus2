@@ -1,10 +1,10 @@
-import { RxHttp } from '@/lib/js/rx-http';
-import { toSnackCase } from '@/lib/js/util';
-import { ViewStore } from '@/store/view';
-import { OrgStore } from '@/store/org';
-import { OwnerOrg } from '@/modules/sys/owner-org/model';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { toSnackCase } from 'src/lib/js/util';
+import { ViewStore } from 'src/store/view';
+import { OrgStore } from 'src/store/org';
+import { OwnerOrg } from 'src/modules/sys/owner-org/model';
 import { BehaviorSubject, forkJoin } from 'rxjs';
-import { T } from '@/lib/js/locale/locale';
+import { T } from 'src/lib/js/locale/locale';
 import { skip, take } from 'rxjs/operators';
 
 const BASE_URL = 'sys/owner-org/';

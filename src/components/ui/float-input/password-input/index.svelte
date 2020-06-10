@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { App } from '@/lib/js/constants';
+  import { App } from 'src/lib/js/constants';
   export let name: string;
   export let disabled = false;
   export let className = '';

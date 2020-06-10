@@ -1,16 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { AppStore } from '@/store/app';
-  import { StringUtil } from '@/lib/js/string-util';
-  import { T } from '@/lib/js/locale/locale';
+  import { AppStore } from 'src/store/app';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import { T } from 'src/lib/js/locale/locale';
   import { of } from 'rxjs';
-  import Autocomplete from '@/components/ui/input/autocomplete';
+  import Autocomplete from 'src/components/ui/input/autocomplete';
   import { SearchType } from './types';
   import { extractTemplate } from './helper';
-  import { AuthStore } from '@/store/auth';
-  import Snackbar from '@/components/ui/snackbar';
-  import { loginSuccess, setHeader } from '@/lib/js/security';
-  import { loadMenuAndUserSettings } from '@/main';
+  import { AuthStore } from 'src/store/auth';
+  import Snackbar from 'src/components/ui/snackbar';
+  import { loginSuccess, setHeader } from 'src/lib/js/security';
+  import { loadMenuAndUserSettings } from 'src/main';
 
   export let id: string;
   export let menuPath: string;

@@ -2,11 +2,11 @@
   import { onMount, onDestroy, SvelteComponent, createEventDispatcher } from 'svelte';
   import { fromEvent, Subscription } from 'rxjs';
   import { take } from 'rxjs/operators';
-  import { apolloClient } from '@/lib/js/hasura-client';
-  import { App } from '@/lib/js/constants';
-  import { ViewStore } from '@/store/view';
+  import { apolloClient } from 'src/lib/js/hasura-client';
+  import { App } from 'src/lib/js/constants';
+  import { ViewStore } from 'src/store/view';
 
-  import Pagination from '@/components/ui/pagination/index.svelte';
+  import Pagination from 'src/components/ui/pagination/index.svelte';
 
   export let view: ViewStore;
   export let workListContainerId: string;
@@ -103,7 +103,7 @@
 
     tableHeight = window['$']('#' + workListContainerId).height() - 50;
     // import SelectableTable component
-    import('@/components/ui/handson-table/index.svelte').then((res) => {
+    import('src/components/ui/handson-table/index.svelte').then((res) => {
       // @ts-ignore
       TableComponent = res.default;
     });

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { T } from '@/lib/js/locale/locale';
-  import { SDate } from '@/lib/js/sdate';
+  import { T } from 'src/lib/js/locale/locale';
+  import { SDate } from 'src/lib/js/sdate';
   import { createEventDispatcher } from 'svelte';
-  import EditIcon from '@/components/layout/icons/common/edit.svelte';
-  import SubmitIcon from '@/components/layout/icons/common/submit.svelte';
-  import CancelSubmitIcon from '@/components/layout/icons/common/cancel-submit.svelte';
+  import EditIcon from 'src/components/layout/icons/common/edit.svelte';
+  import SubmitIcon from 'src/components/layout/icons/common/submit.svelte';
+  import CancelSubmitIcon from 'src/components/layout/icons/common/cancel-submit.svelte';
 
   export let data: any;
   export let disabled = false;

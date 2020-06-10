@@ -1,22 +1,22 @@
 <script lang="ts">
-  import { T } from '@/lib/js/locale/locale';
-  import { SDate } from '@/lib/js/sdate';
+  import { T } from 'src/lib/js/locale/locale';
+  import { SDate } from 'src/lib/js/sdate';
   import { Task } from '../../../types';
   import { onMount, createEventDispatcher } from 'svelte';
-  import { SObject } from '@/lib/js/sobject';
-  import { appStore } from '@/store/app';
-  import { User } from '@/model/user';
-  import { markStringSearch } from '@/lib/js/util';
+  import { SObject } from 'src/lib/js/sobject';
+  import { appStore } from 'src/store/app';
+  import { User } from 'src/model/user';
+  import { markStringSearch } from 'src/lib/js/util';
 
-  import SubmitStatusNewIcon from '@/icons/submit-status-new.svelte';
-  import SubmitStatusSubmittedIcon from '@/icons/submit-status-wait-for-approved.svelte';
-  import SubmitStatusAssignedIcon from '@/icons/assign.svelte';
-  import SubmitStatusHelpIcon from '@/icons/hold.svelte';
-  import SubmitStatusCompletedIcon from '@/icons/submit-status-completed.svelte';
+  import SubmitStatusNewIcon from 'src/icons/submit-status-new.svelte';
+  import SubmitStatusSubmittedIcon from 'src/icons/submit-status-wait-for-approved.svelte';
+  import SubmitStatusAssignedIcon from 'src/icons/assign.svelte';
+  import SubmitStatusHelpIcon from 'src/icons/hold.svelte';
+  import SubmitStatusCompletedIcon from 'src/icons/submit-status-completed.svelte';
 
-  import AssigneeIcon from '@/icons/assignee.svelte';
-  import AssignerIcon from '@/icons/assigner.svelte';
-  import EvaluatorIcon from '@/icons/evaluator.svelte';
+  import AssigneeIcon from 'src/icons/assignee.svelte';
+  import AssignerIcon from 'src/icons/assigner.svelte';
+  import EvaluatorIcon from 'src/icons/evaluator.svelte';
 
   export let task: Task;
   export let selectedTask: Task = undefined;

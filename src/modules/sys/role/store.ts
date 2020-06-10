@@ -1,7 +1,7 @@
-import { OrgStore, orgStore } from '@/store/org';
+import { OrgStore, orgStore } from 'src/store/org';
 import { catchError, first, skip, take, withLatestFrom, zipAll } from 'rxjs/operators';
 import { BehaviorSubject, forkJoin, of, zip } from 'rxjs';
-import { ViewStore } from '@/store/view';
+import { ViewStore } from 'src/store/view';
 
 export class Store {
   constructor(public viewStore: ViewStore) {}

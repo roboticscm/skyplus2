@@ -1,4 +1,4 @@
-import { unccentVietnamese } from '@/lib/js/util';
+import { unccentVietnamese } from 'src/lib/js/util';
 
 export class StringUtil {
   public static toSnackCase(str: string, sep: string) {

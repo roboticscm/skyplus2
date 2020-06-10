@@ -1,7 +1,7 @@
-import { RxHttp } from '@/lib/js/rx-http';
-import { toSnackCase } from '@/lib/js/util';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { toSnackCase } from 'src/lib/js/util';
 import { BehaviorSubject } from 'rxjs';
-import { OwnerOrg } from '@/modules/sys/owner-org/model';
+import { OwnerOrg } from 'src/modules/sys/owner-org/model';
 
 const BASE_URL = 'sys/owner-org/';
 export class OrgStore {

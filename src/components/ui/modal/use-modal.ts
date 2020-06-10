@@ -1,7 +1,7 @@
-import { Window } from '@/lib/js/window';
-import { Settings } from '@/model/settings';
-import { settingsStore } from '@/store/settings';
-import { ButtonPressed } from '@/components/ui/button/types';
+import { Window } from 'src/lib/js/window';
+import { Settings } from 'src/model/settings';
+import { settingsStore } from 'src/store/settings';
+import { ButtonPressed } from 'src/components/ui/button/types';
 
 export const debounceTime = (ms, fn) => {
   let timer;

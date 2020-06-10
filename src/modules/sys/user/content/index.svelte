@@ -4,27 +4,27 @@
   import { fromEvent, of, Observable, EMPTY } from 'rxjs';
   import { fromPromise } from 'rxjs/internal-compatibility';
 
-  import { T } from '@/lib/js/locale/locale';
-  import Form from '@/lib/js/form/form';
-  import { ViewStore } from '@/store/view';
-  import { User } from '@/model/user';
-  import { SObject } from '@/lib/js/sobject';
-  import { apolloClient } from '@/lib/js/hasura-client';
-  import { ButtonType, ButtonId } from '@/components/ui/button/types';
+  import { T } from 'src/lib/js/locale/locale';
+  import Form from 'src/lib/js/form/form';
+  import { ViewStore } from 'src/store/view';
+  import { User } from 'src/model/user';
+  import { SObject } from 'src/lib/js/sobject';
+  import { apolloClient } from 'src/lib/js/hasura-client';
+  import { ButtonType, ButtonId } from 'src/components/ui/button/types';
   import { validation } from './validation';
-  import { StringUtil } from '@/lib/js/string-util';
+  import { StringUtil } from 'src/lib/js/string-util';
 
-  import Button from '@/components/ui/flat-button';
-  import FloatTextInput from '@/components/ui/float-input/text-input';
-  import Error from '@/components/ui/error';
-  import FloatPasswordInput from '@/components/ui/float-input/password-input';
-  import FloatCheckbox from '@/components/ui/float-input/checkbox';
-  import SC from '@/components/set-common';
-  import SimpleImageSelector from '@/components/ui/simple-image-selector';
-  import TreeView from '@/components/ui/tree-view';
+  import Button from 'src/components/ui/flat-button';
+  import FloatTextInput from 'src/components/ui/float-input/text-input';
+  import Error from 'src/components/ui/error';
+  import FloatPasswordInput from 'src/components/ui/float-input/password-input';
+  import FloatCheckbox from 'src/components/ui/float-input/checkbox';
+  import SC from 'src/components/set-common';
+  import SimpleImageSelector from 'src/components/ui/simple-image-selector';
+  import TreeView from 'src/components/ui/tree-view';
   import Store from '../store';
-  import { Debug } from '@/lib/js/debug';
-  import { SJSON } from '@/lib/js/sjson';
+  import { Debug } from 'src/lib/js/debug';
+  import { SJSON } from 'src/lib/js/sjson';
   import { resizeBase64Img } from '../../../../lib/js/image';
 
   // Props

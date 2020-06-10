@@ -1,4 +1,4 @@
-import { getRandomInt } from '@/lib/js/util';
+import { getRandomInt } from 'src/lib/js/util';
 
 let passwordChars = ['○', '☺', '☓', '✳', '✾', '✌', '♛'];
 

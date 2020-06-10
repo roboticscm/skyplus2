@@ -1,6 +1,6 @@
-import { T } from '@/lib/js/locale/locale';
-import { StringUtil } from '@/lib/js/string-util';
-import {AppStore} from "@/store/app";
+import { T } from 'src/lib/js/locale/locale';
+import { StringUtil } from 'src/lib/js/string-util';
+import {AppStore} from "src/store/app";
 
 export const getMenuPathFromUrl = () => {
   return location.pathname.slice(1).replace('--', '/');

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import TwoColumnView from '@/components/layout/two-column-view';
+  import TwoColumnView from 'src/components/layout/two-column-view';
   import WorkList from './work-list/index.svelte';
   import MainContent from './content/index.svelte';
-  import ProgressBar from '@/components/ui/progress-bar';
-  import { ViewStore } from '@/store/view';
+  import ProgressBar from 'src/components/ui/progress-bar';
+  import { ViewStore } from 'src/store/view';
 
   // Props
   export let menuPath: string;

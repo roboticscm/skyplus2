@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  import { T } from '@/lib/js/locale/locale';
+  import { T } from 'src/lib/js/locale/locale';
 
   export let titleKeys: string[] = [];
   export let activeTab: string;

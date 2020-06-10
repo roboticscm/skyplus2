@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { StringUtil } from '@/lib/js/string-util';
-  import { passwordChar } from '@/components/ui/input/autocomplete/helper';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import { passwordChar } from 'src/components/ui/input/autocomplete/helper';
 
   export let displayChar = passwordChar();
   export let name = '';

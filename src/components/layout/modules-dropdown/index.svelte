@@ -1,14 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { App } from '@/lib/js/constants';
-  import { T } from '@/lib/js/locale/locale';
-  import { settingsStore } from '@/store/settings';
-  import { menuStore } from '@/store/menu';
-  import { appStore } from '@/store/app';
-  import { orgStore } from '@/store/org';
-  import DropdownItem from '@/components/ui/dropdown-item';
-  import DepIconMark from '@/components/layout/icons/dep-mark';
-  import { Dropdown } from '@/lib/js/dropdown';
+  import { App } from 'src/lib/js/constants';
+  import { T } from 'src/lib/js/locale/locale';
+  import { settingsStore } from 'src/store/settings';
+  import { menuStore } from 'src/store/menu';
+  import { appStore } from 'src/store/app';
+  import { orgStore } from 'src/store/org';
+  import DropdownItem from 'src/components/ui/dropdown-item';
+  import DepIconMark from 'src/components/layout/icons/dep-mark';
+  import { Dropdown } from 'src/lib/js/dropdown';
 
   export let id: string;
 

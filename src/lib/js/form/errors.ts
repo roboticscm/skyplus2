@@ -1,6 +1,6 @@
 import { Debug } from '../debug';
 // @ts-ignore
-import { T } from '@/lib/js/locale/locale';
+import { T } from 'src/lib/js/locale/locale';
 
 export class Errors {
   public errors: any;

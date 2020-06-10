@@ -1,9 +1,9 @@
-import { SJSON } from '@/lib/js/sjson';
+import { SJSON } from 'src/lib/js/sjson';
 // @ts-ignore
 const axios = require('axios');
 import { API } from './constants';
-import { getToken, getUserId, logout } from '@/lib/js/security';
-import { StringUtil } from '@/lib/js/string-util';
+import { getToken, getUserId, logout } from 'src/lib/js/security';
+import { StringUtil } from 'src/lib/js/string-util';
 
 export class Http {
   public static async callApi(method: string, url: string, params: any, jsonData: any) {

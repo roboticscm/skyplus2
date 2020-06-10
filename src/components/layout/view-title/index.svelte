@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { menuStore } from '@/store/menu';
-  import { App } from '@/lib/js/constants';
-  import { appStore } from '@/store/app';
-  import { RoleMenu } from '@/modules/sys/menu/model';
-  import { ViewStore } from '@/store/view';
+  import { menuStore } from 'src/store/menu';
+  import { App } from 'src/lib/js/constants';
+  import { appStore } from 'src/store/app';
+  import { RoleMenu } from 'src/modules/sys/menu/model';
+  import { ViewStore } from 'src/store/view';
 
   export let view: ViewStore;
 

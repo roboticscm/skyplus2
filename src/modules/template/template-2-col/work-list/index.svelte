@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ViewStore } from '@/store/view';
+  import { ViewStore } from 'src/store/view';
 
   export let menuPath: string;
   export let callFrom = 'Self';

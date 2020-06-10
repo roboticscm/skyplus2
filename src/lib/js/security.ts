@@ -1,8 +1,8 @@
 // @ts-ignore
-import { App, Token } from '@/lib/js/constants';
+import { App, Token } from 'src/lib/js/constants';
 import axios from 'axios';
-import { AppStore, appStore } from '@/store/app';
-import { menuStore } from '@/store/menu';
+import { AppStore, appStore } from 'src/store/app';
+import { menuStore } from 'src/store/menu';
 
 export const getBrowserID = (): string => {
   let nav = window.navigator;

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import SearchIcon from '@/components/layout/icons/common/search.svelte';
-  import { App } from '@/lib/js/constants';
+  import SearchIcon from 'src/components/layout/icons/common/search.svelte';
+  import { App } from 'src/lib/js/constants';
   import { BehaviorSubject } from 'rxjs';
-  import { T } from '@/lib/js/locale/locale';
+  import { T } from 'src/lib/js/locale/locale';
 
   export let placeholder = '';
   export let action: any = undefined;

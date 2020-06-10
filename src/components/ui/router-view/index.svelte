@@ -1,13 +1,13 @@
 <script lang="ts">
   import { routerLinkStore } from '../router-link/store';
-  import Page404 from '@/pages/404/index.svelte';
-  import PageLoading from '@/pages/loading/index.svelte';
-  import PageIntro from '@/pages/intro/index.svelte';
-  import { roleControlStore } from '@/store/role-control';
-  import { SearchUtilStore } from '@/store/search-util';
+  import Page404 from 'src/pages/404/index.svelte';
+  import PageLoading from 'src/pages/loading/index.svelte';
+  import PageIntro from 'src/pages/intro/index.svelte';
+  import { roleControlStore } from 'src/store/role-control';
+  import { SearchUtilStore } from 'src/store/search-util';
   import { take } from 'rxjs/operators';
-  import { AppStore, appStore } from '@/store/app';
-  import { menuStore } from '@/store/menu';
+  import { AppStore, appStore } from 'src/store/app';
+  import { menuStore } from 'src/store/menu';
   import { onMount } from 'svelte';
   import { Subscription, forkJoin } from 'rxjs';
 
@@ -23,7 +23,7 @@
 
   const loadComponent = (uri: string) => {
     if (uri && uri.length > 0) {
-      import(`@/${uri}`)
+      import(`src/${uri}`)
         .then((res) => {
           const { default: com } = res;
           TheComponent = com;

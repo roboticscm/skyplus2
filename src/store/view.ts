@@ -1,28 +1,28 @@
-import { menuStore } from '@/store/menu';
-import { T } from '@/lib/js/locale/locale';
-import { StringUtil } from '@/lib/js/string-util';
+import { menuStore } from 'src/store/menu';
+import { T } from 'src/lib/js/locale/locale';
+import { StringUtil } from 'src/lib/js/string-util';
 import { BehaviorSubject, forkJoin, fromEvent, Observable, of, Subscription } from 'rxjs';
-import { TableUtilStore } from '@/store/table-util';
+import { TableUtilStore } from 'src/store/table-util';
 import { catchError, concatMap, filter, first, skip, switchMap, take } from 'rxjs/operators';
-import { App } from '@/lib/js/constants';
+import { App } from 'src/lib/js/constants';
 import { AxiosResponse } from 'axios';
-import { PayloadRes, RoleControl } from '@/model/base';
+import { PayloadRes, RoleControl } from 'src/model/base';
 import gql from 'graphql-tag';
-import { Debug } from '@/lib/js/debug';
-import { ButtonId, ButtonPressed } from '@/components/ui/button/types';
-import { menuControlStore } from '@/store/menu-control';
-import { getDiffFieldsObject, SObject } from '@/lib/js/sobject';
-import { SDate } from '@/lib/js/sdate';
-import { Language } from '@/modules/sys/language/model';
+import { Debug } from 'src/lib/js/debug';
+import { ButtonId, ButtonPressed } from 'src/components/ui/button/types';
+import { menuControlStore } from 'src/store/menu-control';
+import { getDiffFieldsObject, SObject } from 'src/lib/js/sobject';
+import { SDate } from 'src/lib/js/sdate';
+import { Language } from 'src/modules/sys/language/model';
 import { fromPromise } from 'rxjs/internal-compatibility';
-import Form from '@/lib/js/form/form';
-import { Menu } from '@/modules/sys/menu/model';
-import HumanOrOrgStore from '@/modules/sys/user/store';
-import { roleControlStore } from '@/store/role-control';
-import { appStore } from '@/store/app';
-import { notificationStore, NotifyType } from '@/store/notification';
-import { getUserId } from '@/lib/js/security';
-import { getMenuNameFromPath, getViewTitleFromMenuPath } from '@/lib/js/url-util';
+import Form from 'src/lib/js/form/form';
+import { Menu } from 'src/modules/sys/menu/model';
+import HumanOrOrgStore from 'src/modules/sys/user/store';
+import { roleControlStore } from 'src/store/role-control';
+import { appStore } from 'src/store/app';
+import { notificationStore, NotifyType } from 'src/store/notification';
+import { getUserId } from 'src/lib/js/security';
+import { getMenuNameFromPath, getViewTitleFromMenuPath } from 'src/lib/js/url-util';
 
 export class ViewStore {
   tableName: string;
@@ -722,7 +722,7 @@ export class ViewStore {
           } else {
             this.modalRoleControls$.next(res.data);
           }
-          import('@/modules/' + menuPath + '/index.svelte')
+          import('src/modules/' + menuPath + '/index.svelte')
             .then((res) => {
               this.ModalContentView$.next(res.default);
               resolve('ok');

@@ -5,8 +5,8 @@
 // import { fromEvent, timer } from 'rxjs';
 // import { switchMap } from 'rxjs/operators';
 // import { storiesOf } from '@storybook/svelte';
-// import SetButton from '@/components/ui/button/doc/set-button.svelte';
-// import { ButtonType } from '@/components/ui/button/types';
+// import SetButton from 'src/components/ui/button/doc/set-button.svelte';
+// import { ButtonType } from 'src/components/ui/button/types';
 // //
 // // let saveRunning = false;
 // // const onSaveClick = (event) => {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy, tick } from 'svelte';
-  import { T } from '@/lib/js/locale/locale';
-  import { ViewStore } from '@/store/view';
+  import { T } from 'src/lib/js/locale/locale';
+  import { ViewStore } from 'src/store/view';
   import {
     columns,
     nestedHeaders,
@@ -14,17 +14,17 @@
     fillNullColor,
   } from './helper';
   import { Store } from '../store';
-  import SC from '@/components/set-common';
+  import SC from 'src/components/set-common';
 
-  import { ButtonType, ButtonId } from '@/components/ui/button/types';
-  import Button from '@/components/ui/flat-button';
-  import Checkbox from '@/components/ui/input/checkbox';
+  import { ButtonType, ButtonId } from 'src/components/ui/button/types';
+  import Button from 'src/components/ui/flat-button';
+  import Checkbox from 'src/components/ui/input/checkbox';
   import { catchError, concatMap, switchMap, filter } from 'rxjs/operators';
   import { fromEvent, of, Observable } from 'rxjs';
   import { fromPromise } from 'rxjs/internal-compatibility';
-  import { SObject } from '@/lib/js/sobject';
-  import { Debug } from '@/lib/js/debug';
-  import { ButtonPressed } from '@/components/ui/button/types';
+  import { SObject } from 'src/lib/js/sobject';
+  import { Debug } from 'src/lib/js/debug';
+  import { ButtonPressed } from 'src/components/ui/button/types';
 
   export let view: ViewStore;
   export let store: Store;
@@ -281,7 +281,7 @@
 
   onMount(() => {
     tableHeight = calcTableHeight(tableContainerId);
-    import('@/components/ui/excel-grid/index.svelte').then((res) => (ExcelGrid = res.default));
+    import('src/components/ui/excel-grid/index.svelte').then((res) => (ExcelGrid = res.default));
 
     let resizeTimer;
     window['$'](window).on('resize', function(e) {

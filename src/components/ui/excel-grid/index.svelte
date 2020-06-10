@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import jexcel from 'jexcel';
-  import { Debug } from '@/lib/js/debug';
-  import { settingsStore } from '@/store/settings';
-  import { T } from '@/lib/js/locale/locale';
+  import { Debug } from 'src/lib/js/debug';
+  import { settingsStore } from 'src/store/settings';
+  import { T } from 'src/lib/js/locale/locale';
   const dispatch = createEventDispatcher();
 
   export let id: string;

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
-  import { ButtonType, ButtonPressed } from '@/components/ui/button/types';
+  import { ButtonType, ButtonPressed } from 'src/components/ui/button/types';
   import { dragElement } from '../use-modal';
-  import { StringUtil } from '@/lib/js/string-util';
-  import CloseIcon from '@/components/layout/icons/common/cancel-submit.svelte';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import CloseIcon from 'src/components/layout/icons/common/cancel-submit.svelte';
   export let title: string = undefined;
   export let content: string = undefined;
   export let right = 0;

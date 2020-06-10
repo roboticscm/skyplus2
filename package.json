@@ -7,7 +7,7 @@
     "@rollup/plugin-babel": "^5.0.3",
     "@rollup/plugin-commonjs": "13.0.0",
     "@rollup/plugin-node-resolve": "^7.1.1",
-    "@rollup/plugin-typescript": "^4.0.0",
+    "@rollup/plugin-typescript": "^4.1.2",
     "@storybook/addon-a11y": "^5.3.18",
     "@storybook/addon-actions": "^5.3.18",
     "@storybook/addon-docs": "^5.3.18",
@@ -46,6 +46,7 @@
     "rollup-plugin-svelte": "^5.2.1",
     "rollup-plugin-terser": "^5.3.0",
     "rollup-plugin-typescript2": "^0.27.1",
+    "rollup-plugin-workbox-build": "^0.2.0",
     "sass": "^1.26.7",
     "sass-loader": "^8.0.2",
     "serve": "11",
@@ -68,7 +69,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
     "dev": "webpack-dev-server --open",
-    "devr": "rm -rf ./dist && NODE_ENV=development rollup --config --watch",
+    "devr": "rm -rf ./dist && NODE_ENV=development rollup --esModule --config --watch",
     "buildr": "rm -rf ./dist && NODE_ENV=production rollup --config",
     "format": "npx prettier --write 'src/**/*.{js,ts,svelte,css,scss}'",
     "eslint": "npx eslint  src/**/*.*",
@@ -76,7 +77,6 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.13.0",
-    "@rollup/plugin-json": "^4.1.0",
     "apollo-cache-inmemory": "^1.6.5",
     "apollo-client": "^2.6.8",
     "apollo-link": "^1.2.13",

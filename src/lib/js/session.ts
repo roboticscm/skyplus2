@@ -1,6 +1,6 @@
-import { AppStore } from '@/store/app';
-import { Session } from '@/lib/js/constants';
-import { lockScreen, logout } from '@/lib/js/security';
+import { AppStore } from 'src/store/app';
+import { Session } from 'src/lib/js/constants';
+import { lockScreen, logout } from 'src/lib/js/security';
 import { fromEvent } from 'rxjs';
 import { debounceTime, filter, startWith, tap, withLatestFrom } from 'rxjs/operators';
 

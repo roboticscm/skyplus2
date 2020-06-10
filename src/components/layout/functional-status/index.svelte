@@ -1,12 +1,12 @@
 <script lang="ts">
-  import SubmitStatusNewIcon from '@/icons/submit-status-new24x24.svelte';
-  import SubmitStatusWaitForApprovedIcon from '@/icons/submit-status-wait-for-approved24x24.svelte';
-  import SubmitStatusApprovedIcon from '@/icons/submit-status-approved24x24.svelte';
-  import SubmitStatusProcessingIcon from '@/icons/submit-status-processing24x24.svelte';
-  import SubmitStatusCompletedIcon from '@/icons/submit-status-completed24x24.svelte';
-  import RecentIcon from '@/icons/recent24.svelte';
+  import SubmitStatusNewIcon from 'src/icons/submit-status-new24x24.svelte';
+  import SubmitStatusWaitForApprovedIcon from 'src/icons/submit-status-wait-for-approved24x24.svelte';
+  import SubmitStatusApprovedIcon from 'src/icons/submit-status-approved24x24.svelte';
+  import SubmitStatusProcessingIcon from 'src/icons/submit-status-processing24x24.svelte';
+  import SubmitStatusCompletedIcon from 'src/icons/submit-status-completed24x24.svelte';
+  import RecentIcon from 'src/icons/recent24.svelte';
   import { createEventDispatcher } from 'svelte';
-  import { T } from '@/lib/js/locale/locale';
+  import { T } from 'src/lib/js/locale/locale';
 
   export let data: any[] = [];
 

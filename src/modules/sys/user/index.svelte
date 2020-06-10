@@ -3,14 +3,14 @@
   import { onMount } from 'svelte';
   import { take } from 'rxjs/operators';
 
-  import { App } from '@/lib/js/constants';
-  import { ViewStore } from '@/store/view';
+  import { App } from 'src/lib/js/constants';
+  import { ViewStore } from 'src/store/view';
 
-  import TwoColumnView from '@/components/layout/two-column-view';
+  import TwoColumnView from 'src/components/layout/two-column-view';
   import WorkList from './work-list/index.svelte';
   import MainContent from './content/index.svelte';
-  import ViewTitle from '@/components/layout/view-title';
-  import ProgressBar from '@/components/ui/progress-bar';
+  import ViewTitle from 'src/components/layout/view-title';
+  import ProgressBar from 'src/components/ui/progress-bar';
   import Store from './store';
 
   export let showTitle = true;

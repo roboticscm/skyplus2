@@ -1,27 +1,27 @@
 <script lang="ts">
-  import Modal from '@/components/ui/modal/base/index.svelte';
-  import { T } from '@/lib/js/locale/locale';
-  import Tabs from '@/components/ui/tabs';
-  import PasswordField from '@/components/ui/float-input/custom-password-field';
-  import InputField from '@/components/ui/float-input/text-input';
-  import Error from '@/components/ui/error';
-  import Form from '@/lib/js/form/form';
+  import Modal from 'src/components/ui/modal/base/index.svelte';
+  import { T } from 'src/lib/js/locale/locale';
+  import Tabs from 'src/components/ui/tabs';
+  import PasswordField from 'src/components/ui/float-input/custom-password-field';
+  import InputField from 'src/components/ui/float-input/text-input';
+  import Error from 'src/components/ui/error';
+  import Form from 'src/lib/js/form/form';
   import { themes, getThemeColors } from './helper';
-  import { appStore } from '@/store/app';
-  import { ButtonPressed } from '@/components/ui/button/types';
-  import { settingsStore } from '@/store/settings';
-  import RangeSlider from '@/components/ui/range-slider';
-  import { Color } from '@/lib/js/color';
-  import { SObject } from '@/lib/js/sobject';
+  import { appStore } from 'src/store/app';
+  import { ButtonPressed } from 'src/components/ui/button/types';
+  import { settingsStore } from 'src/store/settings';
+  import RangeSlider from 'src/components/ui/range-slider';
+  import { Color } from 'src/lib/js/color';
+  import { SObject } from 'src/lib/js/sobject';
   import { validation } from './validation';
-  import Snackbar from '@/components/ui/snackbar';
+  import Snackbar from 'src/components/ui/snackbar';
   import { catchError } from 'rxjs/operators';
   import { of } from 'rxjs';
-  import { StringUtil } from '@/lib/js/string-util';
-  import FloatSelect from '@/components/ui/float-input/select';
-  import LanguageStore from '@/modules/sys/locale-resource/store';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import FloatSelect from 'src/components/ui/float-input/select';
+  import LanguageStore from 'src/modules/sys/locale-resource/store';
   import { onMount } from 'svelte';
-  import { Debug } from '@/lib/js/debug';
+  import { Debug } from 'src/lib/js/debug';
 
   const { usedLanguages$ } = LanguageStore;
   const { user$ } = appStore;
@@ -100,7 +100,7 @@
     form = resetForm();
     calcHeight();
     return new Promise((resolve, reject) => {
-      import('@/components/ui/excel-grid/index.svelte').then((res) => {
+      import('src/components/ui/excel-grid/index.svelte').then((res) => {
         ExcelGridComponent = res.default;
         resolve(modalRef.show());
       });

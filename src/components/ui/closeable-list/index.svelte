@@ -2,11 +2,11 @@
   import { createEventDispatcher } from 'svelte';
   import { CloseableListItem } from './types';
   import { Observable } from 'rxjs';
-  import Modal from '@/components/ui/modal/base';
-  import { ModalType } from '@/components/ui/modal/types';
+  import Modal from 'src/components/ui/modal/base';
+  import { ModalType } from 'src/components/ui/modal/types';
   import { ButtonPressed } from '../button/types';
-  import { T } from '@/lib/js/locale/locale';
-  import { API } from '@/lib/js/constants';
+  import { T } from 'src/lib/js/locale/locale';
+  import { API } from 'src/lib/js/constants';
 
   export let confirmDelete = false;
   export let menuPath: string;
@@ -39,7 +39,7 @@
   // @ts-ignore
   $: {
     if (customRender) {
-      import('@/' + customRender).then((res: any) => (CustomRender = res.default));
+      import('src/' + customRender).then((res: any) => (CustomRender = res.default));
     }
   }
 

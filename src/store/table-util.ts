@@ -1,7 +1,7 @@
-import { RxHttp } from '@/lib/js/rx-http';
-import { Http } from '@/lib/js/http';
-import { toSnackCase } from '@/lib/js/util';
-import { SimpleListParam } from '@/model/base';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { Http } from 'src/lib/js/http';
+import { toSnackCase } from 'src/lib/js/util';
+import { SimpleListParam } from 'src/model/base';
 
 const BASE_URL = 'sys/table-util/';
 

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { T } from '@/lib/js/locale/locale';
-  import { SDate } from '@/lib/js/sdate';
+  import { T } from 'src/lib/js/locale/locale';
+  import { SDate } from 'src/lib/js/sdate';
   import { Project } from '../../../types';
   import Chart from 'chart.js';
   import { onMount } from 'svelte';

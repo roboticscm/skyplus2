@@ -2,10 +2,10 @@
   import { onMount, tick } from 'svelte';
   import Split from 'split-grid';
   import { applyLayout } from './helper';
-  import { appStore } from '@/store/app';
-  // import { settingsStore } from '@/store/settings';
-  import { App, GUTTER_WIDTH } from '@/lib/js/constants';
-  import { AppStore } from '@/store/app';
+  import { appStore } from 'src/store/app';
+  // import { settingsStore } from 'src/store/settings';
+  import { App, GUTTER_WIDTH } from 'src/lib/js/constants';
+  import { AppStore } from 'src/store/app';
 
   const { isLogged$ } = AppStore;
 

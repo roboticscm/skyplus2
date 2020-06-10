@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { OrgStore } from '@/store/org';
-  import { AppStore } from '@/store/app';
-  import { App } from '@/lib/js/constants';
-  import OrgIconMark from '@/components/layout/icons/org-mark';
-  import SkyhubLogo from '@/components/layout/icons/skyhub';
-  import NewsStore from '@/pages/intro/store';
+  import { OrgStore } from 'src/store/org';
+  import { AppStore } from 'src/store/app';
+  import { App } from 'src/lib/js/constants';
+  import OrgIconMark from 'src/components/layout/icons/org-mark';
+  import SkyhubLogo from 'src/components/layout/icons/skyhub';
+  import NewsStore from 'src/pages/intro/store';
 
   // @ts-ignore
   const { dataList$ } = NewsStore;

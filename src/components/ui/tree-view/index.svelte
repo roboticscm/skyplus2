@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, tick, createEventDispatcher } from 'svelte';
-  import { genUUID } from '@/lib/js/util';
+  import { genUUID } from 'src/lib/js/util';
   import { Observable } from 'rxjs';
 
   export let id = genUUID();

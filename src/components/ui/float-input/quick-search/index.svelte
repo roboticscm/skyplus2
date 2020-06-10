@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
-  import { fromEvents } from '@/lib/js/rx';
+  import { fromEvents } from 'src/lib/js/rx';
   import { distinctUntilChanged, switchMap } from 'rxjs/operators';
-  import SearchIcon from '@/components/layout/icons/common/search.svelte';
-  import { App } from '@/lib/js/constants';
+  import SearchIcon from 'src/components/layout/icons/common/search.svelte';
+  import { App } from 'src/lib/js/constants';
   import { BehaviorSubject } from 'rxjs';
 
   export let placeholder = '';

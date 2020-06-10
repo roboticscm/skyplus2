@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { ViewStore } from '@/store/view';
+  import { ViewStore } from 'src/store/view';
   import MainContent from './content/index.svelte';
-  import ProgressBar from '@/components/ui/progress-bar';
+  import ProgressBar from 'src/components/ui/progress-bar';
   import Store from './store';
 
   export let menuPath: string;

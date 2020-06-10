@@ -1,32 +1,32 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
-  import Button from '@/components/ui/flat-button';
-  import ViewWrapperModal from '@/components/modal/view-wrapper';
-  import { T } from '@/lib/js/locale/locale';
-  import { ViewStore } from '@/store/view';
-  import { roleControlStore } from '@/store/role-control';
-  import { appStore } from '@/store/app';
+  import Button from 'src/components/ui/flat-button';
+  import ViewWrapperModal from 'src/components/modal/view-wrapper';
+  import { T } from 'src/lib/js/locale/locale';
+  import { ViewStore } from 'src/store/view';
+  import { roleControlStore } from 'src/store/role-control';
+  import { appStore } from 'src/store/app';
   import { distinctUntilChanged, filter, switchMap, take, tap, map, concatMap, catchError } from 'rxjs/operators';
   import { BehaviorSubject, forkJoin, fromEvent, Observable, of } from 'rxjs';
-  import FloatSelect from '@/components/ui/float-input/select';
-  import Autocomplete from '@/components/ui/float-input/simple-autocomplete';
+  import FloatSelect from 'src/components/ui/float-input/select';
+  import Autocomplete from 'src/components/ui/float-input/simple-autocomplete';
   import Store from '../store';
-  import { settingsStore } from '@/store/settings';
-  import { Debug } from '@/lib/js/debug';
-  import QuickSearch from '@/components/ui/float-input/quick-search';
-  import { TableColumn } from '@/model/base';
-  import ProgressBar from '@/components/ui/progress-bar';
-  import { StringUtil } from '@/lib/js/string-util';
-  import { SObject } from '@/lib/js/sobject';
-  import { fromEvents } from '@/lib/js/rx';
-  import { markStringSearch } from '@/lib/js/util';
-  import Pagination from '@/components/ui/pagination';
-  import InputModal from '@/components/ui/modal/base';
+  import { settingsStore } from 'src/store/settings';
+  import { Debug } from 'src/lib/js/debug';
+  import QuickSearch from 'src/components/ui/float-input/quick-search';
+  import { TableColumn } from 'src/model/base';
+  import ProgressBar from 'src/components/ui/progress-bar';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import { SObject } from 'src/lib/js/sobject';
+  import { fromEvents } from 'src/lib/js/rx';
+  import { markStringSearch } from 'src/lib/js/util';
+  import Pagination from 'src/components/ui/pagination';
+  import InputModal from 'src/components/ui/modal/base';
 
-  import { ModalType } from '@/components/ui/modal/types';
-  import { ButtonType, ButtonId } from '@/components/ui/button/types';
+  import { ModalType } from 'src/components/ui/modal/types';
+  import { ButtonType, ButtonId } from 'src/components/ui/button/types';
 
-  import SC from '@/components/set-common';
+  import SC from 'src/components/set-common';
   import { ButtonPressed } from '../../../../components/ui/button/types';
 
   export let view: ViewStore;
@@ -86,7 +86,7 @@
           } else {
             langRoleControls = res.data;
           }
-          import('@/modules/sys/language/index.svelte')
+          import('src/modules/sys/language/index.svelte')
             .then((res) => {
               LanguageView = res.default;
               resolve('ok');
@@ -373,7 +373,7 @@
         readOnly: true,
       });
 
-      import('@/components/ui/excel-grid/index.svelte').then((res) => {
+      import('src/components/ui/excel-grid/index.svelte').then((res) => {
         ExcelGrid = res.default;
       });
     })
@@ -457,7 +457,7 @@
     view.showTrashRestoreModal(event.currentTarget.id, false, scRef);
   };
 
-  import { CommonValidation } from '@/lib/js/common-validation';
+  import { CommonValidation } from 'src/lib/js/common-validation';
   import { fromPromise } from 'rxjs/internal-compatibility';
   import { Mark } from '../../../../lib/js/mark';
   let minNewRecord = 1,

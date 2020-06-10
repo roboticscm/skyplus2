@@ -1,26 +1,26 @@
 <script lang="ts">
-  import { T } from '@/lib/js/locale/locale';
-  import { SDate } from '@/lib/js/sdate';
-  import { NotifyType } from '@/store/notification';
-  import { Notification } from '@/model/base';
-  import { getViewTitleFromMenuPath } from '@/lib/js/url-util';
+  import { T } from 'src/lib/js/locale/locale';
+  import { SDate } from 'src/lib/js/sdate';
+  import { NotifyType } from 'src/store/notification';
+  import { Notification } from 'src/model/base';
+  import { getViewTitleFromMenuPath } from 'src/lib/js/url-util';
   import { createEventDispatcher } from 'svelte';
-  import { StringUtil } from '@/lib/js/string-util';
-  import SubmitIcon from '@/icons/submit24x24.svelte';
-  import CancelSubmitIcon from '@/icons/cancel-submit24x24.svelte';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import SubmitIcon from 'src/icons/submit24x24.svelte';
+  import CancelSubmitIcon from 'src/icons/cancel-submit24x24.svelte';
 
-  import AssignIcon from '@/icons/assign24x24.svelte';
-  import UnAssignIcon from '@/icons/un-assign24x24.svelte';
+  import AssignIcon from 'src/icons/assign24x24.svelte';
+  import UnAssignIcon from 'src/icons/un-assign24x24.svelte';
 
-  import HoldIcon from '@/icons/hold24x24.svelte';
-  import UnHoldIcon from '@/icons/un-hold24x24.svelte';
+  import HoldIcon from 'src/icons/hold24x24.svelte';
+  import UnHoldIcon from 'src/icons/un-hold24x24.svelte';
 
-  import Reminder1 from '@/icons/reminder124x24.svelte';
-  import Reminder2 from '@/icons/reminder224x24.svelte';
-  import UpdateIcon from '@/icons/update24x24.svelte';
-  import { SObject } from '@/lib/js/sobject';
-  import CompleteIcon from '@/icons/complete.svelte';
-  import UnCompleteIcon from '@/icons/un-complete.svelte';
+  import Reminder1 from 'src/icons/reminder124x24.svelte';
+  import Reminder2 from 'src/icons/reminder224x24.svelte';
+  import UpdateIcon from 'src/icons/update24x24.svelte';
+  import { SObject } from 'src/lib/js/sobject';
+  import CompleteIcon from 'src/icons/complete.svelte';
+  import UnCompleteIcon from 'src/icons/un-complete.svelte';
   const dispatch = createEventDispatcher();
 
   export let notification: Notification;

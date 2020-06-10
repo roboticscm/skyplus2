@@ -1,14 +1,14 @@
-import { ViewStore } from '@/store/view';
-import { RxHttp } from '@/lib/js/rx-http';
-import { toSnackCase } from '@/lib/js/util';
+import { ViewStore } from 'src/store/view';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { toSnackCase } from 'src/lib/js/util';
 import { BehaviorSubject, forkJoin, of } from 'rxjs';
 import { catchError, first, skip, zip } from 'rxjs/operators';
-import { User } from '@/model/user';
-import { OwnerOrg } from '@/modules/sys/owner-org/model';
-import { OrgStore } from '@/store/org';
-import HumanOrOrgStore from '@/modules/sys/user/store';
-import { RoleStore } from '@/store/role';
-import { Role } from '@/modules/sys/role-detail/model';
+import { User } from 'src/model/user';
+import { OwnerOrg } from 'src/modules/sys/owner-org/model';
+import { OrgStore } from 'src/store/org';
+import HumanOrOrgStore from 'src/modules/sys/user/store';
+import { RoleStore } from 'src/store/role';
+import { Role } from 'src/modules/sys/role-detail/model';
 
 const BASE_URL = 'sys/assignment-role/';
 export class Store {

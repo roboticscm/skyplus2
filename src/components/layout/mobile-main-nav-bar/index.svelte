@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { menuStore, historyMenuStore } from '@/store/menu';
-  import { appStore } from '@/store/app';
-  import { Debug } from '@/lib/js/debug';
-  import RouterLink from '@/components/ui/router-link/index.svelte';
-  import { settingsStore } from '@/store/settings';
+  import { menuStore, historyMenuStore } from 'src/store/menu';
+  import { appStore } from 'src/store/app';
+  import { Debug } from 'src/lib/js/debug';
+  import RouterLink from 'src/components/ui/router-link/index.svelte';
+  import { settingsStore } from 'src/store/settings';
 
   const { dataList$ } = menuStore;
 

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { settingsStore } from '@/store/settings';
+  import { settingsStore } from 'src/store/settings';
   import { onMount } from 'svelte';
-  import { StringUtil } from '@/lib/js/string-util';
+  import { StringUtil } from 'src/lib/js/string-util';
 
   export let title: string = '';
   export let collapse = true;

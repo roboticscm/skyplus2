@@ -1,4 +1,4 @@
-import { Browser } from '@/lib/js/browser';
+import { Browser } from 'src/lib/js/browser';
 
 export class SDate {
   static convertMillisecondToDateString(millisecond) {

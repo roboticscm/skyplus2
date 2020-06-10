@@ -1,16 +1,16 @@
 <script lang="ts">
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-  import { SObject } from '@/lib/js/sobject';
-  import { markStringSearch } from '@/lib/js/util';
-  import { StringUtil } from '@/lib/js/string-util';
-  import { Debug } from '@/lib/js/debug';
-  import { TableColumn } from '@/model/base';
-  import ProgressBar from '@/components/ui/progress-bar';
+  import { SObject } from 'src/lib/js/sobject';
+  import { markStringSearch } from 'src/lib/js/util';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import { Debug } from 'src/lib/js/debug';
+  import { TableColumn } from 'src/model/base';
+  import ProgressBar from 'src/components/ui/progress-bar';
   import { BehaviorSubject, Observable } from 'rxjs';
   import { map, switchMap, tap, mergeAll, filter, distinctUntilChanged } from 'rxjs/operators';
-  import { fromEvents } from '@/lib/js/rx';
-  import SelectableTable from '@/components/ui/selectable-table';
-  import { settingsStore } from '@/store/settings';
+  import { fromEvents } from 'src/lib/js/rx';
+  import SelectableTable from 'src/components/ui/selectable-table';
+  import { settingsStore } from 'src/store/settings';
   export let columns: TableColumn[];
   export let height = '50vh';
   export let id: string;

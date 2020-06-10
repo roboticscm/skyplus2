@@ -1,5 +1,5 @@
-import { T } from '@/lib/js/locale/locale';
-import { StringUtil } from '@/lib/js/string-util';
+import { T } from 'src/lib/js/locale/locale';
+import { StringUtil } from 'src/lib/js/string-util';
 
 export const functionalStatusFields = [
   {

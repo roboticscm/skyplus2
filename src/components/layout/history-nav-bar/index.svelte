@@ -1,6 +1,6 @@
 <script lang="ts">
-  import NavItem from '@/components/ui/nav-item/index.svelte';
-  import { menuStore } from '@/store/menu';
+  import NavItem from 'src/components/ui/nav-item/index.svelte';
+  import { menuStore } from 'src/store/menu';
 
   const { dataList$ } = menuStore;
 </script>

@@ -4,21 +4,21 @@
   import { fromEvent, of, Observable, EMPTY } from 'rxjs';
   import { fromPromise } from 'rxjs/internal-compatibility';
 
-  import { T } from '@/lib/js/locale/locale';
-  import Form from '@/lib/js/form/form';
-  import { ViewStore } from '@/store/view';
+  import { T } from 'src/lib/js/locale/locale';
+  import Form from 'src/lib/js/form/form';
+  import { ViewStore } from 'src/store/view';
   import { Project } from '../../types';
-  import { SObject } from '@/lib/js/sobject';
-  import { apolloClient } from '@/lib/js/hasura-client';
+  import { SObject } from 'src/lib/js/sobject';
+  import { apolloClient } from 'src/lib/js/hasura-client';
   import { validation } from './validation';
-  import FloatTextInput from '@/components/ui/float-input/text-input';
-  import FloatNumberInput from '@/components/ui/float-input/number-input';
-  import Error from '@/components/ui/error';
+  import FloatTextInput from 'src/components/ui/float-input/text-input';
+  import FloatNumberInput from 'src/components/ui/float-input/number-input';
+  import Error from 'src/components/ui/error';
 
-  import { ButtonType, ButtonId } from '@/components/ui/button/types';
-  import Button from '@/components/ui/flat-button';
-  import SC from '@/components/set-common';
-  import { Debug } from '@/lib/js/debug';
+  import { ButtonType, ButtonId } from 'src/components/ui/button/types';
+  import Button from 'src/components/ui/flat-button';
+  import SC from 'src/components/set-common';
+  import { Debug } from 'src/lib/js/debug';
 
   // Props
   export let view: ViewStore;

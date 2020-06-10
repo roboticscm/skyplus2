@@ -1,9 +1,9 @@
-import { RxHttp } from '@/lib/js/rx-http';
-import { toSnackCase } from '@/lib/js/util';
-import { Http } from '@/lib/js/http';
-import { Settings } from '@/model/settings';
-import { appStore } from '@/store/app';
-import { SJSON } from '@/lib/js/sjson';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { toSnackCase } from 'src/lib/js/util';
+import { Http } from 'src/lib/js/http';
+import { Settings } from 'src/model/settings';
+import { appStore } from 'src/store/app';
+import { SJSON } from 'src/lib/js/sjson';
 
 const BASE_URL = 'sys/user-settings/';
 

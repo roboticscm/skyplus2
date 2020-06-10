@@ -2,12 +2,12 @@
   import { routerLinkStore } from './store';
   import { createEventDispatcher } from 'svelte';
   import { take, skip } from 'rxjs/operators';
-  import { T } from '@/lib/js/locale/locale';
-  import { menuStore } from '@/store/menu';
-  import { StringUtil } from '@/lib/js/string-util';
-  import { Dropdown } from '@/lib/js/dropdown';
-  import { ButtonDropdown } from '@/components/ui/button/model';
-  import DropdownItem from '@/components/ui/dropdown-item';
+  import { T } from 'src/lib/js/locale/locale';
+  import { menuStore } from 'src/store/menu';
+  import { StringUtil } from 'src/lib/js/string-util';
+  import { Dropdown } from 'src/lib/js/dropdown';
+  import { ButtonDropdown } from 'src/components/ui/button/model';
+  import DropdownItem from 'src/components/ui/dropdown-item';
 
   // @ts-ignore
   const { currentComponentUri$ } = routerLinkStore;

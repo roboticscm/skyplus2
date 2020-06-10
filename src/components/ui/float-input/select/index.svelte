@@ -1,10 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
-  import { T } from '@/lib/js/locale/locale';
+  import { T } from 'src/lib/js/locale/locale';
   import { Observable } from 'rxjs';
   import { take } from 'rxjs/operators';
-  import { settingsStore } from '@/store/settings';
-  import { App } from '@/lib/js/constants';
+  import { settingsStore } from 'src/store/settings';
+  import { App } from 'src/lib/js/constants';
 
   export let id: string;
   export let menuPath: string;

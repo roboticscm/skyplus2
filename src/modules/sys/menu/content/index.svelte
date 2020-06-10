@@ -4,29 +4,29 @@
   import { fromEvent, of, Observable, EMPTY } from 'rxjs';
   import { fromPromise } from 'rxjs/internal-compatibility';
 
-  import { T } from '@/lib/js/locale/locale';
-  import Form from '@/lib/js/form/form';
-  import { ViewStore } from '@/store/view';
+  import { T } from 'src/lib/js/locale/locale';
+  import Form from 'src/lib/js/form/form';
+  import { ViewStore } from 'src/store/view';
   import { Menu } from '../model';
-  import { SObject } from '@/lib/js/sobject';
-  import { apolloClient } from '@/lib/js/hasura-client';
-  import { ButtonType, ButtonId } from '@/components/ui/button/types';
+  import { SObject } from 'src/lib/js/sobject';
+  import { apolloClient } from 'src/lib/js/hasura-client';
+  import { ButtonType, ButtonId } from 'src/components/ui/button/types';
   import { validation } from './validation';
-  import { ModalType } from '@/components/ui/modal/types';
-  import FloatTextInput from '@/components/ui/float-input/text-input';
-  import FloatNumberInput from '@/components/ui/float-input/number-input';
-  import FloatCheckbox from '@/components/ui/float-input/checkbox';
-  import Error from '@/components/ui/error';
+  import { ModalType } from 'src/components/ui/modal/types';
+  import FloatTextInput from 'src/components/ui/float-input/text-input';
+  import FloatNumberInput from 'src/components/ui/float-input/number-input';
+  import FloatCheckbox from 'src/components/ui/float-input/checkbox';
+  import Error from 'src/components/ui/error';
 
-  import Button from '@/components/ui/flat-button';
-  import NumberInput from '@/components/ui/input/number-input';
-  import TextInput from '@/components/ui/input/text-input';
-  import Checkbox from '@/components/ui/input/checkbox';
-  import SC from '@/components/set-common';
-  import SimpleImageSelector from '@/components/ui/simple-image-selector';
-  import TreeView from '@/components/ui/tree-view';
+  import Button from 'src/components/ui/flat-button';
+  import NumberInput from 'src/components/ui/input/number-input';
+  import TextInput from 'src/components/ui/input/text-input';
+  import Checkbox from 'src/components/ui/input/checkbox';
+  import SC from 'src/components/set-common';
+  import SimpleImageSelector from 'src/components/ui/simple-image-selector';
+  import TreeView from 'src/components/ui/tree-view';
   import { Store } from '../store';
-  import { Debug } from '@/lib/js/debug';
+  import { Debug } from 'src/lib/js/debug';
 
   // Props
   export let view: ViewStore;

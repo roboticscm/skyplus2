@@ -1,16 +1,16 @@
-import { ViewStore } from '@/store/view';
+import { ViewStore } from 'src/store/view';
 import { BehaviorSubject, of } from 'rxjs';
 import { Project, File, TaskVerification, TaskQualification, Status, Task, Priority, StatusDetail } from '../types';
-import { User } from '@/model/user';
-import { OwnerOrg } from '@/modules/sys/owner-org/model';
-import { TableUtilStore } from '@/store/table-util';
-import { RxHttp } from '@/lib/js/rx-http';
-import { toSnackCase } from '@/lib/js/util';
-import { Http } from '@/lib/js/http';
-import { SObject } from '@/lib/js/sobject';
-import { SJSON } from '@/lib/js/sjson';
+import { User } from 'src/model/user';
+import { OwnerOrg } from 'src/modules/sys/owner-org/model';
+import { TableUtilStore } from 'src/store/table-util';
+import { RxHttp } from 'src/lib/js/rx-http';
+import { toSnackCase } from 'src/lib/js/util';
+import { Http } from 'src/lib/js/http';
+import { SObject } from 'src/lib/js/sobject';
+import { SJSON } from 'src/lib/js/sjson';
 import { catchError } from 'rxjs/operators';
-import { App } from '@/lib/js/constants';
+import { App } from 'src/lib/js/constants';
 
 const BASE_URL = 'task/task/';
 export default class Store {

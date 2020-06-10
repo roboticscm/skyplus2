@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { ViewStore } from '@/store/view';
-  import Button from '@/components/ui/flat-button';
-  import { ButtonType, ButtonId } from '@/components/ui/button/types';
+  import { ViewStore } from 'src/store/view';
+  import Button from 'src/components/ui/flat-button';
+  import { ButtonType, ButtonId } from 'src/components/ui/button/types';
   import Store from '../store';
-  import { T } from '@/lib/js/locale/locale';
+  import { T } from 'src/lib/js/locale/locale';
 
   export let view: ViewStore;
   export let store: Store;

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import { T } from '@/lib/js/locale/locale';
-  import { getThemeColors } from '@/lib/js/color';
+  import { T } from 'src/lib/js/locale/locale';
+  import { getThemeColors } from 'src/lib/js/color';
 
   export let className = 'rich-editor';
   export let height = '100px';
