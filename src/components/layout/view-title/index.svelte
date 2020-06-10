@@ -13,15 +13,15 @@
   document.title = App.NAME + ' - ' + viewTitle;
 </script>
 
-<div class="view-title">
-  {#if selectedMenu}
-    {#if !selectedMenu.useFontIcon && selectedMenu.iconData}
-      <img src={selectedMenu.iconData} alt={selectedMenu.menuName} />
-    {:else if selectedMenu.fontIcon}
-      {@html selectedMenu.fontIcon}
-    {:else}
-      {@html App.DEFAULT_ICON}
-    {/if}
-  {/if}
-  {viewTitle}
-</div>
+<!--<div class="view-title">-->
+<!--  {#if selectedMenu}-->
+<!--    {#if !selectedMenu.useFontIcon && selectedMenu.iconData}-->
+<!--      <img src={selectedMenu.iconData} alt={selectedMenu.menuName} />-->
+<!--    {:else if selectedMenu.fontIcon}-->
+<!--      {@html selectedMenu.fontIcon}-->
+<!--    {:else}-->
+<!--      {@html App.DEFAULT_ICON}-->
+<!--    {/if}-->
+<!--  {/if}-->
+<!--  {viewTitle}-->
+<!--</div>-->

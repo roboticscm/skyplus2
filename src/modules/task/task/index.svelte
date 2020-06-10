@@ -8,6 +8,7 @@
   import ProgressBar from 'src/components/ui/progress-bar';
   import { ViewStore } from 'src/store/view';
   import Store from './store';
+  import ViewTitle from 'src/components/layout/view-title';
 
   // Props
   export let menuPath: string;
@@ -40,6 +41,8 @@
     mainContentRef.doAddNew();
   };
 </script>
+
+<ViewTitle {view} />
 
 <ProgressBar loading$={view.loading$} />
 
