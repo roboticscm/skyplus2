@@ -52,9 +52,9 @@ class MenuStore {
           if (res.data.length > 0) {
             const menuPathFromUrlParam = getMenuPathFromUrlParam();
             if(menuPathFromUrlParam) {
-              this.sysGetMenuByPath(menuPathFromUrlParam).subscribe((res: any) => {
-                this.selectedData = res.data;
-                this.selectedData$.next(res.data);
+              this.sysGetMenuByPath(menuPathFromUrlParam).subscribe((_res: any) => {
+                this.selectedData = _res.data;
+                this.selectedData$.next(_res.data);
               });
             } else {
               this.selectedData = res.data[0];

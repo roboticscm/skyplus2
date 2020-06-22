@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { T } from 'src/lib/js/locale/locale';
   import { getThemeColors } from 'src/lib/js/color';
+  import {StringUtil} from 'src/lib/js/string-util';
 
   export let className = 'rich-editor';
   export let height = '100px';
@@ -29,6 +30,7 @@
   export const setHtmlContent = (htmlContent: string) => {
     if (iframeRef) {
       iframeRef.contentWindow.document.getElementsByTagName('body')[0].innerHTML = htmlContent;
+      setHeight();
     }
   };
 
@@ -63,9 +65,20 @@
     }
   };
 
+  const setHeight = () => {
+    if(iframeRef) {
+      if(StringUtil.countDiv(getHtmlContent()) > 4) {
+        height = '180px';
+      } else {
+        height = '100px';
+      }
+      iframeRef.height = height;
+    }
+  }
+
   onMount(() => {
     if (iframeRef) {
-      iframeRef.height = height;
+      setHeight();
       iframeRef.contentWindow.document.addEventListener('input', onEdit);
       const body: any = iframeRef.contentWindow.document.getElementsByTagName('body')[0];
       body.style.fontFamily = 'Roboto';
@@ -145,6 +158,7 @@
   const onEdit = (e) => {
     editMode = true;
     value = getHtmlContent();
+    setHeight();
   };
 </script>
 

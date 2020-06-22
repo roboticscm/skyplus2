@@ -12,6 +12,7 @@ export class AppStore {
   static screenLock$ = new BehaviorSubject<number>(0);
   static rememberLogin = false;
   static urlParam: any = undefined;
+  static isDetailPage$  =  new BehaviorSubject<boolean>(false);
 
   user$ = new BehaviorSubject<User>(null);
   user: User;

@@ -48,12 +48,15 @@
   import { MessageType } from 'src/store/notification';
   import { HelperStore } from '../../../../store/helper';
   import {getTargetIdFromUrlParam} from "src/lib/js/url-util";
+  import BackIcon from 'src/icons/back24x16.svelte';
+
 
   // Props
   export let view: ViewStore;
   export let menuPath: string;
   export let store: Store;
   export let backCallback: Function = undefined;
+  export let detailTitle = '';
 
   // @ts-ignore
   const {
@@ -90,6 +93,8 @@
   let modalTitle = '';
   let submitType = undefined;
   let isManager = false;
+  let descriptionHeight = '100px';
+  let uploadFileRef: any;
   /**
    * Reset form (reset input and errors)
    * @param {none}
@@ -131,6 +136,11 @@
     return form.evaluators.findIndex((it: any) => it.id == getUserId()) >= 0;
   };
 
+
+  // @ts-ignore
+  $: {
+    detailTitle = form.name + ((form.code && form.code !== '---') ?  ' (' +  form.code + ')' : '' );
+  }
 
   let isTaskEditable = true;
   let _isUserCanEditTask = true;
@@ -182,7 +192,6 @@
     ButtonId.Assign,
     form.errors.any() ||
       form.assignees.length === 0 ||
-      (form.assigners.length > 0 && !isAssignerUser()) ||
           // @ts-ignore
       (!_isUserCanPressAssignButton && $isUpdateMode$),
   );
@@ -217,6 +226,14 @@
   // @ts-ignore
   $: disabledUnComplete = view.isDisabled(ButtonId.UnComplete, form.errors.any() || !_isUserCanPressUnCompleteButton);
 
+  // @ts-ignore
+  $: {
+    if(!(window as any).isSmartPhone ){
+      if (uploadFileRef) {
+        uploadFileRef.style.height = descriptionHeight;
+      }
+    }
+  }
 
   const isUserCanEditTask = () => {
     if (!selectedData) {
@@ -329,7 +346,7 @@
   // @ts-ignore
   $: if(form.assignees) {
     _isUserCanPressAssignButton =
-            (isUserCanPressAssignButton()) && form.assignees.length > 0 && form.assignees[0].id && (form.assigners.length === 0 || isAssignerUser());
+            isUserCanPressAssignButton() && form.assignees.length > 0 && form.assignees[0].id ;//&& (form.assigners.length === 0 || isAssignerUser());
   }
   const onAddAssigner = () => {
     addAssignHumanOrOrg(form.assigners).then((res: any) => {
@@ -618,8 +635,9 @@
     form.errors.clear('secondReminder');
   };
 
-  const onChangeAssigneeEndTime = () => {
+  const onChangeAssigneeEndTime = (event: any) => {
     form.errors.clear('assigneeEndTime');
+    form.assigneeEndConfirm =  event.detail !== null;
   };
 
   const onChangeEvaluateTime = () => {
@@ -876,6 +894,11 @@
     if(form.assigners.length === 0 || !form.assigners[0].id) {
       form.assigners = [{id: getUserId(), name: getUserFullName()}];
     }
+
+    if(form.evaluators.length === 0 || !form.evaluators[0].id) {
+      form.evaluators = [{id: getUserId(), name: getUserFullName()}];
+    }
+
     return fromPromise(
       /* verify permission*/
       view.verifyAssignAction(ButtonId.Assign, scRef, undefined, disabledAssign),
@@ -1103,7 +1126,7 @@
   };
 
   const doSelect = (data: any) => {
-    console.log('...data... ', data);
+    console.log('...data...... ', data);
     selectedData = data;
     if (selectedData) {
       isReadOnlyMode$.next(true);
@@ -1169,7 +1192,7 @@
         _isUserCanPressCancelSubmitButton = isUserCanPressSubmitButton() || isManager;
 
         _isUserCanPressAssignButton =
-                (isUserCanPressAssignButton()) && form.assignees.length > 0 && form.assignees[0].id && (form.assigners.length === 0 || isAssignerUser());
+                isUserCanPressAssignButton() && form.assignees.length > 0 && form.assignees[0].id !== null;//&& (form.assigners.length === 0 || isAssignerUser());
 
         _isUserCanPressUnAssignButton = isUserCanPressAssignButton() || isManager;
         _isUserCanPressHoldButton = isUserCanPressAssignButton() || isManager;
@@ -1410,6 +1433,10 @@
     }
   };
 
+  const onChangeAssigneeStartTime = (event: any) => {
+    form.assigneeStartConfirm =  event.detail !== null;
+  };
+
   const onChangeAssigneeEndTimeConfirm = (event: any) => {
     if (event.target.checked) {
       form.assigneeEndTime = Date.now();
@@ -1483,14 +1510,29 @@
     roleControls={$modalRoleControls$} />
 </ViewWrapperModal>
 <!--//Invisible Element-->
+
+<!--Form navigation controller-->
+{#if window.isSmartPhone}
+<section class="view-navigation-controller">
+  <div class="view-navigation-controller__arrow" on:click={onClickBack}>
+    <BackIcon></BackIcon>
+  </div>
+
+  <div title="{detailTitle}" class="view-navigation-controller__title">
+    {detailTitle}
+  </div>
+
+</section>
+{/if}
+<!--//Form navigation controller-->
+
+
+
+
 <!--Form controller-->
 <section class="view-content-controller" style="display: flex; justify-content: space-between; flex-wrap: nowrap">
   <div style="width: 70%; display: flex; flex-wrap: nowrap">
-    {#if window.isSmartPhone}
-      <Button
-              on:click={onClickBack}
-              btnType={ButtonType.Back}/>
-    {/if}
+
     {#if view.isRendered(ButtonId.Save, !$isUpdateMode$)}
       <Button
         action={useSaveOrUpdateAction}
@@ -1590,8 +1632,42 @@
         </div>
       </div>
       <div class="row">
+
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <FloatTextInput
+                  placeholder={T('TASK.LABEL.TASK_CODE')}
+                  disabled={true}
+                  bind:value={form.code} />
+        </div>
+
+        <!-- Project-->
+        <div class="col-xs-24 col-md-12 col-lg-6">
+          <CustomSelect
+                  bind:value={form.projectId}
+                  placeholder={T('TASK.LABEL.PROJECT') + '(+)'}
+                  id={view.getViewName() + 'ProjectId'}
+                  on:clickLabel={() => onOpenModal('task/project')}
+                  {menuPath}
+                          disabled={!isTaskEditable}
+                          data={$projects$} />
+
+            <!--          <FloatSelect-->
+            <!--            className="large-font-size"-->
+            <!--            saveState={true}-->
+            <!--            autoLoad={true}-->
+            <!--            bind:value={form.projectId}-->
+            <!--            on:clickLabel={() => onOpenModal('task/project')}-->
+            <!--            id={view.getViewName() + 'ProjectId'}-->
+            <!--            placeholder={T('TASK.LABEL.PROJECT') + '(+)'}-->
+            <!--            {menuPath}-->
+            <!--            disabled={readOnlyMode}-->
+            <!--            data$={projects$} />-->
+        </div>
+        <!-- // Project -->
+
+
         <!-- Name -->
-        <div class="col-xs-24 col-md-12">
+        <div class="col-md-24 col-lg-12">
           <FloatTextInput
             className="large-font-size text-active-underline"
             bind:checked={form.isPrivate}
@@ -1605,49 +1681,18 @@
           <Error {form} field="name" />
         </div>
         <!-- // Name -->
-
-        <div class="col-xs-24 col-md-12 col-lg-6">
-          <!--           Project-->
-          <CustomSelect
-            bind:value={form.projectId}
-            placeholder={T('TASK.LABEL.PROJECT') + '(+)'}
-            id={view.getViewName() + 'ProjectId'}
-            on:clickLabel={() => onOpenModal('task/project')}
-            {menuPath}
-            disabled={!isTaskEditable}
-            data={$projects$} />
-
-          <!--          <FloatSelect-->
-          <!--            className="large-font-size"-->
-          <!--            saveState={true}-->
-          <!--            autoLoad={true}-->
-          <!--            bind:value={form.projectId}-->
-          <!--            on:clickLabel={() => onOpenModal('task/project')}-->
-          <!--            id={view.getViewName() + 'ProjectId'}-->
-          <!--            placeholder={T('TASK.LABEL.PROJECT') + '(+)'}-->
-          <!--            {menuPath}-->
-          <!--            disabled={readOnlyMode}-->
-          <!--            data$={projects$} />-->
-        </div>
-        <!-- // Project -->
-        <div class="col-xs-24 col-md-12 col-lg-6">
-          <FloatTextInput
-                  placeholder={T('TASK.LABEL.TASK_CODE')}
-                  disabled={true}
-                  bind:value={form.code} />
-        </div>
       </div>
 
       <div class="row" style="margin-top: 6px;">
         <!-- Task Description -->
         <div class="col-xs-24 col-md-12">
-          <RichEditor bind:value={form.description} disabled={!isTaskEditable}>
+          <RichEditor bind:height={descriptionHeight} bind:value={form.description} disabled={!isTaskEditable}>
             {T('TASK.LABEL.TASK_DESCRIPTION')}:
           </RichEditor>
         </div>
         <!-- // Task Description -->
         <!-- Attach file -->
-        <div class="col-xs-24 col-md-12" style="margin-top: 25px; min-height: 100px;">
+        <div bind:this={uploadFileRef} class="col-xs-24 col-md-12" style="margin-top: 25px; height: 100px;">
           <UploadFiles
             savePath="upload_files/task"
             bind:list={form.taskAttachFiles}
@@ -1880,7 +1925,7 @@
       <!-- Start date-->
       <div class="row">
         <div class="col-xs-24 col-md-12 col-lg-6">
-          <FloatDatePicker
+          <FloatDatePicker on:change={onChangeAssigneeStartTime}
             placeholder={T('COMMON.LABEL.START_TIME')}
             name="assigneeStartTime"
             bind:value={form.assigneeStartTime}

@@ -31,9 +31,9 @@
 
   const recalcPlaceholder = (isLogged: boolean) => {
     if (isLogged) {
-      placeholder = T('SYS.MSG.WHAT_ARE_YOU_THINKING_ABOUT') + '?';
+      placeholder = T('SYS.MSG.WHAT_ARE_YOU_THINKING_ABOUT');
     } else {
-      placeholder = T('SYS.MSG.LOGIN_OR_SEARCH_HERE') + '!';
+      placeholder = T('SYS.MSG.LOGIN_OR_SEARCH_HERE');
     }
   };
   // @ts-ignore

@@ -1,10 +1,12 @@
 <script lang="ts">
   import { menuStore, historyMenuStore } from 'src/store/menu';
-  import { appStore } from 'src/store/app';
+  import { appStore, AppStore } from 'src/store/app';
   import { Debug } from 'src/lib/js/debug';
   import RouterLink from 'src/components/ui/router-link/index.svelte';
   import { settingsStore } from 'src/store/settings';
 
+  // @ts-ignore
+  const {isDetailPage$ } = AppStore;
   const { dataList$ } = menuStore;
 
 
@@ -24,6 +26,7 @@
     hidePopup();
     saveSettings(event.detail);
     saveHistorySettings(event.detail);
+    isDetailPage$.next(false);
   };
 
   const saveSettings = (menuPath: string) => {

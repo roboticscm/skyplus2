@@ -6,13 +6,12 @@ const path = require('path');
 const mode = process.env.NODE_ENV || 'development';
 const prod = mode === 'production';
 const dev = !prod;
+const useCache = process.env.USE_CACHE || 'false';
 
 const magicImporter = require('node-sass-magic-importer');
 const sveltePreprocess = require('svelte-preprocess');
 const CopyPlugin = require('copy-webpack-plugin');
 const onwarn = (warning, onwarn) => warning.code === 'css-unused-selector' || onwarn(warning);
-const Dotenv = require('dotenv-webpack');
-
 
 const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
 
@@ -57,29 +56,45 @@ module.exports = smp.wrap({
     rules: [
       {
         test: /\.tsx?$/,
-        use: [
+        use: prod && useCache === 'true' ? [
+          {
+            loader: 'cache-loader'
+          },
           {
             loader: 'ts-loader',
             options: {
-              // transpileOnly: true
-            },
+              happyPackMode: true,
+              transpileOnly: prod
+            }
           },
-        ],
+        ] : [
+          {
+            loader: 'ts-loader',
+            options: {
+              happyPackMode: true,
+              transpileOnly: prod
+            }
+          },
+        ]
       },
       {
         test: /\.svelte$/,
-        use: {
+        use: prod && useCache === 'true' ? [
+          {
+            loader: 'cache-loader'
+          },
+          {
           loader: 'svelte-loader-hot',
           options: {
             dev,
-            onwarn: onwarn,
+            onwarn,
             preprocess: sveltePreprocess({
               scss: {
                 importer: [magicImporter()],
               },
               typescript: {
                 // skips type checking
-                transpileOnly: false,
+                transpileOnly: prod ? true : false,
               },
             }),
             hotReload: true,
@@ -98,26 +113,50 @@ module.exports = smp.wrap({
               // https://github.com/rixo/svelte-loader-hot#usage
             },
           },
-        },
+        }] : [
+          {
+            loader: 'svelte-loader-hot',
+            options: {
+              dev,
+              onwarn: onwarn,
+              preprocess: sveltePreprocess({
+                scss: {
+                  importer: [magicImporter()],
+                },
+                typescript: {
+                  // skips type checking
+                  transpileOnly: prod ? true : false,
+                },
+              }),
+              hotReload: true,
+              hotOptions: {
+                // whether to preserve local state (i.e. any `let` variable) or
+                // only public props (i.e. `export let ...`)
+                noPreserveState: false,
+                // optimistic will try to recover from runtime errors happening
+                // during component init. This goes funky when your components are
+                // not pure enough.
+                optimistic: true,
+                noReload: true,
+                // noPreserveStateKey: '__'
+                // See docs of svelte-loader-hot for all available options:
+                //
+                // https://github.com/rixo/svelte-loader-hot#usage
+              },
+            },
+          }
+        ],
       },
-      // {
-      //   test: /\.css$/,
-      //   use: [
-      //     /**
-      //      * MiniCssExtractPlugin doesn't support HMR.
-      //      * For developing, use 'style-loader' instead.
-      //      * */
-      //     prod ? MiniCssExtractPlugin.loader : 'style-loader',
-      //     'css-loader',
-      //   ],
-      // },
       {
         test: /\.(md|svg|ico|jpg|jpeg|png|gif|eot|otf|webp|ttf|woff|woff2|cur|ani|pdf|ogg)(\?.*)?$/,
         loader: 'file-loader',
       },
       {
         test: /\.(scss|sass|css)$/,
-        use: [
+        use: prod && useCache === 'true' ? [
+          {
+            loader: 'cache-loader'
+          },
           prod ? MiniCssExtractPlugin.loader : 'style-loader',
           { loader: 'css-loader', options: { sourceMap: true } },
           {
@@ -128,19 +167,23 @@ module.exports = smp.wrap({
               },
             },
           },
-          // {
-          //   loader: 'sass-resources-loader',
-          //   options: {
-          //     resources: '../sass/sass/index.scss'
-          //   }
-          // }
+        ] : [
+          prod ? MiniCssExtractPlugin.loader : 'style-loader',
+          { loader: 'css-loader', options: { sourceMap: true } },
+          {
+            loader: 'sass-loader',
+            options: {
+              sassOptions: {
+                importer: magicImporter(),
+              },
+            },
+          },
         ],
       },
     ],
   },
   mode,
-  plugins: [
-    new Dotenv(),
+  plugins: prod ? [
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name][contenthash].css',
@@ -160,6 +203,21 @@ module.exports = smp.wrap({
       // { from: './public/index.html', to: './index.html' },
       { from: './public/favicon.png', to: './favicon.png' },
     ]),
+  ] : [
+    new MiniCssExtractPlugin({
+      filename: '[name][contenthash].css',
+    }),
+    new webpack.ProvidePlugin({
+      j: 'jquery',
+      jQuery: 'jquery',
+      'd': 'd'
+    }),
+
+    new HtmlWebpackPlugin({
+      hash: true,
+      template: './public/template.html',
+      filename: './index.html'
+    }),
   ],
   devtool: prod ? false : 'source-map',
   devServer: {
@@ -180,11 +238,6 @@ module.exports = smp.wrap({
   //     new TerserPlugin({
   //       parallel: 8,
   //       cache: true,
-  //       cacheKeys: (defaultCacheKeys, file) => {
-  //         defaultCacheKeys.myCacheKey = 'myCacheKeyValue';
-  //
-  //         return defaultCacheKeys;
-  //       },
   //     }),
   //   ],
   // },

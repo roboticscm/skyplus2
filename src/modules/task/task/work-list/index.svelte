@@ -21,7 +21,7 @@
   import { SObject } from 'src/lib/js/sobject';
   import { apolloClient } from 'src/lib/js/hasura-client';
   import { App } from 'src/lib/js/constants';
-  import { appStore } from 'src/store/app';
+  import { appStore, AppStore } from 'src/store/app';
   import Pagination from 'src/components/ui/pagination';
   import { markStringSearch } from 'src/lib/js/util';
   import { SDate } from 'src/lib/js/sdate';
@@ -29,12 +29,16 @@
   import FunctionalStatus from 'src/components/layout/functional-status';
   import { functionalStatusFields } from './helper';
   import MainContent from '../content/index.svelte';
-
   import {getTargetIdFromUrlParam} from "src/lib/js/url-util";
+  import {getViewTitleFromMenuPath} from "src/lib/js/url-util";
+
   export let menuPath: string;
   export let view: ViewStore;
   export let store: Store;
   export let selectedId: string = undefined;
+
+  // @ts-ignore
+  const {isDetailPage$ } = AppStore;
 
   const { fullCount$, needSelectId$ } = view;
   const { taskList$, projectList$, showDashboard$ } = store;
@@ -55,9 +59,8 @@
   let markedData: any[] = undefined;
   let textSearch: string = '';
   let searchKeyword: string = '';
-  let showDetail = false;
   let mainContentRef: any;
-
+  let detailTitle = '';
   const filterColumns = view.searchFields.map((it: any) => {
     it.name = T('TASK.LABEL.' + it.name);
     return it;
@@ -422,9 +425,11 @@
       )
       .subscribe((res: any[]) => {
         if((window as any).isSmartPhone) {
-          showDetail = true;
+          isDetailPage$.next(true);
           setTimeout(() => {
-            view.selectedData$.next(SObject.convertFieldsToCamelCase(res[0].data[0]));
+            const selectedData = SObject.convertFieldsToCamelCase(res[0].data[0]);
+            view.selectedData$.next(selectedData);
+            detailTitle = getViewTitleFromMenuPath(menuPath) + ' - ' + selectedData.name + ' (' + selectedData.code + ')';
             view.loading$.next(false);
           });
         } else {
@@ -437,11 +442,11 @@
   onMount(() => {
     registerSubscription();
 
-
-    pageRef.loadSettings().then(() => {
-      reload();
-    });
-
+    if(pageRef) {
+      pageRef.loadSettings().then(() => {
+        reload();
+      });
+    }
 
     needSelectId$.subscribe((id: string) => {
       if (id) {
@@ -454,9 +459,10 @@
 
     // select target from email link
     setTimeout(() => {
-      if(getTargetIdFromUrlParam()) {
+      const targetId = getTargetIdFromUrlParam();
+      if(targetId) {
         selectedTask = {
-          id: getTargetIdFromUrlParam(),
+          id: targetId,
         };
         doSelect(of(1));
       }
@@ -472,7 +478,10 @@
     });
 
     const headerHeight = window['$'](workListHeaderRef).height() + 10;
-    listRef.style.height = `calc(100% - ${headerHeight}px)`;
+    if(listRef) {
+      listRef.style.height = `calc(100% - ${headerHeight}px)`;
+    }
+
   });
 
   onDestroy(() => {
@@ -486,7 +495,7 @@
 
     selectedTask = undefined;
     if((window as any).isSmartPhone) {
-      showDetail = true;
+      isDetailPage$.next(true);
       setTimeout(() => {
         mainContentRef && mainContentRef.doAddNew();
       }, 500);
@@ -639,7 +648,7 @@
 
 
   const onClickBack = () => {
-    showDetail = false;
+    isDetailPage$.next(false);
   }
 
   const useActionTask = (component, param) => {
@@ -741,9 +750,9 @@
   }
 </style>
 
-{#if showDetail && window.isSmartPhone}
-<section>
-  <MainContent backCallback="{onClickBack}" {view} {menuPath} {store} bind:this={mainContentRef} />
+{#if $isDetailPage$ && window.isSmartPhone}
+<section style="width: 100%;">
+  <MainContent backCallback="{onClickBack}" {detailTitle} {view} {menuPath} {store} bind:this={mainContentRef} />
 </section>
 {:else}
 <section class="view-left-main" style="padding-top: 0px;">
@@ -777,7 +786,7 @@
       showAdvancedSearch={true}
       action={useSearchAction}
       bind:this={quickSearchRef}
-      placeholder={T('TASK.LABEL.SEARCH_TASK_OR_PROJECT') + '...'}>
+      placeholder={T('TASK.LABEL.SEARCH_TASK_OR_PROJECT')}>
       <div
         id="searchTaskWorkListId"
         class="left-dropdown-content"

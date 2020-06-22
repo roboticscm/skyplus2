@@ -171,4 +171,8 @@ export class StringUtil {
       return split[0].substring(0, 1).toUpperCase();
     }
   };
+
+  static  countDiv(source: string) {
+    return (source.match(/<div>/g) || []).length;
+  }
 }

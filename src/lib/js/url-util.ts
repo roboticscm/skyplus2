@@ -8,7 +8,7 @@ export const getMenuPathFromUrl = () => {
 
 export const getMenuPathFromUrlParam = () => {
   const url = new URL(AppStore.urlParam);
-  if(url) {
+  if(url && !url.pathname.includes('logout')) {
     return url.pathname.slice(1).replace('--', '/');
   } else {
     return null;

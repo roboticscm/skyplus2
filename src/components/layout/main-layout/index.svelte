@@ -7,10 +7,19 @@
   import { App, GUTTER_WIDTH } from 'src/lib/js/constants';
   import { AppStore } from 'src/store/app';
 
+  export let headerHeight = '96px';
   const { isLogged$ } = AppStore;
 
-  const defaultHeaderHeight = '96px';
+  const defaultHeaderHeight = headerHeight;
 
+  // @ts-ignore
+  $: {
+    const gridEle: any = document.querySelector('.layout-container');
+    if(gridEle) {
+      gridEle.style['grid-template-rows'] = `${headerHeight} ${GUTTER_WIDTH}px auto`;
+    }
+
+  }
   onMount(async () => {
     Split({
       rowSnapOffset: App.MIN_HEADER_HEIGHT,

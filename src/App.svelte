@@ -27,7 +27,7 @@
   const SMALL_SCREEN_WIDTH = 768;
 
   // @ts-ignore
-  const { isLogged$, screenLock$ } = AppStore;
+  const { isLogged$, screenLock$, isDetailPage$ } = AppStore;
   // @ts-ignore
   const { user$ } = appStore;
 
@@ -90,37 +90,57 @@
     </div>
   </MainLayout>
   {:else}
-    <MainLayout>
-      <section slot="header" class="mobile-header">
-        <div class="mobile-header__top">
-          <div class="mobile-header__top__logo">
-            <div class="mobile-header__top__logo__mark">
-              <OrgIconMark />
+    <MainLayout headerHeight="{$isDetailPage$ ? '50px' : '96px' }">
+      <section slot="header" class="{$isDetailPage$ ? 'mobile-header-detail' : 'mobile-header'} ">
+        {#if !$isDetailPage$}
+          <div class="mobile-header__top">
+            <div class="mobile-header__top__logo">
+              <div class="mobile-header__top__logo__mark">
+                <OrgIconMark />
+              </div>
+              <img class="mobile-header__top__logo__img" src={$currentCompany$.iconData} alt="" />
+              <div class="mobile-separator" ></div>
             </div>
-            <img class="mobile-header__top__logo__img" src={$currentCompany$.iconData} alt="" />
-            <div class="mobile-separator" ></div>
-          </div>
-          <div class="mobile-header__top__module">
-            <ModulesDropdown id="moduleId" />
-          </div>
-          <div class="mobile-header__top__avatar">
-            <UserProfiles />
-          </div>
-        </div>
-
-        <div class="mobile-header__bottom">
-          <div class="mobile-header__bottom__hamburger-menu">
-            <MobileMainNavBar></MobileMainNavBar>
+            <div class="mobile-header__top__module">
+              <ModulesDropdown id="moduleId" />
+            </div>
+            <div class="mobile-header__top__avatar">
+              <UserProfiles />
+            </div>
           </div>
 
-          <div class="mobile-header__bottom__search">
-            <SearchBar id="mainSearchBarId" menuPath="intro" />
+          <div class="mobile-header__bottom">
+            <div class="mobile-header__bottom__hamburger-menu">
+              <MobileMainNavBar></MobileMainNavBar>
+            </div>
+
+            <div class="mobile-header__bottom__search">
+              <SearchBar id="mainSearchBarId" menuPath="intro" />
+            </div>
+
+            <div class="mobile-header__bottom__notify">
+              <Notification />
+            </div>
+          </div>
+          {:else}
+          <div class="mobile-header-detail__left">
+            <div class="mobile-header-detail__left__hamburger-menu" >
+              <MobileMainNavBar></MobileMainNavBar>
+            </div>
+            <div class="mobile-header-detail__left__department">
+              {appStore.org.selectedDepartment.departmentName}
+            </div>
           </div>
 
-          <div class="mobile-header__bottom__notify">
-            <Notification />
+          <div class="mobile-header-detail__right">
+            <div class="mobile-header-detail__right__notify">
+              <Notification />
+            </div>
+            <div class="mobile-header-detail__right__avatar">
+              <UserProfiles />
+            </div>
           </div>
-        </div>
+          {/if}
       </section>
       <div slot="default" style="height: 100%; background: var(--bg-tertiary); overflow: auto;">
         <RouterView bind:this={routerView} />

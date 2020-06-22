@@ -33,6 +33,7 @@
   let mainContentRef: any;
   const onceLoad = () => {};
 
+
   onMount(() => {
     onceLoad();
   });

@@ -255,7 +255,7 @@
         <div class="modal-title">
           <div>
             {#if iconData}
-              <img src={iconData} alt="No Image" />
+              <img src={iconData} alt="" />
             {:else if fontIcon}
               {@html fontIcon}
             {:else}

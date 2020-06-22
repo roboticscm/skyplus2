@@ -29,6 +29,7 @@
         loadFirstMenu(department.departmentId);
         selectedDep = department;
         appStore.org.departmentId = department.departmentId;
+        appStore.org.selectedDepartment = selectedDep;
       });
 
     Dropdown.hide('moduleDropdownId');
@@ -78,8 +79,6 @@
         orgStore.sysGetRoledDepartmentListByUserId().subscribe((res: any) => {
           modules = res.data;
           selectedDep = findDepartmentById(org.departmentId);
-
-          console.log('xxxxxx', selectedDep, org.departmentId);
 
           appStore.org.selectedDepartment = selectedDep;
           if (selectedDep) {
