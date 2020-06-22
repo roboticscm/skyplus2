@@ -26,7 +26,7 @@
 
 <div class="floating-wrapper">
   <input
-    {title}
+    title = {title ? title : value}
     {name}
     type="search"
     {readonly}
