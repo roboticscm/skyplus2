@@ -47,9 +47,8 @@
   import CustomSelect from 'src/components/ui/float-input/custom-select';
   import { MessageType } from 'src/store/notification';
   import { HelperStore } from '../../../../store/helper';
-  import {getTargetIdFromUrlParam} from "src/lib/js/url-util";
+  import { getTargetIdFromUrlParam } from 'src/lib/js/url-util';
   import BackIcon from 'src/icons/back24x16.svelte';
-
 
   // Props
   export let view: ViewStore;
@@ -119,7 +118,6 @@
   let priorityRef, taskVerificationRef, taskQualificationRef: any;
   let taskSectionRef: any;
 
-
   const notAssignAssigner = () => {
     return form.assigners.length === 1 && form.assigners[0].id === null;
   };
@@ -136,10 +134,9 @@
     return form.evaluators.findIndex((it: any) => it.id == getUserId()) >= 0;
   };
 
-
   // @ts-ignore
   $: {
-    detailTitle = form.name + ((form.code && form.code !== '---') ?  ' (' +  form.code + ')' : '' );
+    detailTitle = form.name + (form.code && form.code !== '---' ? ' (' + form.code + ')' : '');
   }
 
   let isTaskEditable = true;
@@ -192,7 +189,7 @@
     ButtonId.Assign,
     form.errors.any() ||
       form.assignees.length === 0 ||
-          // @ts-ignore
+      // @ts-ignore
       (!_isUserCanPressAssignButton && $isUpdateMode$),
   );
 
@@ -228,7 +225,7 @@
 
   // @ts-ignore
   $: {
-    if(!(window as any).isSmartPhone ){
+    if (!(window as any).isSmartPhone) {
       if (uploadFileRef) {
         uploadFileRef.style.height = descriptionHeight;
       }
@@ -277,7 +274,10 @@
   };
 
   const isUserCanPressAssignButton = () => {
-    const result = form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0 || (form.assigners.length === 0 || !form.assigners[0].id);
+    const result =
+      form.assigners.findIndex((it: any) => it.id == getUserId()) >= 0 ||
+      form.assigners.length === 0 ||
+      !form.assigners[0].id;
 
     return result;
   };
@@ -291,7 +291,6 @@
       !(form.assignees[0].id || form.assigners[0].id || form.evaluators[0].id)
     );
   };
-
 
   // ============================== EVENT HANDLE ==========================
 
@@ -344,9 +343,8 @@
   };
 
   // @ts-ignore
-  $: if(form.assignees) {
-    _isUserCanPressAssignButton =
-            isUserCanPressAssignButton() && form.assignees.length > 0 && form.assignees[0].id ;//&& (form.assigners.length === 0 || isAssignerUser());
+  $: if (form.assignees) {
+    _isUserCanPressAssignButton = isUserCanPressAssignButton() && form.assignees.length > 0 && form.assignees[0].id; //&& (form.assigners.length === 0 || isAssignerUser());
   }
   const onAddAssigner = () => {
     addAssignHumanOrOrg(form.assigners).then((res: any) => {
@@ -355,9 +353,12 @@
   };
 
   // @ts-ignore
-  $: if(form.assignees) {
+  $: if (form.assignees) {
     _isUserCanPressAssignButton =
-            (isUserCanPressAssignButton()) && form.assignees.length > 0 && form.assignees[0].id && (form.assigners.length === 0 || isAssignerUser());
+      isUserCanPressAssignButton() &&
+      form.assignees.length > 0 &&
+      form.assignees[0].id &&
+      (form.assigners.length === 0 || isAssignerUser());
   }
   const onAddAssignee = () => {
     addAssignHumanOrOrg(form.assignees).then((res: any) => {
@@ -366,7 +367,7 @@
   };
 
   // @ts-ignore
-  $: if(form.evaluators) {
+  $: if (form.evaluators) {
     _isUserCanPressCompleteButton = isUserCanPressCompleteButton();
   }
   const onAddEvaluator = () => {
@@ -570,7 +571,7 @@
           form.assigneeStatusDetails = [...form.assigneeStatusDetails];
         }
 
-        if(form.assigneeStatusDetails.findIndex((it: StatusDetail) => it.statusCode === 'COMPLETE') >=0) {
+        if (form.assigneeStatusDetails.findIndex((it: StatusDetail) => it.statusCode === 'COMPLETE') >= 0) {
           form.assigneeEndConfirm = true;
           form.assigneeEndTime = Date.now();
         } else {
@@ -597,7 +598,7 @@
           form.assigneeStatusDetails = [{ ...statusModalRef.getData() }];
         }
 
-        if(form.assigneeStatusDetails.findIndex((it: StatusDetail) => it.statusCode === 'COMPLETE') >=0) {
+        if (form.assigneeStatusDetails.findIndex((it: StatusDetail) => it.statusCode === 'COMPLETE') >= 0) {
           form.assigneeEndConfirm = true;
           form.assigneeEndTime = Date.now();
         } else {
@@ -637,7 +638,7 @@
 
   const onChangeAssigneeEndTime = (event: any) => {
     form.errors.clear('assigneeEndTime');
-    form.assigneeEndConfirm =  event.detail !== null;
+    form.assigneeEndConfirm = event.detail !== null;
   };
 
   const onChangeEvaluateTime = () => {
@@ -832,11 +833,11 @@
   const getHumanIds = () => {
     const ret = [
       ...new Set([
-        ...form.assigners.map((it: any) => it.id ? it.id.toString() : it.id),
-        ...form.assignees.map((it: any) => it.id ? it.id.toString() : it.id),
-        ...form.evaluators.map((it: any) => it.id ? it.id.toString() : it.id),
+        ...form.assigners.map((it: any) => (it.id ? it.id.toString() : it.id)),
+        ...form.assignees.map((it: any) => (it.id ? it.id.toString() : it.id)),
+        ...form.evaluators.map((it: any) => (it.id ? it.id.toString() : it.id)),
       ]),
-    ].filter((it) => it !== null && it != getUserId() );
+    ].filter((it) => it !== null && it != getUserId());
     return ret;
   };
 
@@ -891,12 +892,12 @@
 
   const verifyAssign = () => {
     submitType = 'assign';
-    if(form.assigners.length === 0 || !form.assigners[0].id) {
-      form.assigners = [{id: getUserId(), name: getUserFullName()}];
+    if (form.assigners.length === 0 || !form.assigners[0].id) {
+      form.assigners = [{ id: getUserId(), name: getUserFullName() }];
     }
 
-    if(form.evaluators.length === 0 || !form.evaluators[0].id) {
-      form.evaluators = [{id: getUserId(), name: getUserFullName()}];
+    if (form.evaluators.length === 0 || !form.evaluators[0].id) {
+      form.evaluators = [{ id: getUserId(), name: getUserFullName() }];
     }
 
     return fromPromise(
@@ -1068,7 +1069,6 @@
             if (res.response.data.message) {
               scRef.snackbarRef().showUnknownError(res.response.data.message);
             } else {
-
               form.errors.errors = form.recordErrors(res.response.data);
             }
 
@@ -1076,10 +1076,9 @@
             form.submitStatus = (beforeForm && beforeForm.submitStatus) || SubmitStatus.Init;
 
             // rollback prev assigner list
-            if(submitType === 'assign') {
+            if (submitType === 'assign') {
               form.assigners = (beforeForm && beforeForm.assigners) || [];
             }
-
           } else {
             // success
 
@@ -1185,14 +1184,15 @@
       HelperStore.isManager(getUserId(), form.createdBy, menuPath).subscribe((res: any) => {
         isManager = StringUtil.toBoolean(res.data);
 
-        _isUserCanEditTask = isUserCanEditTask() || (isManager && (form.assigners.length === 0 || !form.assigners[0].id));
+        _isUserCanEditTask =
+          isUserCanEditTask() || (isManager && (form.assigners.length === 0 || !form.assigners[0].id));
 
         _isUserCanPressEditButton = isUserCanPressEditButton() || isManager;
         _isUserCanPressSubmitButton = isUserCanPressSubmitButton() || isManager;
         _isUserCanPressCancelSubmitButton = isUserCanPressSubmitButton() || isManager;
 
         _isUserCanPressAssignButton =
-                isUserCanPressAssignButton() && form.assignees.length > 0 && form.assignees[0].id !== null;//&& (form.assigners.length === 0 || isAssignerUser());
+          isUserCanPressAssignButton() && form.assignees.length > 0 && form.assignees[0].id !== null; //&& (form.assigners.length === 0 || isAssignerUser());
 
         _isUserCanPressUnAssignButton = isUserCanPressAssignButton() || isManager;
         _isUserCanPressHoldButton = isUserCanPressAssignButton() || isManager;
@@ -1343,7 +1343,7 @@
 
   onMount(() => {
     registerSubscription();
-    if(!(window as any).isSmartPhone) {
+    if (!(window as any).isSmartPhone) {
       doAddNew();
     }
 
@@ -1358,10 +1358,9 @@
       }
     });
 
-
     return () => {
       needSelectIdSub.unsubscribe();
-    }
+    };
   });
 
   onDestroy(() => {
@@ -1397,7 +1396,7 @@
 
   // when user click on work list. load selected data to the right form
   const selectDataSub = view.selectedData$.subscribe((data) => {
-    if(data) {
+    if (data) {
       doSelect(data);
     }
   });
@@ -1434,7 +1433,7 @@
   };
 
   const onChangeAssigneeStartTime = (event: any) => {
-    form.assigneeStartConfirm =  event.detail !== null;
+    form.assigneeStartConfirm = event.detail !== null;
   };
 
   const onChangeAssigneeEndTimeConfirm = (event: any) => {
@@ -1447,7 +1446,7 @@
 
   const onClickBack = () => {
     backCallback && backCallback();
-  }
+  };
 </script>
 
 <style lang="scss">
@@ -1513,21 +1512,16 @@
 
 <!--Form navigation controller-->
 {#if window.isSmartPhone}
-<section class="view-navigation-controller">
-  <div class="view-navigation-controller__arrow" on:click={onClickBack}>
-    <BackIcon></BackIcon>
-  </div>
+  <section class="view-navigation-controller">
+    <div class="view-navigation-controller__arrow" on:click={onClickBack}>
+      <BackIcon />
+    </div>
 
-  <div title="{detailTitle}" class="view-navigation-controller__title">
-    {detailTitle}
-  </div>
+    <div title={detailTitle} class="view-navigation-controller__title">{detailTitle}</div>
 
-</section>
+  </section>
 {/if}
 <!--//Form navigation controller-->
-
-
-
 
 <!--Form controller-->
 <section class="view-content-controller" style="display: flex; justify-content: space-between; flex-wrap: nowrap">
@@ -1634,37 +1628,33 @@
       <div class="row">
 
         <div class="col-xs-24 col-md-12 col-lg-6">
-          <FloatTextInput
-                  placeholder={T('TASK.LABEL.TASK_CODE')}
-                  disabled={true}
-                  bind:value={form.code} />
+          <FloatTextInput placeholder={T('TASK.LABEL.TASK_CODE')} disabled={true} bind:value={form.code} />
         </div>
 
         <!-- Project-->
         <div class="col-xs-24 col-md-12 col-lg-6">
           <CustomSelect
-                  bind:value={form.projectId}
-                  placeholder={T('TASK.LABEL.PROJECT') + '(+)'}
-                  id={view.getViewName() + 'ProjectId'}
-                  on:clickLabel={() => onOpenModal('task/project')}
-                  {menuPath}
-                          disabled={!isTaskEditable}
-                          data={$projects$} />
+            bind:value={form.projectId}
+            placeholder={T('TASK.LABEL.PROJECT') + '(+)'}
+            id={view.getViewName() + 'ProjectId'}
+            on:clickLabel={() => onOpenModal('task/project')}
+            {menuPath}
+            disabled={!isTaskEditable}
+            data={$projects$} />
 
-            <!--          <FloatSelect-->
-            <!--            className="large-font-size"-->
-            <!--            saveState={true}-->
-            <!--            autoLoad={true}-->
-            <!--            bind:value={form.projectId}-->
-            <!--            on:clickLabel={() => onOpenModal('task/project')}-->
-            <!--            id={view.getViewName() + 'ProjectId'}-->
-            <!--            placeholder={T('TASK.LABEL.PROJECT') + '(+)'}-->
-            <!--            {menuPath}-->
-            <!--            disabled={readOnlyMode}-->
-            <!--            data$={projects$} />-->
+          <!--          <FloatSelect-->
+          <!--            className="large-font-size"-->
+          <!--            saveState={true}-->
+          <!--            autoLoad={true}-->
+          <!--            bind:value={form.projectId}-->
+          <!--            on:clickLabel={() => onOpenModal('task/project')}-->
+          <!--            id={view.getViewName() + 'ProjectId'}-->
+          <!--            placeholder={T('TASK.LABEL.PROJECT') + '(+)'}-->
+          <!--            {menuPath}-->
+          <!--            disabled={readOnlyMode}-->
+          <!--            data$={projects$} />-->
         </div>
         <!-- // Project -->
-
 
         <!-- Name -->
         <div class="col-md-24 col-lg-12">
@@ -1907,25 +1897,22 @@
       {menuPath}>
 
       <div slot="subTitle" class="section-sub-title w-100">
-        <div class="col1">
-          {form.assignees
-            .map((it) => it.name)
-            .join(
-              ', ',
-            )}
-        </div>
+        <div class="col1">{form.assignees.map((it) => it.name).join(', ')}</div>
 
         <div class="col2">
-          {(form.submitStatus === SubmitStatus.Held ? ' (' + T('TASK.MSG.HOLD') + ')' : form.submitStatus !== SubmitStatus.Assigned ? ' (' + T('TASK.MSG.TASK_NOT_ASSIGN_YET') + ')' : '')}
+          {form.submitStatus === SubmitStatus.Held ? ' (' + T('TASK.MSG.HOLD') + ')' : form.submitStatus !== SubmitStatus.Assigned ? ' (' + T('TASK.MSG.TASK_NOT_ASSIGN_YET') + ')' : ''}
         </div>
 
-        <div class="col3">{SDate.convertMillisecondToDateTimeString(form.assigneeStartTime)} - {SDate.convertMillisecondToDateTimeString(form.assigneeEndTime)}</div>
+        <div class="col3">
+          {SDate.convertMillisecondToDateTimeString(form.assigneeStartTime)} - {SDate.convertMillisecondToDateTimeString(form.assigneeEndTime)}
+        </div>
       </div>
 
       <!-- Start date-->
       <div class="row">
         <div class="col-xs-24 col-md-12 col-lg-6">
-          <FloatDatePicker on:change={onChangeAssigneeStartTime}
+          <FloatDatePicker
+            on:change={onChangeAssigneeStartTime}
             placeholder={T('COMMON.LABEL.START_TIME')}
             name="assigneeStartTime"
             bind:value={form.assigneeStartTime}

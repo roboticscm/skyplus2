@@ -50,6 +50,8 @@
     <WorkList {view} {store} {menuPath} />
   </div>
   <div style="height: 100%;" slot="default">
-    <MainContent {view} {store} {menuPath} />
+    {#if !window.isSmartPhone}
+      <MainContent {view} {store} {menuPath} />
+    {/if}
   </div>
 </TwoColumnView>

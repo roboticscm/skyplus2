@@ -68,11 +68,11 @@
         </div>
 
         {#if item.counter != undefined}
-        <div
-          class="functional-status__item__counter {idx === activeIndex ? 'functional-status__item__counter__active' : 'text-disabled'}">
-          {item.counter || '0'}
-        </div>
-          {/if}
+          <div
+            class="functional-status__item__counter {idx === activeIndex ? 'functional-status__item__counter__active' : 'text-disabled'}">
+            {item.counter || '0'}
+          </div>
+        {/if}
       </div>
     {/if}
   {/each}

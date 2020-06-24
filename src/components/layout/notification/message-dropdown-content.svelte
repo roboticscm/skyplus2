@@ -178,7 +178,7 @@
 
   const onClickToggleSearch = () => {
     showSearch = !showSearch;
-  }
+  };
 </script>
 
 <div style="overflow: auto; width: 100%; height: 100%;" class="default-padding">
@@ -186,15 +186,15 @@
     <div class="bold-text" style="width: 100%;">{T('TASK.LABEL.' + type)}</div>
     <div style="text-align: right; cursor: pointer" on:click={onClickToggleSearch}>
       {#if showSearch}
-      <i class="fa fa-chevron-up"></i>
-        {:else}
-      <SearchIcon></SearchIcon>
-        {/if}
+        <i class="fa fa-chevron-up" />
+      {:else}
+        <SearchIcon />
+      {/if}
     </div>
   </div>
   {#if showSearch}
-  <QuickSearch loading$={searchProgress$} action={useInputAction} placeholder={T('COMMON.LABEL.FILTER')} />
-    {/if}
+    <QuickSearch loading$={searchProgress$} action={useInputAction} placeholder={T('COMMON.LABEL.FILTER')} />
+  {/if}
   <div style="display: flex; margin-top: 10px; justify-content: center; align-content: center;">
     {#each iconsTab as icon}
       {#if icon.show !== undefined}

@@ -29,8 +29,7 @@
   import FunctionalStatus from 'src/components/layout/functional-status';
   import { functionalStatusFields } from './helper';
   import MainContent from '../content/index.svelte';
-  import {getTargetIdFromUrlParam} from "src/lib/js/url-util";
-  import {getViewTitleFromMenuPath} from "src/lib/js/url-util";
+  import { getTargetIdFromUrlParam, getViewTitleFromMenuPath } from 'src/lib/js/url-util';
 
   export let menuPath: string;
   export let view: ViewStore;
@@ -38,7 +37,7 @@
   export let selectedId: string = undefined;
 
   // @ts-ignore
-  const {isDetailPage$ } = AppStore;
+  const { isDetailPage$ } = AppStore;
 
   const { fullCount$, needSelectId$ } = view;
   const { taskList$, projectList$, showDashboard$ } = store;
@@ -424,12 +423,13 @@
         switchMap((_) => forkJoin([store.tskGetTaskById(selectedTask.id)])),
       )
       .subscribe((res: any[]) => {
-        if((window as any).isSmartPhone) {
+        if ((window as any).isSmartPhone) {
           isDetailPage$.next(true);
           setTimeout(() => {
             const selectedData = SObject.convertFieldsToCamelCase(res[0].data[0]);
             view.selectedData$.next(selectedData);
-            detailTitle = getViewTitleFromMenuPath(menuPath) + ' - ' + selectedData.name + ' (' + selectedData.code + ')';
+            detailTitle =
+              getViewTitleFromMenuPath(menuPath) + ' - ' + selectedData.name + ' (' + selectedData.code + ')';
             view.loading$.next(false);
           });
         } else {
@@ -442,7 +442,7 @@
   onMount(() => {
     registerSubscription();
 
-    if(pageRef) {
+    if (pageRef) {
       pageRef.loadSettings().then(() => {
         reload();
       });
@@ -460,14 +460,13 @@
     // select target from email link
     setTimeout(() => {
       const targetId = getTargetIdFromUrlParam();
-      if(targetId) {
+      if (targetId) {
         selectedTask = {
           id: targetId,
         };
         doSelect(of(1));
       }
     }, 1000);
-
 
     onClickFunctionalStatus({
       detail: {
@@ -478,10 +477,9 @@
     });
 
     const headerHeight = window['$'](workListHeaderRef).height() + 10;
-    if(listRef) {
+    if (listRef) {
       listRef.style.height = `calc(100% - ${headerHeight}px)`;
     }
-
   });
 
   onDestroy(() => {
@@ -492,14 +490,12 @@
   });
 
   const onAddNew = () => {
-
     selectedTask = undefined;
-    if((window as any).isSmartPhone) {
+    if ((window as any).isSmartPhone) {
       isDetailPage$.next(true);
       setTimeout(() => {
         mainContentRef && mainContentRef.doAddNew();
       }, 500);
-
     } else {
       dispatch('addNew');
     }
@@ -625,8 +621,8 @@
 
   const onClickFunctionalStatus = (event: any) => {
     view.page = 1;
-    if(event.detail.field === 'recent') {
-      filteredList =[getDefaultValueForItem(filterColumns[0])];
+    if (event.detail.field === 'recent') {
+      filteredList = [getDefaultValueForItem(filterColumns[0])];
       textSearch = App.SEARCH_ALL;
     } else {
       const selectedStatusField = {
@@ -642,19 +638,16 @@
       ];
     }
 
-
     onSelectSearchField();
   };
 
-
   const onClickBack = () => {
     isDetailPage$.next(false);
-  }
+  };
 
   const useActionTask = (component, param) => {
     selectSub = doSelect(fromEvent(component, 'click'));
   };
-
 </script>
 
 <style lang="scss">
@@ -751,144 +744,144 @@
 </style>
 
 {#if $isDetailPage$ && window.isSmartPhone}
-<section style="width: 100%;">
-  <MainContent backCallback="{onClickBack}" {detailTitle} {view} {menuPath} {store} bind:this={mainContentRef} />
-</section>
+  <section style="width: 100%;">
+    <MainContent backCallback={onClickBack} {detailTitle} {view} {menuPath} {store} bind:this={mainContentRef} />
+  </section>
 {:else}
-<section class="view-left-main" style="padding-top: 0px;">
-  <div bind:this={workListHeaderRef}>
-  <!-- Add new -->
-  <div style="display: flex; justify-content: center; align-content: flex-start;">
-    {#if view.isRendered(ButtonId.AddNew)}
-      <Button on:click={onAddNew} btnType={ButtonType.AddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
-    {/if}
-    <Button
-      on:click={onToggleDashboard}
-      btnType={ButtonType.Dashboard}
-      text={$showDashboard$ ? T('COMMON.BUTTON.HIDE_DASHBOARD') : T('COMMON.BUTTON.SHOW_DASHBOARD')} />
-  </div>
-  <!--   // Add new-->
-  <div class="horizontal-separator" style="margin-top: 5px;" />
-
-  <div style="margin-top: 6px; margin-bottom: 4px;">
-    <FunctionalStatus
-      bind:this={functionalStatusRef}
-      data={mappedFunctionalStatusFields}
-      on:click={onClickFunctionalStatus} />
-  </div>
-  </div>
-  <div bind:this={listRef} style="overflow: auto;">
-  <!-- Search-->
-  <div bind:this={searchWrapperRef}>
-    <QuickSearch
-      loading$={searchProgress$}
-      on:clickAdvanced={onClickAdvanced}
-      showAdvancedSearch={true}
-      action={useSearchAction}
-      bind:this={quickSearchRef}
-      placeholder={T('TASK.LABEL.SEARCH_TASK_OR_PROJECT')}>
-      <div
-        id="searchTaskWorkListId"
-        class="left-dropdown-content"
-        style="color: black; font-weight: 400; padding: 6px;">
-        <div class="advanced-search">
-          <div class="advanced-search__header">
-            <div class="advanced-search__header__search">
-              <Button on:click={onSelectSearchField} btnType={ButtonType.Custom} text={T('COMMON.BUTTON.SEARCH')} />
-            </div>
-            <div class="advanced-search__header__close">
-              <i style="font-size: 1rem;" on:click|stopPropagation={onCloseSearch} class="primary fa fa-times" />
-            </div>
-          </div>
-
-          <div class="advanced-search__body">
-            <div class="advanced-search__body__content">
-              {#each filteredList.filter((it) => mappedFunctionalStatusFields.findIndex((f) => f.id === it.id) < 0) as item, index}
-                <div style="display: flex;">
-                  <ContentFilter
-                    {menuPath}
-                    searchFunc={doAutocompleteSearch}
-                    on:emptyCount={onEmptyCountSearchAdv}
-                    id={item.id}
-                    on:search={(e) => onSearch(e, item, index)}
-                    on:itemChange={(e) => onItemChangeFilter(e, item)}
-                    list={filterColumns}
-                    excludeList={usedFilterColumns}
-                    selected={item}
-                    bind:value={item.value} />
-                  <i
-                    on:click={() => onRemoveFilter(item)}
-                    class="primary advanced-search__body__content__close-item fa fa-times" />
-                </div>
-              {/each}
-            </div>
-          </div>
-
-          <div class="advanced-search__footer">
-            <Button on:click={onSelectSearchField} btnType={ButtonType.Custom} text={T('COMMON.BUTTON.SEARCH')} />
-          </div>
-        </div>
+  <section class="view-left-main" style="padding-top: 0px;">
+    <div bind:this={workListHeaderRef}>
+      <!-- Add new -->
+      <div style="display: flex; justify-content: center; align-content: flex-start;">
+        {#if view.isRendered(ButtonId.AddNew)}
+          <Button on:click={onAddNew} btnType={ButtonType.AddNew} disabled={view.isDisabled(ButtonId.AddNew)} />
+        {/if}
+        <Button
+          on:click={onToggleDashboard}
+          btnType={ButtonType.Dashboard}
+          text={$showDashboard$ ? T('COMMON.BUTTON.HIDE_DASHBOARD') : T('COMMON.BUTTON.SHOW_DASHBOARD')} />
       </div>
-    </QuickSearch>
-  </div>
-  <!-- // Search -->
+      <!--   // Add new-->
+      <div class="horizontal-separator" style="margin-top: 5px;" />
 
-  <!-- Filter -->
-  {#if mappedFilterList.length > 0}
-    <div style="margin-top: 6px;">
-      <CloseableList
-        directClose={true}
-        className="closeable-list__floating-controller closeable-list-auto-height"
-        on:close={onCloseFilter}
-        on:closeAll={onCloseAllFilter}
-        bind:list={mappedFilterList}
-        {menuPath}
-        id={view.getViewName() + 'FilterId'} />
+      <div style="margin-top: 6px; margin-bottom: 4px;">
+        <FunctionalStatus
+          bind:this={functionalStatusRef}
+          data={mappedFunctionalStatusFields}
+          on:click={onClickFunctionalStatus} />
+      </div>
     </div>
-  {/if}
-  <!-- // Filter -->
-  <!-- Option task or project view -->
-  <div style="display: flex; justify-content: space-evenly; margin-bottom: 6px; margin-top: 10px;">
-    <Radio text={T('TASK.LABEL.TASK')} bind:group={viewBy} value="task" />
-    <Radio text={T('TASK.LABEL.PROJECT')} bind:group={viewBy} value="project" />
-  </div>
-  <!-- // Option task or project view -->
+    <div bind:this={listRef} style="overflow: auto;">
+      <!-- Search-->
+      <div bind:this={searchWrapperRef}>
+        <QuickSearch
+          loading$={searchProgress$}
+          on:clickAdvanced={onClickAdvanced}
+          showAdvancedSearch={true}
+          action={useSearchAction}
+          bind:this={quickSearchRef}
+          placeholder={T('TASK.LABEL.SEARCH_TASK_OR_PROJECT')}>
+          <div
+            id="searchTaskWorkListId"
+            class="left-dropdown-content"
+            style="color: black; font-weight: 400; padding: 6px;">
+            <div class="advanced-search">
+              <div class="advanced-search__header">
+                <div class="advanced-search__header__search">
+                  <Button on:click={onSelectSearchField} btnType={ButtonType.Custom} text={T('COMMON.BUTTON.SEARCH')} />
+                </div>
+                <div class="advanced-search__header__close">
+                  <i style="font-size: 1rem;" on:click|stopPropagation={onCloseSearch} class="primary fa fa-times" />
+                </div>
+              </div>
 
-  {#if viewBy === 'task'}
-    <div style="margin-top: 1px;">
-      <Pagination
-        {menuPath}
-        totalRecords={$fullCount$}
-        smallSize={true}
-        on:loadPage={onLoadPage}
-        on:init={onPaginationInit}
-        bind:this={pageRef} />
-    </div>
+              <div class="advanced-search__body">
+                <div class="advanced-search__body__content">
+                  {#each filteredList.filter((it) => mappedFunctionalStatusFields.findIndex((f) => f.id === it.id) < 0) as item, index}
+                    <div style="display: flex;">
+                      <ContentFilter
+                        {menuPath}
+                        searchFunc={doAutocompleteSearch}
+                        on:emptyCount={onEmptyCountSearchAdv}
+                        id={item.id}
+                        on:search={(e) => onSearch(e, item, index)}
+                        on:itemChange={(e) => onItemChangeFilter(e, item)}
+                        list={filterColumns}
+                        excludeList={usedFilterColumns}
+                        selected={item}
+                        bind:value={item.value} />
+                      <i
+                        on:click={() => onRemoveFilter(item)}
+                        class="primary advanced-search__body__content__close-item fa fa-times" />
+                    </div>
+                  {/each}
+                </div>
+              </div>
 
-    <div bind:this={viewByTaskRef} use:useActionTask >
-      {#if markedData}
-        {#if markedData.length > 0}
-          {#each markedData as task}
-            <TaskView
-              keyword={searchKeyword}
-              task={SObject.convertFieldsToCamelCase(task)}
-              {selectedTask}
-              on:click={onClickTask} />
+              <div class="advanced-search__footer">
+                <Button on:click={onSelectSearchField} btnType={ButtonType.Custom} text={T('COMMON.BUTTON.SEARCH')} />
+              </div>
+            </div>
+          </div>
+        </QuickSearch>
+      </div>
+      <!-- // Search -->
+
+      <!-- Filter -->
+      {#if mappedFilterList.length > 0}
+        <div style="margin-top: 6px;">
+          <CloseableList
+            directClose={true}
+            className="closeable-list__floating-controller closeable-list-auto-height"
+            on:close={onCloseFilter}
+            on:closeAll={onCloseAllFilter}
+            bind:list={mappedFilterList}
+            {menuPath}
+            id={view.getViewName() + 'FilterId'} />
+        </div>
+      {/if}
+      <!-- // Filter -->
+      <!-- Option task or project view -->
+      <div style="display: flex; justify-content: space-evenly; margin-bottom: 6px; margin-top: 10px;">
+        <Radio text={T('TASK.LABEL.TASK')} bind:group={viewBy} value="task" />
+        <Radio text={T('TASK.LABEL.PROJECT')} bind:group={viewBy} value="project" />
+      </div>
+      <!-- // Option task or project view -->
+
+      {#if viewBy === 'task'}
+        <div style="margin-top: 1px;">
+          <Pagination
+            {menuPath}
+            totalRecords={$fullCount$}
+            smallSize={true}
+            on:loadPage={onLoadPage}
+            on:init={onPaginationInit}
+            bind:this={pageRef} />
+        </div>
+
+        <div bind:this={viewByTaskRef} use:useActionTask>
+          {#if markedData}
+            {#if markedData.length > 0}
+              {#each markedData as task}
+                <TaskView
+                  keyword={searchKeyword}
+                  task={SObject.convertFieldsToCamelCase(task)}
+                  {selectedTask}
+                  on:click={onClickTask} />
+              {/each}
+            {:else}{T('TASK.MSG.NO_TASK_FOUND')}{/if}
+          {:else}
+            {@html App.PROGRESS_BAR}
+          {/if}
+        </div>
+      {/if}
+
+      {#if viewBy === 'project'}
+        <div>
+          {#each $projectList$ as project}
+            <ProjectView {project} />
           {/each}
-        {:else}{T('TASK.MSG.NO_TASK_FOUND')}{/if}
-      {:else}
-        {@html App.PROGRESS_BAR}
+        </div>
       {/if}
     </div>
-  {/if}
-
-  {#if viewBy === 'project'}
-    <div>
-      {#each $projectList$ as project}
-        <ProjectView {project} />
-      {/each}
-    </div>
-  {/if}
-  </div>
-</section>
+  </section>
 {/if}

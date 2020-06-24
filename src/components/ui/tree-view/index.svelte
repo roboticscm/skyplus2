@@ -228,7 +228,9 @@
       },
     };
 
-    (window['$'] as any).fn.zTree.init(window['$']('#' + id), setting, _data);
+    tick().then(() => {
+      (window['$'] as any).fn.zTree.init(window['$']('#' + id), setting, _data);
+    });
 
     tick().then(() => disableTree(disabled));
   }

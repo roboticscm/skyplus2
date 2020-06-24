@@ -15,10 +15,9 @@
   // @ts-ignore
   $: {
     const gridEle: any = document.querySelector('.layout-container');
-    if(gridEle) {
+    if (gridEle) {
       gridEle.style['grid-template-rows'] = `${headerHeight} ${GUTTER_WIDTH}px auto`;
     }
-
   }
   onMount(async () => {
     Split({

@@ -23,11 +23,13 @@
   import SimpleImageSelector from 'src/components/ui/simple-image-selector';
   import Store from '../store';
   import { Debug } from 'src/lib/js/debug';
+  import BackIcon from 'src/icons/back24x16.svelte';
 
   // Props
   export let view: ViewStore;
   export let menuPath: string;
-
+  export let backCallback: Function = undefined;
+  export let detailTitle = '';
   // Observable
   // @ts-ignore
   const { selectedData$, hasAnyDeletedRecord$, deleteRunning$, saveRunning$, isReadOnlyMode$, isUpdateMode$ } = view;
@@ -401,6 +403,19 @@
 <!--Invisible Element-->
 <SC bind:this={scRef} {view} {menuPath} />
 <!--//Invisible Element-->
+
+<!--Form navigation controller-->
+{#if window.isSmartPhone}
+  <section class="view-navigation-controller">
+    <div class="view-navigation-controller__arrow" on:click={() => backCallback && backCallback()}>
+      <BackIcon />
+    </div>
+
+    <div title={detailTitle} class="view-navigation-controller__title">{detailTitle}</div>
+
+  </section>
+{/if}
+<!--//Form navigation controller-->
 
 <!--Form controller-->
 <section class="view-content-controller">

@@ -79,7 +79,7 @@
       dropdownFocused = false;
     }, 200);
 
-    const ele: any =  document.querySelector(`#${'dropdown' + id}`);
+    const ele: any = document.querySelector(`#${'dropdown' + id}`);
     ele && ele.classList.remove('show-auto-dropdown');
   };
 

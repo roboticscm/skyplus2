@@ -27,12 +27,14 @@
   import TreeView from 'src/components/ui/tree-view';
   import { Store } from '../store';
   import { Debug } from 'src/lib/js/debug';
+  import BackIcon from 'src/icons/back24x16.svelte';
 
   // Props
   export let view: ViewStore;
   export let store: Store;
   export let menuPath: string;
-
+  export let backCallback: Function = undefined;
+  export let detailTitle = '';
   // Observable
   // @ts-ignore
   const { selectedData$, hasAnyDeletedRecord$, deleteRunning$, saveRunning$, isReadOnlyMode$, isUpdateMode$ } = view;
@@ -358,6 +360,10 @@
     },
   };
   // ============================== //HOOK ==========================
+
+  const onClickBack = () => {
+    backCallback && backCallback();
+  };
 </script>
 
 <style lang="scss">
@@ -372,6 +378,19 @@
 <!--Invisible Element-->
 <SC bind:this={scRef} {view} {menuPath} />
 <!--//Invisible Element-->
+
+<!--Form navigation controller-->
+{#if window.isSmartPhone}
+  <section class="view-navigation-controller">
+    <div class="view-navigation-controller__arrow" on:click={onClickBack}>
+      <BackIcon />
+    </div>
+
+    <div title={detailTitle} class="view-navigation-controller__title">{detailTitle}</div>
+
+  </section>
+{/if}
+<!--//Form navigation controller-->
 
 <!--Form controller-->
 <section class="view-content-controller">

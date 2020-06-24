@@ -15,7 +15,7 @@
   import { unlockScreen } from 'src/lib/js/security';
   import Nickname from 'src/components/layout/nickname';
   import { getUserFullName } from 'src/lib/js/security';
-  import {onMount} from 'svelte';
+  import { onMount } from 'svelte';
   import OrgIconMark from 'src/components/layout/icons/org-mark';
   import MobileMainNavBar from 'src/components/layout/mobile-main-nav-bar';
 
@@ -41,13 +41,11 @@
 
   const onResizeWindow = () => {
     windowWidth = window.innerWidth;
-  }
+  };
 
   onMount(() => {
     window.addEventListener('resize', onResizeWindow);
   });
-
-
 </script>
 
 {#if $isLogged$ && $user$}
@@ -64,33 +62,33 @@
 
 {#if $isLogged$}
   {#if windowWidth >= SMALL_SCREEN_WIDTH}
-  <MainLayout>
-    <section slot="header" class="layout-header layout-header-logged-in">
-      <div class="layout-header__top">
-        <div class="layout-header__top__left">
-          <BranchDropdown />
-          <div class="separator" />
-          <ModulesDropdown id="moduleId" />
-        </div>
-        <div class="layout-header__top__center">
+    <MainLayout>
+      <section slot="header" class="layout-header layout-header-logged-in">
+        <div class="layout-header__top">
+          <div class="layout-header__top__left">
+            <BranchDropdown />
+            <div class="separator" />
+            <ModulesDropdown id="moduleId" />
+          </div>
+          <div class="layout-header__top__center">
             <SearchBar id="mainSearchBarId" menuPath="intro" />
+          </div>
+          <div class="layout-header__top__right">
+            <Notification />
+            <UserProfiles />
+          </div>
         </div>
-        <div class="layout-header__top__right">
-          <Notification />
-          <UserProfiles />
-        </div>
-      </div>
-      <nav class="layout-header__bottom">
+        <nav class="layout-header__bottom">
           <MainNavBar />
-      </nav>
-    </section>
+        </nav>
+      </section>
 
-    <div slot="default" style="height: 100%; background: var(--bg-tertiary); overflow: auto;">
-      <RouterView bind:this={routerView} />
-    </div>
-  </MainLayout>
+      <div slot="default" style="height: 100%; background: var(--bg-tertiary); overflow: auto;">
+        <RouterView bind:this={routerView} />
+      </div>
+    </MainLayout>
   {:else}
-    <MainLayout headerHeight="{$isDetailPage$ ? '50px' : '96px' }">
+    <MainLayout headerHeight={$isDetailPage$ ? '50px' : '96px'}>
       <section slot="header" class="{$isDetailPage$ ? 'mobile-header-detail' : 'mobile-header'} ">
         {#if !$isDetailPage$}
           <div class="mobile-header__top">
@@ -99,7 +97,7 @@
                 <OrgIconMark />
               </div>
               <img class="mobile-header__top__logo__img" src={$currentCompany$.iconData} alt="" />
-              <div class="mobile-separator" ></div>
+              <div class="mobile-separator" />
             </div>
             <div class="mobile-header__top__module">
               <ModulesDropdown id="moduleId" />
@@ -111,7 +109,7 @@
 
           <div class="mobile-header__bottom">
             <div class="mobile-header__bottom__hamburger-menu">
-              <MobileMainNavBar></MobileMainNavBar>
+              <MobileMainNavBar />
             </div>
 
             <div class="mobile-header__bottom__search">
@@ -122,14 +120,12 @@
               <Notification />
             </div>
           </div>
-          {:else}
+        {:else}
           <div class="mobile-header-detail__left">
-            <div class="mobile-header-detail__left__hamburger-menu" >
-              <MobileMainNavBar></MobileMainNavBar>
+            <div class="mobile-header-detail__left__hamburger-menu">
+              <MobileMainNavBar />
             </div>
-            <div class="mobile-header-detail__left__department">
-              {appStore.org.selectedDepartment.departmentName}
-            </div>
+            <div class="mobile-header-detail__left__department">{appStore.org.selectedDepartment.departmentName}</div>
           </div>
 
           <div class="mobile-header-detail__right">
@@ -140,7 +136,7 @@
               <UserProfiles />
             </div>
           </div>
-          {/if}
+        {/if}
       </section>
       <div slot="default" style="height: 100%; background: var(--bg-tertiary); overflow: auto;">
         <RouterView bind:this={routerView} />

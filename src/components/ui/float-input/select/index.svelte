@@ -126,7 +126,6 @@
   }
 </script>
 
-
 <div class="floating-wrapper">
   <select
     on:change={onChange}

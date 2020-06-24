@@ -49,9 +49,11 @@
 
 <TwoColumnView id={'mainLayout' + view.getViewName()} {showTitle} {menuPath}>
   <div style="height: 100%;" slot="viewLeft">
-    <WorkList {view} {store} {callFrom} />
+    <WorkList {view} {store} {callFrom} {menuPath} />
   </div>
   <div style="height: 100%;" slot="default">
-    <MainContent {view} {menuPath} />
+    {#if !window.isSmartPhone}
+      <MainContent {view} {menuPath} />
+    {/if}
   </div>
 </TwoColumnView>

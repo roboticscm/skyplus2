@@ -63,6 +63,8 @@
   </div>
 
   <div style="height: 100%" slot="default">
-    <MainContent {view} {menuPath} />
+    {#if !window.isSmartPhone}
+      <MainContent {view} {menuPath} />
+    {/if}
   </div>
 </TwoColumnView>

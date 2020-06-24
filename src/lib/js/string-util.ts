@@ -127,7 +127,7 @@ export class StringUtil {
       return StringUtil.replaceAll(value, '`', '');
     }
 
-    return unccentVietnamese( StringUtil.replaceAll(StringUtil.replaceAll(value, ' ', ':*&') + ':*', '#', ''));
+    return unccentVietnamese(StringUtil.replaceAll(StringUtil.replaceAll(value, ' ', ':*&') + ':*', '#', ''));
   }
 
   public static formatSearchParam(value: string) {
@@ -172,7 +172,7 @@ export class StringUtil {
     }
   };
 
-  static  countDiv(source: string) {
+  static countDiv(source: string) {
     return (source.match(/<div>/g) || []).length;
   }
 }

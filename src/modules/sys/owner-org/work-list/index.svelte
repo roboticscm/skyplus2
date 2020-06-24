@@ -7,11 +7,15 @@
   import TreeView from 'src/components/ui/tree-view';
   import { SObject } from 'src/lib/js/sobject';
   import { apolloClient } from 'src/lib/js/hasura-client';
+  import { AppStore } from 'src/store/app';
+  import { getViewTitleFromMenuPath } from 'src/lib/js/url-util';
+  import MainContent from '../content/index.svelte';
 
   // Props
   export let view: ViewStore;
   export let store: Store;
   export let callFrom: string;
+  export let menuPath: string = undefined;
 
   // Other vars
   const workListContainerId = `workList${view.getViewName()}Container`;
@@ -20,6 +24,11 @@
   let allColumnsSub, needSelectIdSub, needHighlightIdSub, selectDataSub: Subscription;
   let apolloClientList$: any;
   let treeRef: any;
+
+  // @ts-ignore
+  const { isDetailPage$ } = AppStore;
+  let detailTitle = '';
+  let mainContentRef: any;
 
   const { orgData$ } = store;
 
@@ -68,9 +77,21 @@
         switchMap((_) => forkJoin([view.getOneById(selectedId)])),
       )
       .subscribe((res: any[]) => {
-        view.selectedData$.next(SObject.convertFieldsToCamelCase(res[0].data[0]));
-        view.loading$.next(false);
-        selectedId = undefined;
+        if ((window as any).isSmartPhone) {
+          isDetailPage$.next(true);
+          setTimeout(() => {
+            const selectedData = SObject.convertFieldsToCamelCase(res[0].data[0]);
+            view.selectedData$.next(selectedData);
+
+            detailTitle = getViewTitleFromMenuPath(menuPath) + ' - ' + selectedData.name;
+            view.loading$.next(false);
+            selectedId = undefined;
+          });
+        } else {
+          view.selectedData$.next(SObject.convertFieldsToCamelCase(res[0].data[0]));
+          view.loading$.next(false);
+          selectedId = undefined;
+        }
       });
   };
 
@@ -121,8 +142,18 @@
     }
   }
   // =========================//REACTIVE===========================
+
+  const onClickBack = () => {
+    isDetailPage$.next(false);
+  };
 </script>
 
-<section id={workListContainerId} class="view-left-main">
-  <TreeView bind:this={treeRef} data={$orgData$} id={treeId} on:click={onClickTree} />
-</section>
+{#if $isDetailPage$ && window.isSmartPhone}
+  <section style="width: 100%;">
+    <MainContent backCallback={onClickBack} {detailTitle} {view} {menuPath} bind:this={mainContentRef} />
+  </section>
+{:else}
+  <section id={workListContainerId} class="view-left-main">
+    <TreeView bind:this={treeRef} data={$orgData$} id={treeId} on:click={onClickTree} />
+  </section>
+{/if}

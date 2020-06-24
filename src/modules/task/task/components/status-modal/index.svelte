@@ -69,7 +69,7 @@
         : taskVerificationRef && taskVerificationRef.getSelectedName(),
       statusId: statusRef && statusRef.getSelectedId(),
       verificationId: taskVerificationRef && taskVerificationRef.getSelectedId(),
-      statusCode:  taskVerificationRef && taskVerificationRef.getSelectedItem().code,
+      statusCode: taskVerificationRef && taskVerificationRef.getSelectedItem().code,
     };
   };
 

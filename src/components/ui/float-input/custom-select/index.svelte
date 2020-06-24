@@ -116,7 +116,7 @@
     readonly
     {disabled}
     bind:value={selectedItem.name} />
-  <label class="floating__label {disabled ? 'disabled': ''}" data-content={placeholder} on:click={onClickLabel} />
+  <label class="floating__label {disabled ? 'disabled' : ''}" data-content={placeholder} on:click={onClickLabel} />
   <div style={`height: ${height};`} class="simple-auto-dropdown" id={'dropdown' + id}>
     {#if data && data.length > 0}
       <SelectableTable

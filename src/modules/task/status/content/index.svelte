@@ -19,10 +19,13 @@
   import Button from 'src/components/ui/flat-button';
   import SC from 'src/components/set-common';
   import { Debug } from 'src/lib/js/debug';
+  import BackIcon from 'src/icons/back24x16.svelte';
 
   // Props
   export let view: ViewStore;
   export let menuPath: string;
+  export let backCallback: Function = undefined;
+  export let detailTitle = '';
 
   // Observable
   // @ts-ignore
@@ -328,11 +331,28 @@
     },
   };
   // ============================== //HOOK ==========================
+
+  const onClickBack = () => {
+    backCallback && backCallback();
+  };
 </script>
 
 <!--Invisible Element-->
 <SC bind:this={scRef} {view} {menuPath} />
 <!--//Invisible Element-->
+
+<!--Form navigation controller-->
+{#if window.isSmartPhone}
+  <section class="view-navigation-controller">
+    <div class="view-navigation-controller__arrow" on:click={onClickBack}>
+      <BackIcon />
+    </div>
+
+    <div title={detailTitle} class="view-navigation-controller__title">{detailTitle}</div>
+
+  </section>
+{/if}
+<!--//Form navigation controller-->
 
 <!--Form controller-->
 <section class="view-content-controller">

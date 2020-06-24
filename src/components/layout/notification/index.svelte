@@ -99,7 +99,7 @@
     for (const item of newestNotificationList) {
       const index = pushToDrawingList(item.id);
       const col = Math.floor(count / yNumItems);
-      item.top = windowHeight -  (index + 1 - col * yNumItems) * (modalHeight + padding);
+      item.top = windowHeight - (index + 1 - col * yNumItems) * (modalHeight + padding);
       item.right = col * modalWidth + col * padding + padding;
 
       count++;
@@ -330,7 +330,7 @@
       {/if}
 
       <div id="chatDropdown" class="right-dropdown-content" style="height: 600px;">
-        <MessageDropdownContent type={NotifyType.Chat} on:click={(e) => onClickItem (e, 'chatDropdown')} data={chat} />
+        <MessageDropdownContent type={NotifyType.Chat} on:click={(e) => onClickItem(e, 'chatDropdown')} data={chat} />
       </div>
     </div>
 
@@ -346,7 +346,10 @@
       {/if}
 
       <div id="functionalDropdown" class="right-dropdown-content" style="height: 600px;">
-        <MessageDropdownContent type={NotifyType.Functional} on:click={(e) => onClickItem (e, 'functionalDropdown')} data={functional} />
+        <MessageDropdownContent
+          type={NotifyType.Functional}
+          on:click={(e) => onClickItem(e, 'functionalDropdown')}
+          data={functional} />
       </div>
     </div>
 
@@ -360,7 +363,10 @@
         <div class="badge">{countAlarm}</div>
       {/if}
       <div id="alarmDropdown" class="right-dropdown-content" style="height: 600px;">
-        <MessageDropdownContent type={NotifyType.Alarm} on:click={(e) => onClickItem (e, 'alarmDropdown')} data={alarm} />
+        <MessageDropdownContent
+          type={NotifyType.Alarm}
+          on:click={(e) => onClickItem(e, 'alarmDropdown')}
+          data={alarm} />
       </div>
     </div>
   {/if}

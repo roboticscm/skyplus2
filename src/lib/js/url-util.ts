@@ -1,6 +1,6 @@
 import { T } from 'src/lib/js/locale/locale';
 import { StringUtil } from 'src/lib/js/string-util';
-import {AppStore} from "src/store/app";
+import { AppStore } from 'src/store/app';
 
 export const getMenuPathFromUrl = () => {
   return location.pathname.slice(1).replace('--', '/');
@@ -8,7 +8,7 @@ export const getMenuPathFromUrl = () => {
 
 export const getMenuPathFromUrlParam = () => {
   const url = new URL(AppStore.urlParam);
-  if(url && !url.pathname.includes('logout')) {
+  if (url && !url.pathname.includes('logout')) {
     return url.pathname.slice(1).replace('--', '/');
   } else {
     return null;
@@ -17,7 +17,7 @@ export const getMenuPathFromUrlParam = () => {
 
 export const getDepIdFromUrlParam = () => {
   const url = new URL(AppStore.urlParam);
-  if(url) {
+  if (url) {
     return url.searchParams.get('depId');
   } else {
     return null;
@@ -26,7 +26,7 @@ export const getDepIdFromUrlParam = () => {
 
 export const getTargetIdFromUrlParam = () => {
   const url = new URL(AppStore.urlParam);
-  if(url) {
+  if (url) {
     return url.searchParams.get('id');
   } else {
     return null;

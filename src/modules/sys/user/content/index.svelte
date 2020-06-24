@@ -26,11 +26,14 @@
   import { Debug } from 'src/lib/js/debug';
   import { SJSON } from 'src/lib/js/sjson';
   import { resizeBase64Img } from '../../../../lib/js/image';
+  import BackIcon from 'src/icons/back24x16.svelte';
 
   // Props
   export let view: ViewStore;
   export let store: Store;
   export let menuPath: string;
+  export let backCallback: Function = undefined;
+  export let detailTitle = '';
 
   // Observable
   // @ts-ignore
@@ -329,9 +332,10 @@
 
   const doSelect = (data: any) => {
     selectedData = data;
-    if (selectedData) {
-      // check default department
-      tick().then(() => {
+
+    // check default department
+    tick().then(() => {
+      if (selectedData) {
         checkDefaultDepartment(selectedData.defaultOwnerOrgId);
         isReadOnlyMode$.next(true);
         isUpdateMode$.next(true);
@@ -344,8 +348,8 @@
         form.name = `${form.lastName} ${form.firstName}`;
         // save init value for checking data change
         beforeForm = SObject.clone(form);
-      });
-    }
+      }
+    });
   };
   // ============================== //FUNCTIONAL ==========================
 
@@ -441,11 +445,31 @@
   .menu-font-icon {
     font-size: 1.6rem !important;
   }
+
+  @media screen and (max-width: 768px) {
+    .image-container {
+      height: auto;
+      width: 50%;
+    }
+  }
 </style>
 
 <!--Invisible Element-->
 <SC bind:this={scRef} {view} {menuPath} />
 <!--//Invisible Element-->
+
+<!--Form navigation controller-->
+{#if window.isSmartPhone}
+  <section class="view-navigation-controller">
+    <div class="view-navigation-controller__arrow" on:click={() => backCallback && backCallback()}>
+      <BackIcon />
+    </div>
+
+    <div title={detailTitle} class="view-navigation-controller__title">{detailTitle}</div>
+
+  </section>
+{/if}
+<!--//Form navigation controller-->
 
 <!--Form controller-->
 <section class="view-content-controller">

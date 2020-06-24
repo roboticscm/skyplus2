@@ -6,9 +6,8 @@
   import { settingsStore } from 'src/store/settings';
 
   // @ts-ignore
-  const {isDetailPage$ } = AppStore;
+  const { isDetailPage$ } = AppStore;
   const { dataList$ } = menuStore;
-
 
   const showPopup = () => {
     const ele: any = document.querySelector('#mobileMainNavBarId');
@@ -57,19 +56,18 @@
   const onMouseout = () => {
     hidePopup();
   };
-
-
 </script>
 
 <div class="nav" id="mainNavBarWrapperId">
   <i class="fa fa-bars" on:mouseover={onMouseover} on:mouseout={onMouseout}>
     <div id="mobileMainNavBarId" class="dropdown-content">
       {#each $dataList$ as row}
-          <RouterLink className="dropdown-item"
-            menuName={row.menuName}
-            on:navigate={onNavigate}
-            __path={'/' + row.path.replace('/', '--')}
-            activeClass="dropdown-content__selected" />
+        <RouterLink
+          className="dropdown-item"
+          menuName={row.menuName}
+          on:navigate={onNavigate}
+          __path={'/' + row.path.replace('/', '--')}
+          activeClass="dropdown-content__selected" />
       {/each}
     </div>
   </i>

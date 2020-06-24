@@ -33,7 +33,6 @@
   let mainContentRef: any;
   const onceLoad = () => {};
 
-
   onMount(() => {
     onceLoad();
   });
@@ -59,10 +58,8 @@
   <div style="height: 100%" slot="default">
     {#if $showDashboard$}
       <DashboardContent />
-    {:else}
-      {#if !window.isSmartPhone}
-        <MainContent {view} {menuPath} {store} bind:this={mainContentRef} />
-      {/if}
+    {:else if !window.isSmartPhone}
+      <MainContent {view} {menuPath} {store} bind:this={mainContentRef} />
     {/if}
   </div>
 </TwoColumnView>

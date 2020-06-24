@@ -10,10 +10,18 @@
   import { T } from 'src/lib/js/locale/locale';
   import { Store } from '../store';
   import QuickSearch from 'src/components/ui/input/quick-search';
+  import { AppStore } from 'src/store/app';
+  import { getViewTitleFromMenuPath } from 'src/lib/js/url-util';
+  import MainContent from '../content/index.svelte';
 
   export let view: ViewStore;
   export let store: Store;
   export let menuPath: string;
+
+  // @ts-ignore
+  const { isDetailPage$ } = AppStore;
+  let detailTitle = '';
+  let mainContentRef: any;
 
   const columns: TableColumn[] = [
     {
@@ -101,7 +109,16 @@
 
   const onSelection = (event) => {
     if (event.detail.length > 0) {
-      store.selectedUserRole$.next(event.detail[0]);
+      if ((window as any).isSmartPhone) {
+        isDetailPage$.next(true);
+        setTimeout(() => {
+          store.selectedUserRole$.next(event.detail[0]);
+          detailTitle =
+            getViewTitleFromMenuPath(menuPath) + ' - ' + event.detail[0].lastName + ' ' + event.detail[0].firstName;
+        });
+      } else {
+        store.selectedUserRole$.next(event.detail[0]);
+      }
     }
   };
 
@@ -133,33 +150,44 @@
     // }
   });
   // =========================//HOOK===========================
+
+  const onClickBack = () => {
+    isDetailPage$.next(false);
+  };
 </script>
 
-<section class="view-left-main">
-  <div style="height: calc(100% - 20px);">
-    <SelectableTable
-      startRowCount={(view.page - 1) * view.pageSize + 1}
-      bind:this={tableRef}
-      on:selection={onSelection}
-      {columns}
-      {menuPath}
-      showRowNumber={false}
-      data={$dataList$}
-      id={'userTableWorkList' + view.getViewName() + 'Id'}>
-      <span style="display: flex; padding-bottom: 6px;" slot="header" let:filter>
-        <div style="width: 100%;">
-          <QuickSearch on:input={(e) => filter(e.target.value)} />
-        </div>
-      </span>
-    </SelectableTable>
-  </div>
-  <div style="margin-top: 1px;">
-    <Pagination
-      {menuPath}
-      totalRecords={$fullCount$}
-      smallSize={true}
-      on:loadPage={onLoadPage}
-      on:init={onPaginationInit}
-      bind:this={pageRef} />
-  </div>
-</section>
+{#if $isDetailPage$ && window.isSmartPhone}
+  <section style="width: 100%;">
+    <MainContent {store} backCallback={onClickBack} {detailTitle} {view} {menuPath} bind:this={mainContentRef} />
+  </section>
+{:else}
+
+  <section class="view-left-main">
+    <div style="height: calc(100% - 20px);">
+      <SelectableTable
+        startRowCount={(view.page - 1) * view.pageSize + 1}
+        bind:this={tableRef}
+        on:selection={onSelection}
+        {columns}
+        {menuPath}
+        showRowNumber={false}
+        data={$dataList$}
+        id={'userTableWorkList' + view.getViewName() + 'Id'}>
+        <span style="display: flex; padding-bottom: 6px;" slot="header" let:filter>
+          <div style="width: 100%;">
+            <QuickSearch on:input={(e) => filter(e.target.value)} />
+          </div>
+        </span>
+      </SelectableTable>
+    </div>
+    <div style="margin-top: 1px;">
+      <Pagination
+        {menuPath}
+        totalRecords={$fullCount$}
+        smallSize={true}
+        on:loadPage={onLoadPage}
+        on:init={onPaginationInit}
+        bind:this={pageRef} />
+    </div>
+  </section>
+{/if}

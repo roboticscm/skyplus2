@@ -21,10 +21,13 @@
   import { settingsStore } from 'src/store/settings';
   import { Settings } from 'src/model/settings';
   import QuickSearch from 'src/components/ui/input/quick-search';
+  import BackIcon from 'src/icons/back24x16.svelte';
 
   export let view: ViewStore;
   export let store: Store;
   export let menuPath: string;
+  export let backCallback: Function = undefined;
+  export let detailTitle = '';
 
   const { isReadOnlyMode$, isUpdateMode$, saveRunning$ } = view;
   const { orgData$, userData$, roleData$, selectedUserRole$ } = store;
@@ -246,8 +249,9 @@
       }
 
       let containerEle: any = document.querySelector('.view-container-inside-form-2-col');
-
-      containerEle.style['grid-template-columns'] = `${leftWidth} ${GUTTER_WIDTH}px auto`;
+      if (containerEle) {
+        containerEle.style['grid-template-columns'] = `${leftWidth} ${GUTTER_WIDTH}px auto`;
+      }
     });
 
     return Split({
@@ -312,7 +316,7 @@
     // @ts-ignore
     const selectedUserRole = $selectedUserRole$;
     if (selectedUserRole) {
-      orgTreeViewRef.selectNodeById(selectedUserRole.defaultOwnerOrgId, true);
+      orgTreeViewRef && orgTreeViewRef.selectNodeById(selectedUserRole.defaultOwnerOrgId, true);
     }
   }
 
@@ -333,6 +337,20 @@
 </style>
 
 <SC {view} {menuPath} bind:this={scRef} />
+
+<!--Form navigation controller-->
+{#if window.isSmartPhone}
+  <section class="view-navigation-controller">
+    <div class="view-navigation-controller__arrow" on:click={() => backCallback && backCallback()}>
+      <BackIcon />
+    </div>
+
+    <div title={detailTitle} class="view-navigation-controller__title">{detailTitle}</div>
+
+  </section>
+{/if}
+<!--//Form navigation controller-->
+
 <section class="view-content-controller">
   {#if $roleData$ !== null}
     <FlatButton btnType={ButtonType.Reset} on:click={onReset} />
@@ -355,8 +373,8 @@
   {/if}
 </section>
 <section class="view-content-main">
-  <main class="view-container-inside-form-2-col">
-    <div class="bg-primary default-border">
+  <main class="{window.isSmartPhone ? 'row' : 'view-container-inside-form-2-col'} ">
+    <div class="{window.isSmartPhone ? 'col-xs-24 col-lg-6' : ''} bg-primary default-border">
       <TreeView
         data={$orgData$}
         bind:this={orgTreeViewRef}
@@ -365,8 +383,10 @@
         <div slot="label">{T('COMMON.LABEL.ORG')}:</div>
       </TreeView>
     </div>
-    <div class="left-grid-vertical-gutter-inside-form" />
-    <div class="bg-primary">
+    {#if !window.isSmartPhone}
+      <div class="left-grid-vertical-gutter-inside-form" />
+    {/if}
+    <div class="{window.isSmartPhone ? 'col-xs-24 col-lg-18 px-xs-0 mt-xs-1 mt-md-0' : ''} bg-primary">
       <div class="row">
         <div class="default-border col-sm-24 col-md-12">
           <SelectableTable
@@ -404,7 +424,7 @@
           </SelectableTable>
         </div>
 
-        <div class="default-border col-sm-24 col-md-12">
+        <div class="default-border col-sm-24 col-md-12 mt-xs-1 mt-md-0">
           <ExcelGrid
             columns={roleColumns}
             data={$roleData$}

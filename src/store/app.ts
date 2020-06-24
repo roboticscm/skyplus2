@@ -4,15 +4,14 @@ import { settingsStore } from 'src/store/settings';
 import HumanOrOrgStore from 'src/modules/sys/user/store';
 import { NavBarConfig } from 'src/model/nav-bar-config';
 import { catchError } from 'rxjs/operators';
-import {getDepIdFromUrlParam} from "src/lib/js/url-util";
-
+import { getDepIdFromUrlParam } from 'src/lib/js/url-util';
 
 export class AppStore {
   static isLogged$ = new BehaviorSubject<boolean>(false);
   static screenLock$ = new BehaviorSubject<number>(0);
   static rememberLogin = false;
   static urlParam: any = undefined;
-  static isDetailPage$  =  new BehaviorSubject<boolean>(false);
+  static isDetailPage$ = new BehaviorSubject<boolean>(false);
 
   user$ = new BehaviorSubject<User>(null);
   user: User;
@@ -44,8 +43,8 @@ export class AppStore {
           let [companyId, departmentId, menuPath, lang, theme, alpha, headerHeight] = res.data.split('#');
 
           const depIdFromUrlParam = getDepIdFromUrlParam();
-          if(depIdFromUrlParam) {
-              departmentId = depIdFromUrlParam;
+          if (depIdFromUrlParam) {
+            departmentId = depIdFromUrlParam;
           }
           // org
           this.org = {

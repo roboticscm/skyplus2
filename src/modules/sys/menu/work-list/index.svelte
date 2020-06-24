@@ -6,6 +6,9 @@
   import { switchMap, tap, filter } from 'rxjs/operators';
   import SimpleWorkList from 'src/components/work-list/simple-work-list';
   import { SObject } from 'src/lib/js/sobject';
+  import { AppStore } from 'src/store/app';
+  import { getViewTitleFromMenuPath } from 'src/lib/js/url-util';
+  import MainContent from '../content/index.svelte';
 
   // Props
   export let view: ViewStore;
@@ -13,11 +16,15 @@
   export let menuPath: string;
   export let callFrom: string;
 
+  // @ts-ignore
+  const { isDetailPage$ } = AppStore;
   // Other vars
   const workListContainerId = `workList${view.getViewName()}Container`;
   const tableId = `workList${view.getViewName()}${callFrom.replace('/', '__')}Table`;
   let selectedId: string = undefined;
   let selectSub: Subscription;
+  let detailTitle = '';
+  let mainContentRef: any;
 
   const doSelect = (ob$: Observable<any>) => {
     return ob$
@@ -33,11 +40,24 @@
         ),
       )
       .subscribe((res: any[]) => {
-        view.selectedData$.next(SObject.convertFieldsToCamelCase(res[0].data[0]));
-        store.availableDep$.next(res[1].data);
-        store.assignedDep$.next(res[2].data);
-        view.loading$.next(false);
-        selectedId = undefined;
+        if ((window as any).isSmartPhone) {
+          isDetailPage$.next(true);
+          setTimeout(() => {
+            const selectedData = SObject.convertFieldsToCamelCase(res[0].data[0]);
+            view.selectedData$.next(selectedData);
+            store.availableDep$.next(res[1].data);
+            store.assignedDep$.next(res[2].data);
+            detailTitle = getViewTitleFromMenuPath(menuPath) + ' - ' + selectedData.name;
+            view.loading$.next(false);
+            selectedId = undefined;
+          });
+        } else {
+          view.selectedData$.next(SObject.convertFieldsToCamelCase(res[0].data[0]));
+          store.availableDep$.next(res[1].data);
+          store.assignedDep$.next(res[2].data);
+          view.loading$.next(false);
+          selectedId = undefined;
+        }
       });
   };
 
@@ -64,8 +84,18 @@
       selectSub.unsubscribe();
     }
   });
+
+  const onClickBack = () => {
+    isDetailPage$.next(false);
+  };
 </script>
 
-<section id={workListContainerId} class="view-left-main">
-  <SimpleWorkList {view} {menuPath} {tableId} on:selection={onSelection} />
-</section>
+{#if $isDetailPage$ && window.isSmartPhone}
+  <section style="width: 100%;">
+    <MainContent backCallback={onClickBack} {detailTitle} {view} {menuPath} {store} bind:this={mainContentRef} />
+  </section>
+{:else}
+  <section id={workListContainerId} class="view-left-main">
+    <SimpleWorkList {view} {menuPath} {tableId} on:selection={onSelection} />
+  </section>
+{/if}
