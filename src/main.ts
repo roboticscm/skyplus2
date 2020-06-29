@@ -136,6 +136,7 @@ interface Window {
 // @ts-ignore
 declare var ResizeObserver: ResizeObserver;
 
+
 // mobile detect
 const md = new MobileDetect(window.navigator.userAgent);
 (window as any).isSmartPhone = md.mobile() !== null && md.phone() !== null;

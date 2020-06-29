@@ -37,7 +37,10 @@ export class Http {
           } else {
             reject(error);
           }
-          logout();
+          setTimeout(() => {
+            logout();
+          }, 5000);
+
         });
     });
   }
@@ -63,7 +66,9 @@ export class Http {
           } else {
             reject(error);
           }
-          logout();
+          setTimeout(() => {
+            logout();
+          }, 5000);
         });
     });
   }

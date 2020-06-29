@@ -13,6 +13,7 @@ export class Proxy {
   // static HOST_URL = 'localhost:8081';
 }
 
+
 export class API {
   // static API_DOMAIN = 'localhost';
   // static API_DOMAIN = '192.168.10.3';
