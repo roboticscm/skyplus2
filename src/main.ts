@@ -140,3 +140,19 @@ declare var ResizeObserver: ResizeObserver;
 // mobile detect
 const md = new MobileDetect(window.navigator.userAgent);
 (window as any).isSmartPhone = md.mobile() !== null && md.phone() !== null;
+
+
+// Test GRPC
+// const {HelloRequest, HelloReply} = require('./lib/js/grpc/helloworld_pb');
+// const {SimplePromiseClient} = require('./lib/js/grpc/helloworld_grpc_web_pb');
+//
+// const start = Date.now();
+// const echoService = new SimplePromiseClient('http://localhost:8888');
+// const request = new HelloRequest();
+// request.setName('Hello World!.....????');
+//
+// echoService.sayHello(request, {}).then((res) => {
+//     console.log("???", res.array[0][0]);
+//     const end = Date.now();
+//     console.log("took ", end - start);
+// })

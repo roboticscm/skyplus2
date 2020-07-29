@@ -23,7 +23,6 @@
   export let keyword = '';
 
   const { user$ } = appStore;
-  const user = user$.value;
 
   const dispatch = createEventDispatcher();
   let taskTimeRef, assigneeTimeRef: any;
@@ -81,7 +80,12 @@
   }
 
   const getHuman = (humanNames: string[]) => {
-    let index = humanNames.findIndex((humanName: string) => humanName === user.lastName + ' ' + user.firstName);
+    // @ts-ignore
+    if(!$user$) {
+      return [undefined, undefined];
+    }
+    // @ts-ignore
+    let index = humanNames.findIndex((humanName: string) => humanName === $user$.lastName + ' ' + $user$.firstName);
     if (index < 0) {
       index = 0;
     }

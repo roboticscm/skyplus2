@@ -15,9 +15,9 @@ export class Proxy {
 
 
 export class API {
-  // static API_DOMAIN = 'localhost';
-  // static API_DOMAIN = '192.168.10.3';
-  static API_DOMAIN = '172.16.22.16';
+  static API_DOMAIN = 'localhost';
+  // static API_DOMAIN = '172.16.50.10';
+  // static API_DOMAIN = '172.16.22.16';
   // static API_DOMAIN = 'frontend.com.vn';
   static API_SERVER = `${Protocol.HTTP}://${API.API_DOMAIN}:7581`;
 

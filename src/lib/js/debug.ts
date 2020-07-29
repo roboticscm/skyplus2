@@ -1,6 +1,7 @@
 export const isDebugMode = (): boolean => {
   // @ts-ignore
-  return process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'dev';
+  //return process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'dev';
+  return false;
 };
 
 export const log = (...message: any) => {

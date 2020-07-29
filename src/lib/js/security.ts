@@ -30,6 +30,9 @@ export const getUserId = () => {
 };
 
 export const getUserFullName = () => {
+  if(!appStore.user) {
+    return '';
+  }
   return appStore.user.lastName + ' ' + appStore.user.firstName;
 };
 
